@@ -1,0 +1,44 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.24;
+
+import {Test} from "forge-std/Test.sol";
+import {Hub} from "src/Hub.sol";
+import {USDzy} from "src/USDzy.sol";
+import {MockERC20} from "src/mocks/MockERC20.sol";
+import {MockDIAFeed} from "src/mocks/MockDIAFeed.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+
+contract PPSInvariantTest is Test {
+    USDzy usdzy;
+    Hub hub;
+    MockERC20 token;
+    MockDIAFeed feed;
+
+    function setUp() public {
+        usdzy = new USDzy();
+        usdzy.initialize("USDzy", "USZY", address(this));
+        hub = new Hub();
+        hub.initialize(address(usdzy), address(this));
+        usdzy.grantRole(usdzy.MINTER_ROLE(), address(hub));
+        usdzy.grantRole(usdzy.BURNER_ROLE(), address(hub));
+
+        token = new MockERC20("TKN", "TKN");
+        feed = new MockDIAFeed(int256(2_000000), block.timestamp);
+        hub.setAssetConfig(address(token), address(feed), 18, 6, 0, true);
+    }
+
+    function testPPSInvariantBootstrap() public view {
+        assertEq(hub.pps6(), 1_000_000);
+    }
+
+    function testPPSMatchesAssetsOverSupply() public {
+        token.mint(address(this), 1e18);
+        IERC20(address(token)).approve(address(hub), type(uint256).max);
+        hub.deposit(address(token), 1e18);
+    uint256 assets = hub.totalAssetsUsd6();
+        uint256 supply = usdzy.totalSupply();
+        if (supply > 0) {
+            assertEq(hub.pps6(), (assets * 1_000_000) / supply);
+        }
+    }
+}

@@ -45,11 +45,36 @@ $ forge snapshot
 $ anvil
 ```
 
-### Deploy
+### Deploy Phase‑1
+
+The `script/Deploy_Phase1.s.sol` script requires the following environment variables to be set when running via `forge script`:
+
+- USDC_TOKEN
+- USDT_TOKEN
+- DAI_TOKEN
+- DIA_USDC_FEED
+- DIA_USDT_FEED
+- DIA_DAI_FEED
+- TIMELOCK_ADMIN (optional; if unset the script will use the caller address)
+
+Phase-1 deploy notes:
+- All stablecoin token decimals are assumed to be 6 (USDC/USDT).
+- DIA feed price decimals must be provided via env vars and must be either 8 or 18.
+
+Dry-run (Arbitrum Sepolia)
+
+Required envs for dry-run: RPC_URL, PRIVATE_KEY, TIMELOCK_ADMIN, USDC_TOKEN, USDT_TOKEN, DAI_TOKEN, DIA_USDC_FEED, DIA_USDT_FEED, DIA_DAI_FEED, DIA_USDC_FEED_DECIMALS, DIA_USDT_FEED_DECIMALS, DIA_DAI_FEED_DECIMALS
+
+Run the dry-run script with forge (no addresses are included here):
 
 ```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
+forge script script/DryRun_Sepolia.s.sol \
+	--rpc-url $RPC_URL --broadcast --verify --slow --legacy -vvvv
 ```
+
+Example (local):
+
+Run the script via `forge script` and set the env vars as normal in your shell or a .env file.
 
 ### Cast
 

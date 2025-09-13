@@ -1,0 +1,16 @@
+{
+  "name": "staking-deploy",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "tsc",
+    "deploy": "node dist/deploy.js"
+  },
+  "dependencies": {
+    "ethers": "^6.0.0",
+    "dotenv": "^16.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}
