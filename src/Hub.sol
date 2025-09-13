@@ -189,7 +189,7 @@ contract Hub is
     function pps6() public view returns (uint256) {
         uint256 supply = IERC20(address(usdzy)).totalSupply();
         if (supply == 0) return 1_000_000;
-    uint256 assets = totalAssetsUsd6();
+        uint256 assets = totalAssetsUsd6();
         return (assets * 1_000_000) / supply;
     }
 
@@ -198,7 +198,7 @@ contract Hub is
         AssetConfig memory c = assetCfg[asset];
         require(c.enabled, "asset disabled");
         SafeERC20.safeTransferFrom(IERC20(asset), msg.sender, address(this), amount);
-    uint256 usd6 = quoteUsd6(asset, amount, true); // haircut on deposit
+        uint256 usd6 = quoteUsd6(asset, amount, true); // haircut on deposit
         uint256 shares = (usd6 * 1_000_000) / pps6();
         require(shares > 0, "zero shares");
         usdzy.mint(msg.sender, shares);

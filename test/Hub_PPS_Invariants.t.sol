@@ -35,7 +35,7 @@ contract PPSInvariantTest is Test {
         token.mint(address(this), 1e18);
         IERC20(address(token)).approve(address(hub), type(uint256).max);
         hub.deposit(address(token), 1e18);
-    uint256 assets = hub.totalAssetsUsd6();
+        uint256 assets = hub.totalAssetsUsd6();
         uint256 supply = usdzy.totalSupply();
         if (supply > 0) {
             assertEq(hub.pps6(), (assets * 1_000_000) / supply);

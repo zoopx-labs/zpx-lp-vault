@@ -35,12 +35,12 @@ contract HubPhase1Test is Test {
         // For test simplicity, we'll treat usdc as 6-dec by using amounts scaled accordingly.
 
         // price feeds: priceDecimals = 6 (we'll set feed to return price scaled to 1e6)
-    feedUsdc = new MockDIAFeed(int256(1_000000), block.timestamp);
-    feedDai = new MockDIAFeed(int256(1_000000), block.timestamp);
+        feedUsdc = new MockDIAFeed(int256(1_000000), block.timestamp);
+        feedDai = new MockDIAFeed(int256(1_000000), block.timestamp);
 
         // configure assets
-    hub.setAssetConfig(address(usdc), address(feedUsdc), 6, 6, 0, true);
-    hub.setAssetConfig(address(dai), address(feedDai), 18, 6, 0, true);
+        hub.setAssetConfig(address(usdc), address(feedUsdc), 6, 6, 0, true);
+        hub.setAssetConfig(address(dai), address(feedDai), 18, 6, 0, true);
     }
 
     function testDepositAndWithdrawFlow() public {
@@ -66,9 +66,9 @@ contract HubPhase1Test is Test {
 
         // ensure hub has liquidity: deposit 1 DAI to serve payout
         // refresh DAI price feed so transfer doesn't revert due to staleness after warp
-    feedDai.set(int256(1_000000), block.timestamp);
-    // send DAI to hub as liquidity without calling hub.deposit (would mint shares to sender)
-    SafeERC20.safeTransfer(IERC20(address(dai)), address(hub), 1e18);
+        feedDai.set(int256(1_000000), block.timestamp);
+        // send DAI to hub as liquidity without calling hub.deposit (would mint shares to sender)
+        SafeERC20.safeTransfer(IERC20(address(dai)), address(hub), 1e18);
 
         // claim withdraw into DAI
         hub.claimWithdraw(0, address(dai));
