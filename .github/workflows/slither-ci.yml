@@ -7,8 +7,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Setup Forge
-        run: sudo apt-get update && sudo apt-get install -y libssl-dev pkg-config git curl build-essential && curl -L https://foundry.paradigm.xyz | bash && source ~/.bashrc && foundryup
+      - name: Setup Foundry
+        uses: foundry-rs/setup-foundry@v1
+        with:
+          foundry-version: latest
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
       - name: Run Slither (container) on src/
         run: |
           mkdir -p slither
