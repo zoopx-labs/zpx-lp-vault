@@ -1,0 +1,23 @@
+name: Slither
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  slither:
+    name: Run Slither static analysis
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Foundry
+        run: |
+          curl -L https://foundry.paradigm.xyz | bash
+          source $HOME/.bashrc
+          foundryup || true
+
+      - name: Run Slither (via Docker)
+        run: |
+          docker run --rm -v "$PWD":/src -w /src --entrypoint slither trailofbits/slither:latest /src --config-file /src/.slither.config.json || true
