@@ -14,7 +14,7 @@ jobs:
         with:
           version: stable
       - name: Cache libs
-        run: forge install --no-commit
+        run: forge install
       - name: Check formatting
         run: forge fmt --check
       - name: Build
