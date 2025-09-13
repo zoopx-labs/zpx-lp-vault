@@ -1,25 +1,23 @@
-# zpx-lp-vault
+<p align="center">
+	<img src="./assets/zoopx-logo.png" alt="ZoopX Labs" width="360" />
+</p>
 
-This repository is a Foundry monorepo implementing a cross-chain hub-and-spoke liquidity vault. It provides a multi-asset Arbitrum Hub with a USD-denominated yield share token (USDzy), optional ZPX incentive streaming, and Phase‑2 spoke vaults and routing for cross-chain liquidity balancing via adapters and a deployer Factory.
+# zpx-lp-vault — ZoopX Labs
 
-Key properties: UUPS upgradeability, role-gated admin surfaces (OpenZeppelin AccessControl), pausability, SafeERC20 usage and explicit replay protection for cross-chain messages.
+This repository is a Foundry monorepo implementing a production-oriented cross-chain hub-and-spoke liquidity vault built by ZoopX Labs. It provides a multi-asset Arbitrum Hub with a USD-denominated yield-share token (`USDzy`), optional ZPX incentives, and Phase‑2 spoke vaults with routing to balance liquidity across chains via adapters and a Factory deployer.
+
+Key properties: UUPS upgradeability, role-gated admin surfaces (OpenZeppelin AccessControl), pausability, SafeERC20 usage, and explicit replay protection for cross-chain messages.
 
 ## Table of contents
 
 - Architecture at a glance
-- Diagrams
 - Diagram (flows)
 - Contract inventory
 - Key protocol behaviors
-  - Cross-chain Message Schema
-  - Roles & Permissions Matrix
-  - Protocol Parameters & Defaults
 - Deployment
-  - Environment variables (consolidated)
 - Testing & CI
 - Security, upgradeability & storage
 - Operational runbook quicklinks
-- Quick Ops Runbook
 - Roadmap & versioning
 - License & contact
 
@@ -31,20 +29,37 @@ Phase-1 → Phase-1.5 → Phase-2
 - Phase-1.5 (ZPX incentives): `src/zpx/ZPXArb.sol`, `src/zpx/MintGate_Arb.sol`, `src/zpx/ZPXRewarder.sol` — optional ZPX token, endpoint-pinned minter and streaming/top-up rewarder.
 - Phase-2 (Spokes/Router/Messaging/Factory): `src/spoke/SpokeVault.sol`, `src/router/Router.sol`, `src/messaging/MessagingEndpointReceiver.sol`, `src/usdzy/USDzyRemoteMinter.sol`, `src/factory/Factory.sol`, `src/messaging/MockAdapter.sol` — spoke vaults (ERC-4626 surface with LP disabled), router TVL ring buffer and rebalance, adapter → receiver mint, and a Factory to deploy and wire proxies.
 
-## Diagrams
+## Diagram (flows)
 
-Design diagrams and inline ASCII diagrams were removed from this README to avoid renderer incompatibilities in some previewers. If visual assets are desired they can be exported as SVG/PNG and added under `docs/assets/`.
+Deposit → Mint
 
+```
+User --deposit(asset)--> Hub (`src/Hub.sol`) --mint--> USDzy (`src/USDzy.sol`) (pps6() based)
+```
 
-## Flow summaries
+Withdraw queue
 
-High-level flow summaries (also reflected in the "Key protocol behaviors" section):
+```
+User --requestWithdraw(asset, amount)--> Hub (burn USDzy, lock USD liability) --after 2h--> claimWithdraw(asset) --> Hub transfers asset
+```
 
-- Deposit → Hub: user approves and deposits a stable token; Hub normalizes value to USD6, computes shares using `pps6()`, and mints `USDzy` to the user.
-- Withdraw queue: `requestWithdraw` burns `USDzy` and locks a USD liability; after ~2 hours a user can `claimWithdraw` which converts the locked USD liability to the requested asset and transfers it.
-- Spoke borrow/repay: `Router` borrows from a `SpokeVault` (borrow role only); later the router or repay agent repays, reducing debt.
-- Router rebalance → remote mint: when `needsRebalance()` is true, `Router` sends a message via an adapter; the destination `MessagingEndpointReceiver` verifies the message and forwards it to `USDzyRemoteMinter` which mints `USDzy` on the destination chain.
+Borrow / Repay (Spoke)
 
+```
+Router --borrow--> SpokeVault (`src/spoke/SpokeVault.sol`) --repay--> Router/Hub
+```
+
+Router Rebalance
+
+```
+Router (`src/router/Router.sol`) --needsRebalance()--> adapter.send(...) --> MessagingEndpointReceiver (`src/messaging/MessagingEndpointReceiver.sol`) --onMessage--> USDzyRemoteMinter (`src/usdzy/USDzyRemoteMinter.sol`) mint
+```
+
+Adapter → Receiver → Mint
+
+```
+Adapter (`src/messaging/MockAdapter.sol` or production adapter) -> MessagingEndpointReceiver -> USDzyRemoteMinter.onMessage -> IUSDzy.mint
+```
 
 ## Contract inventory
 
@@ -92,96 +107,16 @@ High-level flow summaries (also reflected in the "Key protocol behaviors" sectio
 - Endpoints can be whitelisted via `setEndpoint(chainId, addr, allowed)`.
 - `_verifyAndMark(srcChainId, srcAddr, payload, nonce)` performs signature/adapter checks and marks the nonce to prevent replays. `USDzyRemoteMinter.onMessage` calls this before `IUSDzy.mint`.
 
-## Cross-chain Message Schema
-
-The code expects a packed payload with the following field order and scaling:
-
-```solidity
-// Packed payload fields (document exact order & scaling)
-struct BridgeMsg {
-  uint64  srcChainId;
-  address srcSender;
-  address dstHub;        // Hub on destination chain
-  address beneficiary;   // receiver of minted USDzy
-  uint256 amount;        // scaling: USD6 units for USDzy amounts
-  uint64  purpose;       // 1=rebal, 2=incentive, etc.
-  uint64  nonce;
-}
-// Replay key (persisted in MessagingEndpointReceiver.used):
-// keccak256(abi.encode(srcChainId, srcSender, nonce, beneficiary, amount, purpose))
-```
-
-Adapter-authority note: once `setAdapter(address)` is set on `MessagingEndpointReceiver.sol`, `onMessage` MUST be invoked by that adapter address and the `(srcChainId, srcAddr)` must be present in the `allowedEndpoint` map. Legacy direct calls are permitted only until an adapter is pinned; in production pin the adapter and require endpoints to be whitelisted and reject direct calls.
-
-## Roles & Permissions Matrix
-
-| Contract | Roles (holder post-deploy) | Capabilities |
-|---|---|---|
-| `src/Hub.sol` | DEFAULT_ADMIN, PAUSER (timelock/multisig); KEEPER (ops) | Set feeds/haircuts/staleness; pause/unpause; allow requestWithdraw during pause |
-| `src/USDzy.sol` | MINTER/BURNER (Hub), DEFAULT_ADMIN (timelock/multisig) | UUPS upgrades; EIP-2612 permit; share mint/burn |
-| `src/spoke/SpokeVault.sol` | DEFAULT_ADMIN/PAUSER (spoke admin), BORROWER (Router) | Borrow/repay; LP ops disabled (all ERC-4626 entrypoints revert) |
-| `src/router/Router.sol` | DEFAULT_ADMIN/PAUSER (router admin), KEEPER/RELAYER (ops) | Fill, repay, poke snapshots, rebalance, setAdapter |
-| `src/usdzy/USDzyRemoteMinter.sol` | owner (timelock/multisig) | Verified onMessage → mint USDzy |
-| `src/zpx/ZPXArb.sol` | DEFAULT_ADMIN (timelock/multisig), MINTER (MintGate) | UUPS + permit + burn |
-| `src/zpx/MintGate_Arb.sol` | owner (timelock/multisig) | Pin endpoint, replay-guarded mint |
-| `src/zpx/ZPXRewarder.sol` | DEFAULT_ADMIN (timelock/multisig), TOPUP (MintGate) | Stream rewards to USDzy stakers |
-| `src/factory/Factory.sol` | DEFAULT_ADMIN (governance) | Cache impls, deploy proxies (paused by default), wire roles, renounce temporary admin |
-
-## Protocol Parameters & Defaults
-
-### Hub (Arbitrum)
-
-| Param | Default | Notes |
-|---|---:|---|
-| withdrawDelay | 2 hours | Queue delay before claims |
-| maxStaleness | 300 seconds | Price freshness bound |
-| haircutBps | USDC 10, USDT 15, DAI 10 | Safety haircut on deposits |
-| pps6() | see formula | 1e6 scaling; 1_000_000 when supply==0 |
-
-### Router
-
-| Trigger | Value | Notes |
-|---|---:|---|
-| Health threshold | < 40% of 7-day avg TVL | Triggers rebalance |
-| Time trigger | >= 24h since last | Triggers rebalance |
-
-### SpokeVault
-
-| Param | Default | Notes |
-|---|---:|---|
-| borrowCap | max (or env-configured) | Cap in asset units |
-| maxUtilizationBps | 9000 | Utilization guardrail |
-
-## Oracle integration
+### Oracle integration
 
 - The Hub supports DIA or Chainlink feeds; each asset config is set with `Hub.setAssetConfig(token, feed, tokenDecimals, priceDecimals, haircutBps, enabled)`.
 - `maxStaleness` is enforced per-Hub and compared against feed timestamps; `haircutBps` is applied on deposit values and used to conservatively compute liability on withdraw.
 
-### Feed Addresses
+## Upgradeability & storage
 
-- Feeds are governed via `Hub.setAssetConfig(token, feed, tokenDecimals, priceDecimals, haircutBps, enabled)`.
-- Example (mainnet USDC/USD Chainlink aggregator): `0x50834F3163758fcC1Df9973b6e91f0F0F0434aD3`. Use via `setAssetConfig(token, feed, tokenDecs, priceDecs, haircutBps, enabled)`. Feeds are changeable by admin (timelock/multisig).
-
-## Deployed Addresses
-
-Fill addresses after production deploy. Tables intentionally left blank for auditor/ops to populate.
-
-### Arbitrum (Hub)
-
-| Contract | Address |
-|---|---|
-| Hub | |
-| USDzy | |
-| USDzyRemoteMinter | |
-| ZPXArb | |
-| MintGate_Arb | |
-| ZPXRewarder | |
-
-### Per-spoke chain
-
-| Chain | SpokeVault | Router | Adapter |
-|---|---|---|---|
-|  |  |  |  |
+- Major contracts use UUPS: `src/Hub.sol`, `src/USDzy.sol`, `src/spoke/SpokeVault.sol`, `src/router/Router.sol`, `src/usdzy/USDzyRemoteMinter.sol`, `src/factory/Factory.sol`, `src/zpx/ZPXArb.sol`.
+- Authorization for upgrades is implemented in `_authorizeUpgrade` and gated by admin roles.
+- Storage layout snapshots are committed under `storage/*.json`. Run the upgrade-sim tests in `test/upgrade/*` to validate storage compatibility before upgrades.
 
 ## Deployment
 
@@ -190,38 +125,48 @@ Fill addresses after production deploy. Tables intentionally left blank for audi
 - Foundry (forge/cast/anvil) installed: https://book.getfoundry.sh/
 - An RPC endpoint and a funded deployer key.
 
-### Environment variables (consolidated)
+### Environment variables by script
 
-This table lists environment variables used by the deploy scripts in `script/` (Phase-1, Phase-1.5, Phase-2, and dry-run scripts).
+#### Phase-1 (`script/Deploy_Phase1.s.sol`)
 
-| Variable | Used by script(s) | Purpose |
-|---|---|---|
-| `RPC_URL` | all scripts | RPC endpoint for forge script |
-| `PRIVATE_KEY` | all scripts | Deployer private key for broadcast |
-| `USDC_TOKEN` | `script/Deploy_Phase1.s.sol`, `script/DryRun_Sepolia.s.sol` | USDC token address (6 decimals) |
-| `USDT_TOKEN` | `script/Deploy_Phase1.s.sol`, `script/DryRun_Sepolia.s.sol` | USDT token address (6 decimals) |
-| `DAI_TOKEN` | `script/Deploy_Phase1.s.sol`, `script/DryRun_Sepolia.s.sol` | DAI token address |
-| `DIA_USDC_FEED` | `script/Deploy_Phase1.s.sol`, `script/DryRun_Sepolia.s.sol` | DIA/Chainlink feed for USDC |
-| `DIA_USDT_FEED` | `script/Deploy_Phase1.s.sol`, `script/DryRun_Sepolia.s.sol` | DIA/Chainlink feed for USDT |
-| `DIA_DAI_FEED` | `script/Deploy_Phase1.s.sol`, `script/DryRun_Sepolia.s.sol` | DIA/Chainlink feed for DAI |
-| `DIA_USDC_FEED_DECIMALS` | `script/Deploy_Phase1.s.sol`, `script/DryRun_Sepolia.s.sol` | Feed decimals for USDC feed (e.g. 8 or 18) |
-| `DIA_USDT_FEED_DECIMALS` | `script/Deploy_Phase1.s.sol`, `script/DryRun_Sepolia.s.sol` | Feed decimals for USDT feed |
-| `DIA_DAI_FEED_DECIMALS` | `script/Deploy_Phase1.s.sol`, `script/DryRun_Sepolia.s.sol` | Feed decimals for DAI feed |
-| `TIMELOCK_ADMIN` | `script/Deploy_Phase1.s.sol` | (optional) Address that will be the Hub admin / timelock |
-| `ZPX_ADMIN` | `script/Deploy_Phase1_5_Arb.s.sol` | Admin / owner for `ZPXArb.sol` |
-| `USDZY_ADDR` | `script/Deploy_Phase1_5_Arb.s.sol` | Deployed `USDzy` address (Hub deploy output) |
-| `USDZY_ADMIN` | `script/Deploy_Phase1_5_Arb.s.sol` | (optional) admin for USDzy; timelock recommended |
-| `MINT_ENDPOINT_SRC_CHAINID` | `script/Deploy_Phase1_5_Arb.s.sol` | Source chain id for MintGate endpoint pinning |
-| `MINT_ENDPOINT_SRC_ADDR` | `script/Deploy_Phase1_5_Arb.s.sol` | Source endpoint address for MintGate pinning |
-| `ZPX_TOPUP_AMOUNT` | `script/Deploy_Phase1_5_Arb.s.sol` | Amount to top-up rewarder on deploy |
-| `ZPX_TOPUP_DURATION` | `script/Deploy_Phase1_5_Arb.s.sol` | Duration (seconds) for streaming top-up |
-| `FACTORY_ADDR` | `script/Deploy_Phase2_Spoke.s.sol` | Existing Factory to use for proxy deployment |
-| `SPOKE_ASSET` | `script/Deploy_Phase2_Spoke.s.sol` | Asset token for the Spoke (e.g., USDC) |
-| `SPOKE_ADMIN` | `script/Deploy_Phase2_Spoke.s.sol` | Admin for the deployed spoke proxy |
-| `ROUTER_ADMIN` | `script/Deploy_Phase2_Spoke.s.sol` | Admin for router proxy |
-| `ADAPTER_ADDR` | `script/Deploy_Phase2_Spoke.s.sol` | Adapter address used by Router to send messages |
-| `FEE_COLLECTOR` | `script/Deploy_Phase2_Spoke.s.sol` | Fee collector address for Router |
-| `KEEPER_ADDR` | `script/Deploy_Phase2_Spoke.s.sol` | Keeper address for scheduled `pokeTvlSnapshot` / rebalance |
+| Variable | Purpose |
+|---|---|
+| `USDC_TOKEN` | USDC token address (6 decimals) |
+| `USDT_TOKEN` | USDT token address (6 decimals) |
+| `DAI_TOKEN` | DAI token address |
+| `DIA_USDC_FEED` | DIA/Chainlink feed for USDC |
+| `DIA_USDT_FEED` | DIA/Chainlink feed for USDT |
+| `DIA_DAI_FEED` | DIA/Chainlink feed for DAI |
+| `DIA_USDC_FEED_DECIMALS` | Feed decimals for USDC feed (e.g. 8 or 18) |
+| `DIA_USDT_FEED_DECIMALS` | Feed decimals for USDT feed |
+| `DIA_DAI_FEED_DECIMALS` | Feed decimals for DAI feed |
+| `TIMELOCK_ADMIN` | (optional) Address that will be the Hub admin / timelock |
+| `RPC_URL` | RPC endpoint for forge script |
+| `PRIVATE_KEY` | Deployer private key for broadcast |
+
+#### Phase-1.5 (`script/Deploy_Phase1_5_Arb.s.sol`)
+
+| Variable | Purpose |
+|---|---|
+| `ZPX_ADMIN` | Admin / owner for `ZPXArb.sol` |
+| `USDZY_ADDR` | Deployed `USDzy` address (Hub deploy output) |
+| `USDZY_ADMIN` | (optional) admin for USDzy; timelock recommended |
+| `MINT_ENDPOINT_SRC_CHAINID` | Source chain id for MintGate endpoint pinning |
+| `MINT_ENDPOINT_SRC_ADDR` | Source endpoint address for MintGate pinning |
+| `ZPX_TOPUP_AMOUNT` | Amount to top-up rewarder on deploy |
+| `ZPX_TOPUP_DURATION` | Duration (seconds) for streaming top-up |
+
+#### Phase-2 (`script/Deploy_Phase2_Spoke.s.sol`, `script/Deploy_MockAdapter.s.sol`)
+
+| Variable | Purpose |
+|---|---|
+| `FACTORY_ADDR` | Existing Factory to use for proxy deployment |
+| `SPOKE_ASSET` | Asset token for the Spoke (e.g., USDC) |
+| `SPOKE_ADMIN` | Admin for the deployed spoke proxy |
+| `ROUTER_ADMIN` | Admin for router proxy |
+| `ADAPTER_ADDR` | Adapter address used by Router to send messages |
+| `FEE_COLLECTOR` | Fee collector address for Router |
+| `KEEPER_ADDR` | Keeper address for scheduled `pokeTvlSnapshot` / rebalance |
 
 ### Core commands
 
@@ -289,44 +234,17 @@ Read the operational and audit documents:
 - Borrow caps & utilization: `SpokeVault` enforces `borrowCap` and `maxUtilizationBps` to limit exposure.
 - Reentrancy & CEI: critical state-changing flows use `nonReentrant` and follow checks-effects-interactions.
 
-## Quick Ops Runbook
+## Operational runbook quicklinks
 
-Short actionable commands; for full procedures see `docs/OPS_RUNBOOK.md`.
+- Rotate feeds / haircuts / maxStaleness: `src/Hub.sol` setters (call via timelock)
+- Pause / unpause: `src/Hub.sol`, `src/spoke/SpokeVault.sol`, `src/router/Router.sol`
+- Service withdraw queue: `requestWithdraw` / `claimWithdraw` in `src/Hub.sol`
+- Reward top-ups: `src/zpx/ZPXRewarder.sol::notifyTopUp`
 
-Rotate feeds (setAssetConfig)
+## Upgrade notes
 
-```bash
-# Example: set USDC feed and haircut via an admin (timelock)
-forge script script/Deploy_Phase1.s.sol --rpc-url $RPC_URL --broadcast
-# or use a custom script/cast transaction calling Hub.setAssetConfig
-```
-
-Change maxStaleness / haircutBps
-
-```bash
-# Use timelock to call Hub.setMaxStaleness(...) or Hub.setAssetConfig(...)
-```
-
-Pause/unpause Hub/Spoke/Router
-
-```bash
-# From admin / timelock
-cast send <HUB_ADDRESS> "pause()" --private-key $PRIVATE_KEY --rpc-url $RPC_URL
-cast send <SPOKE_ADDRESS> "pause()" --private-key $PRIVATE_KEY --rpc-url $RPC_URL
-cast send <ROUTER_ADDRESS> "unpause()" --private-key $PRIVATE_KEY --rpc-url $RPC_URL
-```
-
-Dry run scripts (Phase-1 and Phase-2)
-
-```bash
-forge script script/DryRun_Sepolia.s.sol --rpc-url $RPC_URL --broadcast
-forge script script/Deploy_Phase2_Spoke.s.sol --rpc-url $RPC_URL --broadcast
-```
-
-## Upgrade notes & storage snapshots
-
-- Storage layout snapshots are committed under `storage/*.json` and referenced by `test/upgrade/*` tests.
-- All UUPS upgrades are expected to be governed by timelock/multisig; run `test/upgrade/*` before any production upgrade.
+- UUPS `upgradeTo` / `upgradeToAndCall` are available on UUPS contracts. `_authorizeUpgrade` is role-gated — ensure the timelock/multisig holds admin.
+- Validate storage compatibility against `storage/*.json` snapshots and run `test/upgrade/*` before any production upgrade.
 
 ## Roadmap & versioning
 
@@ -334,8 +252,11 @@ forge script script/Deploy_Phase2_Spoke.s.sol --rpc-url $RPC_URL --broadcast
 
 ## License & contact
 
-- License: see repository top-level license files.
-- Contact: repo maintainers; for security disclosures use the repository's GitHub security contact.
+- License: See the repository top-level license files (MIT / Apache as applicable).
+- Maintained by: ZoopX Labs — https://github.com/zoopx-labs
+- Security disclosures: Please use the repository's GitHub security contact and responsible disclosure process.
+
+For general inquiries or partnership requests, contact maintainers via the GitHub repo or email security@zoopx.xyz (preferred for security reports).
 
 ## References
 
