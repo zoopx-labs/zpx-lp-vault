@@ -27,10 +27,11 @@ jobs:
       - name: Slither
         uses: crytic/slither-action@v0.3.0
         with:
-          node-version: 20
-          target: .
+          slither-version: '0.11.4'
+          solc-version: '0.8.24'
+          target: src
           fail-on: medium
-          slither-args: --exclude-informational
+          slither-args: --exclude-informational --debug
       - name: Gas snapshot
         run: |
           forge snapshot
