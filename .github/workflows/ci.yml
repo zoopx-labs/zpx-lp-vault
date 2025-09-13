@@ -1,36 +1,8 @@
 name: CI
 
-on: [push, pull_request]
-
-jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Install Foundry
-        uses: foundry-rs/setup-foundry@v1
-        with:
-          version: latest
-      - name: Cache libs
-        run: forge install --no-commit
-      - name: Check formatting
-        run: forge fmt --check
-      - name: Build
-        run: forge build
-      - name: Placeholder scan
-        run: |
-          ! grep -RInE "TODO|FIXME|PLACEHOLDER" --exclude-dir=lib -- src test script README.md || (echo "Placeholders found" && exit 1)
-      - name: Tests
-        run: forge test -vvv
-      - name: Gas snapshot
-        run: |
-          forge snapshot
-          git diff --exit-code gas-snapshot || (echo "gas-snapshot changed; commit updated snapshot" && exit 1)
-      - name: Coverage
-        run: forge coverage --report lcov
-name: CI
-
-on: [push, pull_request]
+on:
+  push:
+  pull_request:
 
 jobs:
   test:
