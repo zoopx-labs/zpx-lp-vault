@@ -1,0 +1,20 @@
+name: Slither Static Analysis
+
+on: [push, pull_request]
+
+jobs:
+  slither:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Forge
+        run: sudo apt-get update && sudo apt-get install -y libssl-dev pkg-config git curl build-essential && curl -L https://foundry.paradigm.xyz | bash && source ~/.bashrc && foundryup
+      - name: Run Slither (container)
+        run: |
+          docker run --rm -v "${{ github.workspace }}":/src -w /src ghcr.io/crytic/slither:latest \
+            sh -c "slither . --json slither/slither_report.json || true"
+      - name: Upload Slither report
+        uses: actions/upload-artifact@v4
+        with:
+          name: slither-report
+          path: slither/slither_report.json
