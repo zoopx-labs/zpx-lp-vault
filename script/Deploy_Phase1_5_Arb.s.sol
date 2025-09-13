@@ -5,6 +5,7 @@ import "forge-std/Script.sol";
 import {ZPXArb} from "../src/zpx/ZPXArb.sol";
 import {MintGate_Arb} from "../src/zpx/MintGate_Arb.sol";
 import {ZPXRewarder} from "../src/zpx/ZPXRewarder.sol";
+import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
 contract DeployPhase15Arb is Script {
     function run() external {
@@ -21,14 +22,19 @@ contract DeployPhase15Arb is Script {
 
         vm.startBroadcast();
 
-        ZPXArb z = new ZPXArb();
-        z.initialize("ZPX", "ZPX", zpxAdmin);
+        // deploy implementation
+        ZPXArb impl = new ZPXArb();
+        bytes memory init = abi.encodeWithSelector(ZPXArb.initialize.selector, "ZPX", "ZPX", zpxAdmin);
+        ERC1967Proxy proxy = new ERC1967Proxy(address(impl), init);
+        ZPXArb z = ZPXArb(address(proxy));
 
+        // deploy gate and wire endpoint
         MintGate_Arb gate = new MintGate_Arb(address(z));
         gate.setEndpoint(srcChain, srcAddr);
         // grant gate minter role
         z.grantRole(z.MINTER_ROLE(), address(gate));
-        // transfer admin to timelock and revoke deployer
+        // ensure DEFAULT_ADMIN_ROLE is only the timelock
+        // grant admin to timelock and revoke deployer
         z.grantRole(z.DEFAULT_ADMIN_ROLE(), zpxAdmin);
         z.revokeRole(z.DEFAULT_ADMIN_ROLE(), msg.sender);
 
