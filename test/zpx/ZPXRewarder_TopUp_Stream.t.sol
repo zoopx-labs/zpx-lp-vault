@@ -16,10 +16,10 @@ contract ZPXRewarderTest is Test {
     MockERC20 staker;
 
     function setUp() public {
-    usdzy = new USDzy();
-    usdzy.initialize("USDzy", "USZY", address(this));
-    // allow this test contract to mint USDzy for staking
-    usdzy.grantRole(usdzy.MINTER_ROLE(), address(this));
+        usdzy = new USDzy();
+        usdzy.initialize("USDzy", "USZY", address(this));
+        // allow this test contract to mint USDzy for staking
+        usdzy.grantRole(usdzy.MINTER_ROLE(), address(this));
 
         zpx = new ZPXArb();
         zpx.initialize("ZPX", "ZPX", address(this));
@@ -39,18 +39,18 @@ contract ZPXRewarderTest is Test {
     }
 
     function testTopUpAndClaim() public {
-    // gate mints to rewarder and notifies topup (gate is TOPUP_ROLE)
-    gate.setEndpoint(1, address(0x1234));
-    // mint 100 ZPX to rewarder
-    gate.consumeAndMint(1, address(0x1234), 1, address(rewarder), 100e18, bytes32("REWARD_TOPUP"));
-    // notify for 100 seconds as gate (prank)
-    vm.prank(address(gate));
-    rewarder.notifyTopUp(100e18, 100);
+        // gate mints to rewarder and notifies topup (gate is TOPUP_ROLE)
+        gate.setEndpoint(1, address(0x1234));
+        // mint 100 ZPX to rewarder
+        gate.consumeAndMint(1, address(0x1234), 1, address(rewarder), 100e18, bytes32("REWARD_TOPUP"));
+        // notify for 100 seconds as gate (prank)
+        vm.prank(address(gate));
+        rewarder.notifyTopUp(100e18, 100);
 
-    // user stakes USDzy after top-up
-    usdzy.mint(address(this), 1e6);
-    usdzy.approve(address(rewarder), type(uint256).max);
-    rewarder.deposit(1e6);
+        // user stakes USDzy after top-up
+        usdzy.mint(address(this), 1e6);
+        usdzy.approve(address(rewarder), type(uint256).max);
+        rewarder.deposit(1e6);
 
         // warp 50s, claim partial
         vm.warp(block.timestamp + 50);
@@ -62,9 +62,9 @@ contract ZPXRewarderTest is Test {
         assertEq(bal, expectedReward);
 
         // top-up mid-flight: mint another 100 and extend
-    gate.consumeAndMint(1, address(0x1234), 2, address(rewarder), 100e18, bytes32("REWARD_TOPUP"));
-    vm.prank(address(gate));
-    rewarder.notifyTopUp(100e18, 100);
+        gate.consumeAndMint(1, address(0x1234), 2, address(rewarder), 100e18, bytes32("REWARD_TOPUP"));
+        vm.prank(address(gate));
+        rewarder.notifyTopUp(100e18, 100);
 
         // warp to end and claim remaining
         vm.warp(block.timestamp + 200);

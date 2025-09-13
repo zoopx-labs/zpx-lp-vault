@@ -56,14 +56,14 @@ contract DryRunSepolia is Script {
         // for a freshly-deployed hub compute last ticket id via requestsCount()
         uint256 id = hub.requestsCount() - 1;
         (,, uint64 readyAt,) = hub.requests(id);
-    console.log("asset:");
-    console.logAddress(usdcToken);
-    console.log("deposit amt:");
-    console.logUint(1_000_000);
-    console.log("ticketId:");
-    console.logUint(id);
-    console.log("readyAt:");
-    console.logUint(readyAt);
+        console.log("asset:");
+        console.logAddress(usdcToken);
+        console.log("deposit amt:");
+        console.logUint(1_000_000);
+        console.log("ticketId:");
+        console.logUint(id);
+        console.log("readyAt:");
+        console.logUint(readyAt);
 
         vm.stopBroadcast();
     }
