@@ -1,0 +1,5 @@
+DIASlatenessTest:testClaimRevertsWhenStale() (gas: 239060)
+DIASlatenessTest:testDepositRevertsWhenStale() (gas: 115296)
+HubPhase1Test:testDepositAndWithdrawFlow() (gas: 355560)
+PPSInvariantTest:testPPSInvariantBootstrap() (gas: 12890)
+PPSInvariantTest:testPPSMatchesAssetsOverSupply() (gas: 188545)
