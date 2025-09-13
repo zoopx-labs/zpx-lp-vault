@@ -12,7 +12,7 @@ import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/U
 
 /**
  * @title ZPXArb
- * @dev UUPS upgradeable mintable ERC20 with permit and AccessControl. No burn in V1.
+ * @dev UUPS upgradeable mintable ERC20 with permit, burnable (ERC20BurnableUpgradeable) and AccessControl.
  */
 contract ZPXArb is
     Initializable,
