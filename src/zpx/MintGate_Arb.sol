@@ -40,8 +40,8 @@ contract MintGate_Arb is Ownable {
         require(srcContract == allowedSrc, "bad src");
         bytes32 key = keccak256(abi.encode(srcChainId, srcContract, nonce, recipient, amount, purpose));
         require(!used[key], "replay");
-    used[key] = true;
-    emit MintOnMessage(recipient, amount, purpose, nonce);
-    ZPXArb(zpx).mint(recipient, amount);
+        used[key] = true;
+        emit MintOnMessage(recipient, amount, purpose, nonce);
+        ZPXArb(zpx).mint(recipient, amount);
     }
 }

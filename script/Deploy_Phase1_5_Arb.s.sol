@@ -29,10 +29,10 @@ contract DeployPhase15Arb is Script {
         ZPXArb z = ZPXArb(address(proxy));
 
         // deploy gate and wire endpoint
-    MintGate_Arb gate = new MintGate_Arb(address(z));
-    gate.setEndpoint(srcChain, srcAddr);
-    // Ensure governance controls endpoint changes
-    gate.transferOwnership(zpxAdmin);
+        MintGate_Arb gate = new MintGate_Arb(address(z));
+        gate.setEndpoint(srcChain, srcAddr);
+        // Ensure governance controls endpoint changes
+        gate.transferOwnership(zpxAdmin);
         // grant gate minter role
         z.grantRole(z.MINTER_ROLE(), address(gate));
         // ensure DEFAULT_ADMIN_ROLE is only the timelock
