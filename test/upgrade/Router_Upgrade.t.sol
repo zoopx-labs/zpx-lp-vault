@@ -17,9 +17,9 @@ contract RouterUpgrade is Test {
         router.pokeTvlSnapshot();
 
         // upgrade
-    Router impl2 = new Router();
-    bytes32 implSlot = bytes32(uint256(keccak256("eip1967.proxy.implementation")) - 1);
-    vm.store(address(router), implSlot, bytes32(uint256(uint160(address(impl2)))));
+        Router impl2 = new Router();
+        bytes32 implSlot = bytes32(uint256(keccak256("eip1967.proxy.implementation")) - 1);
+        vm.store(address(router), implSlot, bytes32(uint256(uint160(address(impl2)))));
 
         // state preserved (lastSnapDay may be 0 in test env but poke should have set it)
         // just call poke again to ensure functions still callable

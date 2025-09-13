@@ -18,9 +18,9 @@ contract SpokeVaultUpgrade is Test {
         assertEq(vault.maxBorrow(), 1_000_000);
 
         // upgrade
-    SpokeVault impl2 = new SpokeVault();
-    bytes32 implSlot = bytes32(uint256(keccak256("eip1967.proxy.implementation")) - 1);
-    vm.store(address(vault), implSlot, bytes32(uint256(uint160(address(impl2)))));
+        SpokeVault impl2 = new SpokeVault();
+        bytes32 implSlot = bytes32(uint256(keccak256("eip1967.proxy.implementation")) - 1);
+        vm.store(address(vault), implSlot, bytes32(uint256(uint160(address(impl2)))));
 
         // state preserved
         assertEq(vault.maxBorrow(), 1_000_000);
