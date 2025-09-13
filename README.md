@@ -1,3 +1,8 @@
+
+# ZoopX Protocol - liquidity Pool Vaults
+
+
+
 <p align="center">
 	<img src="./assets/zoopx-logo.png" alt="ZoopX Labs" width="360" />
 </p>
@@ -265,3 +270,19 @@ For general inquiries or partnership requests, contact maintainers via the GitHu
 - Tests: `test/**` (phase2 & upgrade sims included)
 - Storage snapshots: `storage/*.json`
 - CI: `.github/workflows/*`
+
+---
+
+## Footer
+
+© 2025 ZoopX Labs. Maintained by ZoopX Labs — https://github.com/zoopx-labs
+
+For security disclosures: security@zoopx.xyz
+
+License: see the repository top-level license files (MIT / Apache as applicable).
+
+Built with Foundry (forge). This documentation is maintained for developer and auditor use; confirm on-chain addresses and admin roles before interacting with deployed contracts.
+
+
+
+
