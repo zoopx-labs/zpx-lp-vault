@@ -1,0 +1,15 @@
+{
+  "exclude": [
+    "lib/**",
+    "test/**",
+    "script/**"
+  ],
+  "detectors": {
+    "reentrancy": true,
+    "uninitialized-state": true,
+    "unchecked-low-level-calls": true
+  },
+  "output": {
+    "json": "slither-report.json"
+  }
+}

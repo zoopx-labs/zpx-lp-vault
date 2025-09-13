@@ -1,0 +1,41 @@
+name: Slither Static Analysis
+
+on: [push, pull_request]
+
+jobs:
+  slither:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Foundry (foundryup)
+        run: |
+          sudo apt-get update && sudo apt-get install -y curl build-essential
+          curl -L https://foundry.paradigm.xyz | bash
+          $HOME/.foundry/bin/foundryup || true
+          echo "$HOME/.foundry/bin" >> $GITHUB_PATH
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
+      - name: Run Slither (container) on src/
+        run: |
+          mkdir -p slither
+          docker run --rm -v "${{ github.workspace }}":/src -w /src ghcr.io/crytic/slither:latest \
+            sh -c "slither src --json slither/slither.json || true"
+      - name: Upload Slither report
+        uses: actions/upload-artifact@v4
+        with:
+          name: slither-report
+          path: slither/slither.json
+      - name: Fail on High/Medium findings
+        run: |
+          if [ -f slither/slither.json ]; then
+            echo "Parsing slither/slither.json for High/Medium findings"
+            if jq -e '.results.issues[]? | select(.severity=="High" or .severity=="Medium")' slither/slither.json > /dev/null; then
+              echo "High or Medium severity findings detected. Failing CI to force triage."
+              jq '.results.issues[]? | select(.severity=="High" or .severity=="Medium")' slither/slither.json | tee slither/high_or_medium.json
+              exit 1
+            else
+              echo "No High/Medium findings"
+            fi
+          else
+            echo "No slither report generated"
+          fi
