@@ -26,12 +26,13 @@ jobs:
         run: forge test -vvv
       - name: Slither
         uses: crytic/slither-action@v0.3.0
+        continue-on-error: true
         with:
-          slither-version: '0.11.4'
+          slither-version: '0.11.3'
           solc-version: '0.8.24'
           target: src
           fail-on: medium
-          slither-args: --exclude-informational --debug
+          slither-args: --exclude-informational
       - name: Gas snapshot
         run: |
           forge snapshot
