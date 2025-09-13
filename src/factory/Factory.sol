@@ -15,21 +15,23 @@ contract Factory is Initializable, AccessControlUpgradeable {
     address public spokeVaultImpl;
     address public routerImpl;
 
-    event ImplUpdated(string name, address impl);
+    event ImplementationUpdated(bytes32 what, address impl);
 
     function initialize(address admin) public initializer {
         __AccessControl_init();
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
     }
 
-    function setSpokeVaultImpl(address impl) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    function setSpokeVaultImpl(address impl) public onlyRole(DEFAULT_ADMIN_ROLE) {
+        require(impl != address(0), "impl zero");
         spokeVaultImpl = impl;
-        emit ImplUpdated("SpokeVault", impl);
+        emit ImplementationUpdated("SpokeVault", impl);
     }
 
-    function setRouterImpl(address impl) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    function setRouterImpl(address impl) public onlyRole(DEFAULT_ADMIN_ROLE) {
+        require(impl != address(0), "impl zero");
         routerImpl = impl;
-        emit ImplUpdated("Router", impl);
+        emit ImplementationUpdated("Router", impl);
     }
 
     function deploySpoke(
@@ -47,12 +49,16 @@ contract Factory is Initializable, AccessControlUpgradeable {
         if (implVAddr == address(0)) {
             SpokeVault implV = new SpokeVault();
             implVAddr = address(implV);
+            // cache the implementation so future deploys reuse it
+            setSpokeVaultImpl(implVAddr);
         }
 
         address implRAddr = routerImpl;
         if (implRAddr == address(0)) {
             Router implR = new Router();
             implRAddr = address(implR);
+            // cache the router impl as well
+            setRouterImpl(implRAddr);
         }
 
         // prepare initializers and deploy proxies
