@@ -8,7 +8,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install Foundry
-        run: curl -L https://foundry.paradigm.xyz | bash && source ~/.bashrc && foundryup
+        uses: foundry-rs/setup-foundry@v1
+        with:
+          version: latest
       - name: Cache libs
         run: forge install --no-commit
       - name: Check formatting
