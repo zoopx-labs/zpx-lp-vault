@@ -21,12 +21,10 @@ contract FactorySmoke is Test {
         f.setSpokeVaultImpl(implV);
         f.setRouterImpl(implR);
 
-
-
         (address v, address r) = f.deploySpoke(
             uint64(block.chainid), address(0x1), "sv", "sv", address(this), address(this), address(0x2), address(0)
         );
-    // ensure deployed addresses are contracts
+        // ensure deployed addresses are contracts
         uint256 sizeV;
         uint256 sizeR;
         assembly {
@@ -37,24 +35,22 @@ contract FactorySmoke is Test {
         }
         assertGt(sizeV, 0);
         assertGt(sizeR, 0);
-    // implementation slot should be nonzero
-    bytes32 implSlot = bytes32(uint256(keccak256("eip1967.proxy.implementation")) - 1);
-    bytes32 implVSlot = vm.load(v, implSlot);
-    bytes32 implRSlot = vm.load(r, implSlot);
-    assertTrue(implVSlot != bytes32(0));
-    assertTrue(implRSlot != bytes32(0));
+        // implementation slot should be nonzero
+        bytes32 implSlot = bytes32(uint256(keccak256("eip1967.proxy.implementation")) - 1);
+        bytes32 implVSlot = vm.load(v, implSlot);
+        bytes32 implRSlot = vm.load(r, implSlot);
+        assertTrue(implVSlot != bytes32(0));
+        assertTrue(implRSlot != bytes32(0));
 
-    // BORROWER_ROLE should be granted to router
-    bytes32 role = SpokeVault(v).BORROWER_ROLE();
-    assertTrue(SpokeVault(v).hasRole(role, r));
+        // BORROWER_ROLE should be granted to router
+        bytes32 role = SpokeVault(v).BORROWER_ROLE();
+        assertTrue(SpokeVault(v).hasRole(role, r));
 
-    // both should be paused by default
-    // calling deposit or fill should revert due to paused; we just check pause/unpause via Pausable
-    // SpokeVault paused -> pause() would revert for non-pauser, but isPaused exposed via low-level call
-    // instead, check that unpause by admin succeeds
-    SpokeVault(v).unpause();
-    Router(r).unpause();
+        // both should be paused by default
+        // calling deposit or fill should revert due to paused; we just check pause/unpause via Pausable
+        // SpokeVault paused -> pause() would revert for non-pauser, but isPaused exposed via low-level call
+        // instead, check that unpause by admin succeeds
+        SpokeVault(v).unpause();
+        Router(r).unpause();
     }
 }
-
-
