@@ -10,7 +10,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install Foundry
-        uses: gakonst/setup-foundry@v1
+        uses: foundry-rs/foundry-toolchain@v1
         with:
           version: latest
       - name: Cache libs
