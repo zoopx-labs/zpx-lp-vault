@@ -2,13 +2,6 @@
 # ZoopX Protocol - liquidity Pool Vaults
 
 
-
-<p align="center">
-	<img src="./assets/zoopx-logo.png" alt="ZoopX Labs" width="360" />
-</p>
-
-# zpx-lp-vault — ZoopX Labs
-
 This repository is a Foundry monorepo implementing a production-oriented cross-chain hub-and-spoke liquidity vault built by ZoopX Labs. It provides a multi-asset Arbitrum Hub with a USD-denominated yield-share token (`USDzy`), optional ZPX incentives, and Phase‑2 spoke vaults with routing to balance liquidity across chains via adapters and a Factory deployer.
 
 Key properties: UUPS upgradeability, role-gated admin surfaces (OpenZeppelin AccessControl), pausability, SafeERC20 usage, and explicit replay protection for cross-chain messages.
@@ -248,16 +241,12 @@ Read the operational and audit documents:
 
 ## Upgrade notes
 
-- UUPS `upgradeTo` / `upgradeToAndCall` are available on UUPS contracts. `_authorizeUpgrade` is role-gated — ensure the timelock/multisig holds admin.
-- Validate storage compatibility against `storage/*.json` snapshots and run `test/upgrade/*` before any production upgrade.
 
 ## Roadmap & versioning
 
-- Current status: Phase-2 dev-complete (suggested tag: `v0.9.0-devcomplete`). Next steps: fuzzing, formal audit, production mainnet deploy.
+Documentation version: 1.0
 
 ## License & contact
-
-- License: See the repository top-level license files (MIT / Apache as applicable).
 - Maintained by: ZoopX Labs — https://github.com/zoopx-labs
 - Security disclosures: Please use the repository's GitHub security contact and responsible disclosure process.
 
@@ -273,13 +262,9 @@ For general inquiries or partnership requests, contact maintainers via the GitHu
 
 ---
 
-## Footer
-
 © 2025 ZoopX Labs. Maintained by ZoopX Labs — https://github.com/zoopx-labs
 
-For security disclosures: security@zoopx.xyz
-
-License: see the repository top-level license files (MIT / Apache as applicable).
+For security disclosures: support@zoopx.xyz
 
 Built with Foundry (forge). This documentation is maintained for developer and auditor use; confirm on-chain addresses and admin roles before interacting with deployed contracts.
 
