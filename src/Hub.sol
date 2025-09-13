@@ -205,13 +205,17 @@ contract Hub is
         emit Deposited(msg.sender, asset, amount, usd6, shares);
     }
 
-    function requestWithdraw(uint256 shares) external nonReentrant whenNotPaused {
+    function requestWithdraw(uint256 shares) external nonReentrant {
         require(shares > 0, "zero");
         uint256 usdOwed6 = (shares * pps6()) / 1_000_000;
         usdzy.burn(msg.sender, shares);
         uint64 readyAt = uint64(block.timestamp + withdrawDelay);
         requests.push(WithdrawReq({owner: msg.sender, usdOwed6: uint128(usdOwed6), readyAt: readyAt, claimed: false}));
         emit WithdrawRequested(requests.length - 1, msg.sender, shares, usdOwed6, readyAt);
+    }
+
+    function requestsCount() external view returns (uint256) {
+        return requests.length;
     }
 
     function claimWithdraw(uint256 id, address payoutAsset) external nonReentrant whenNotPaused {

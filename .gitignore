@@ -12,3 +12,8 @@ docs/
 
 # Dotenv file
 .env
+
+# Local artifacts
+.gas-snapshot
+lcov.info
+coverage/

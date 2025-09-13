@@ -24,6 +24,13 @@ jobs:
           ! grep -RInE "TODO|FIXME|PLACEHOLDER" --exclude-dir=lib -- src test script README.md || (echo "Placeholders found" && exit 1)
       - name: Tests
         run: forge test -vvv
+      - name: Slither
+        uses: crytic/slither-action@v0.3.0
+        with:
+          node-version: 20
+          target: .
+          fail-on: medium
+          slither-args: --exclude-informational
       - name: Gas snapshot
         run: |
           forge snapshot

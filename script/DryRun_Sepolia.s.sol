@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 
-import {Script, console2} from "forge-std/Script.sol";
+import {Script} from "forge-std/Script.sol";
+import "forge-std/console.sol";
 import {USDzy} from "src/USDzy.sol";
 import {Hub} from "src/Hub.sol";
 
@@ -52,11 +53,17 @@ contract DryRunSepolia is Script {
         uint256 shares = usdzy.balanceOf(msg.sender);
         hub.requestWithdraw(shares);
 
-        // for a freshly-deployed hub the request id will be 0
-        uint256 id = 0;
+        // for a freshly-deployed hub compute last ticket id via requestsCount()
+        uint256 id = hub.requestsCount() - 1;
         (,, uint64 readyAt,) = hub.requests(id);
-        console2.log("ticketId:", id);
-        console2.log("readyAt:", readyAt);
+    console.log("asset:");
+    console.logAddress(usdcToken);
+    console.log("deposit amt:");
+    console.logUint(1_000_000);
+    console.log("ticketId:");
+    console.logUint(id);
+    console.log("readyAt:");
+    console.logUint(readyAt);
 
         vm.stopBroadcast();
     }
