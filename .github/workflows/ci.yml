@@ -43,8 +43,7 @@ jobs:
             --foundry-out-directory out
             --exclude-dependencies
             --filter-paths "(^lib/|^test/|^script/)"
-            --exclude-detector unprotected-initializer
-            --exclude-detector unprotected-upgradeable-contract
+            # Removed unsupported --exclude-detector flags (v0.11.3 doesn't accept them)
 
       - name: Gas snapshot
         run: |
