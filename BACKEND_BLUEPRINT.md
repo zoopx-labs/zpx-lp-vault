@@ -225,6 +225,23 @@ CREATE TABLE errors (
 
 ---
 
+## Recent security hardening (2025-09-15)
+
+- Added targeted hardening and tests following a Slither run. Key changes pushed to `main`:
+  - `MockAdapter.send` now uses a reentrancy guard (test adapter) and validates destination non-zero. This reduces a Slither reentrancy finding for test adapters.
+  - `Factory.deploySpoke` now inherits `ReentrancyGuardUpgradeable` and the deployment flow is `nonReentrant` to reduce external-call ordering risks when wiring new proxies.
+  - `USDzyRemoteMinter` now initializes and uses `ReentrancyGuardUpgradeable` and protects `mintFromGateway`/`onMessage` with `nonReentrant`.
+  - `Router.fill` and `Hub.quoteUsd6`/`totalAssetsUsd6` were updated to use `Math.mulDiv` for safer multiply/divide ordering and improved precision. Some remaining divide-before-multiply flags in other files were noted for follow-up.
+  - Captured previously-unused external returns (vault.borrow / vault.repay) and emitted debt in `repay` for clearer accounting.
+  - Added negative unit tests asserting unauthorized callers cannot call UUPS `upgradeTo` on proxies for key contracts (upgrade access control tests).
+  - Generated Slither JSON reports (committed): `slither-report-after.json`, `slither-report-after2.json`, `slither-report-after3.json` in repo root. Tests green after edits.
+
+Notes / residual findings from Slither:
+- Several `unprotected-upgradeable-contract` findings remain flagged by Slither and require a careful audit (some are false-positives stemming from init patterns); recommended follow-up: audit `_authorizeUpgrade` across flagged contracts and add negative upgrade tests per contract.
+- `calls-inside-a-loop` for `Hub.totalAssetsUsd6` persists because balanceOf and oracle reads are still invoked per-token; mitigations include bounding token list, caching prices, or accepting as operational with monitored SLOs.
+- A small number of `divide-before-multiply` cases remain (e.g., in `LocalDepositGateway` and withdraw math) and can be converted to `Math.mulDiv` safely.
+
+
 ## APIs (REST/GraphQL)
 - **GET /tvl**: chain, vault, tvl, timestamp
 - **GET /pps**: chain, router, pps, timestamp
