@@ -30,9 +30,9 @@ contract MessagingAuthorityTest is Test {
         adapter = new MockAdapter();
         r = new ReceiverForAuth();
         // register src endpoint as allowed by owner
-    r.setEndpoint(1, address(adapter), true);
-    // also allow the test caller (adapter.send will encode msg.sender as the test caller)
-    r.setEndpoint(1, address(this), true);
+        r.setEndpoint(1, address(adapter), true);
+        // also allow the test caller (adapter.send will encode msg.sender as the test caller)
+        r.setEndpoint(1, address(this), true);
     }
 
     function testAdapterMustBeCallerWhenAdapterSet() public {
@@ -41,10 +41,10 @@ contract MessagingAuthorityTest is Test {
         // set adapter on receiver (owner only)
         r.setAdapter(address(adapter));
 
-    // direct call from srcAddr should fail because adapter is configured
-    vm.prank(address(0xCAFE));
-    vm.expectRevert(bytes("NOT_ADAPTER"));
-    r.onMessage(1, address(0xCAFE), payload, 1);
+        // direct call from srcAddr should fail because adapter is configured
+        vm.prank(address(0xCAFE));
+        vm.expectRevert(bytes("NOT_ADAPTER"));
+        r.onMessage(1, address(0xCAFE), payload, 1);
 
         // calling via adapter should succeed
         uint64 n = adapter.send(1, address(r), payload);

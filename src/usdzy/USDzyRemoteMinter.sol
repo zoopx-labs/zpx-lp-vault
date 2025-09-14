@@ -27,10 +27,10 @@ contract USDzyRemoteMinter is
     event GatewayMinted(address indexed to, uint256 shares);
 
     function initialize(address usdzy_, address admin_) public initializer {
-    require(usdzy_ != address(0), "usdzy zero");
-    require(admin_ != address(0), "admin zero");
-    usdzy = usdzy_;
-    admin = admin_;
+        require(usdzy_ != address(0), "usdzy zero");
+        require(admin_ != address(0), "admin zero");
+        usdzy = usdzy_;
+        admin = admin_;
         __MessagingEndpointReceiver_init(admin_);
         __ReentrancyGuard_init();
         _grantRole(DEFAULT_ADMIN_ROLE, admin_);
@@ -43,7 +43,10 @@ contract USDzyRemoteMinter is
     }
 
     // onMessage called by MessagingAdapter in tests
-    function onMessage(uint64 srcChainId, address srcAddr, bytes calldata payload, uint64 nonce) external nonReentrant {
+    function onMessage(uint64 srcChainId, address srcAddr, bytes calldata payload, uint64 nonce)
+        external
+        nonReentrant
+    {
         _verifyAndMark(srcChainId, srcAddr, payload, nonce);
         (address to, uint256 amount) = abi.decode(payload, (address, uint256));
         // mint as the final external interaction

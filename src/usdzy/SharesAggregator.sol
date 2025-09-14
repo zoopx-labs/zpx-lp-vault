@@ -14,14 +14,14 @@ contract SharesAggregator is Initializable, UUPSUpgradeable, AccessControlUpgrad
     event ReportBurn(uint64 chainId, uint256 shares);
 
     function initialize(address admin) public initializer {
-    require(admin != address(0), "admin zero");
-    __AccessControl_init();
-    _grantRole(DEFAULT_ADMIN_ROLE, admin);
+        require(admin != address(0), "admin zero");
+        __AccessControl_init();
+        _grantRole(DEFAULT_ADMIN_ROLE, admin);
     }
 
     function setAdapter(address a) external onlyRole(DEFAULT_ADMIN_ROLE) {
-    require(a != address(0), "adapter zero");
-    adapter = a;
+        require(a != address(0), "adapter zero");
+        adapter = a;
     }
 
     function reportMint(uint64 srcChainId, uint256 shares) external {

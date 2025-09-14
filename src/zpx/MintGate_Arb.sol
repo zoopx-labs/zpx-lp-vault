@@ -24,7 +24,7 @@ contract MintGate_Arb is Ownable {
     }
 
     function setEndpoint(uint64 srcChainId, address srcContract) external onlyOwner {
-    require(srcContract != address(0), "SRC=0");
+        require(srcContract != address(0), "SRC=0");
         allowedSrcChainId = srcChainId;
         allowedSrc = srcContract;
         emit EndpointUpdated(srcChainId, srcContract);

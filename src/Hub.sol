@@ -168,10 +168,10 @@ contract Hub is
         require(c.enabled, "asset disabled");
         uint256 amt6 = _scaleTo6(amount, c.decimals);
         uint256 px6 = _px6(asset);
-    uint256 gross = Math.mulDiv(amt6, px6, 1_000_000);
-    if (!applyHaircut) return gross;
-    uint256 cut = Math.mulDiv(gross, c.haircutBps, 10_000);
-    return gross - cut;
+        uint256 gross = Math.mulDiv(amt6, px6, 1_000_000);
+        if (!applyHaircut) return gross;
+        uint256 cut = Math.mulDiv(gross, c.haircutBps, 10_000);
+        return gross - cut;
     }
 
     /// @notice Total assets across configured tokens, summed in USD6. INTERNAL USE: does not re-apply haircuts beyond quoteUSD6 behavior.

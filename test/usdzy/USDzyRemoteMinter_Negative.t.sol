@@ -15,9 +15,10 @@ contract USDzyRemoteMinterNegativeTest is Test {
         usdzy = new USDzy();
         usdzy.initialize("USDzy", "USZY", address(this));
 
-    USDzyRemoteMinter impl = new USDzyRemoteMinter();
-    ERC1967Proxy proxy = new ERC1967Proxy(address(impl), abi.encodeCall(USDzyRemoteMinter.initialize, (address(usdzy), admin)));
-    minter = USDzyRemoteMinter(address(proxy));
+        USDzyRemoteMinter impl = new USDzyRemoteMinter();
+        ERC1967Proxy proxy =
+            new ERC1967Proxy(address(impl), abi.encodeCall(USDzyRemoteMinter.initialize, (address(usdzy), admin)));
+        minter = USDzyRemoteMinter(address(proxy));
 
         // no GATEWAY_ROLE granted to test caller
     }

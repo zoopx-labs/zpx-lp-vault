@@ -20,7 +20,7 @@ contract Factory is Initializable, AccessControlUpgradeable, ReentrancyGuardUpgr
 
     function initialize(address admin) public initializer {
         __AccessControl_init();
-    __ReentrancyGuard_init();
+        __ReentrancyGuard_init();
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
     }
 

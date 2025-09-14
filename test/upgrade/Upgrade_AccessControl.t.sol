@@ -26,11 +26,11 @@ contract UpgradeAccessControlTest is Test {
 
         Router impl2 = new Router();
 
-    address attacker = address(0xBEEF);
-    vm.prank(attacker);
-    vm.expectRevert();
-    // call upgradeTo via proxy - should revert due to _authorizeUpgrade
-    IUUPS(proxy).upgradeTo(address(impl2));
+        address attacker = address(0xBEEF);
+        vm.prank(attacker);
+        vm.expectRevert();
+        // call upgradeTo via proxy - should revert due to _authorizeUpgrade
+        IUUPS(proxy).upgradeTo(address(impl2));
     }
 
     function testNonAdminCannotUpgradeHub() public {
@@ -42,10 +42,10 @@ contract UpgradeAccessControlTest is Test {
 
         Hub impl2 = new Hub();
 
-    address attacker = address(0xBEEF);
-    vm.prank(attacker);
-    vm.expectRevert();
-    IUUPS(proxy).upgradeTo(address(impl2));
+        address attacker = address(0xBEEF);
+        vm.prank(attacker);
+        vm.expectRevert();
+        IUUPS(proxy).upgradeTo(address(impl2));
     }
 
     function testNonAdminCannotUpgradeSpokeVault() public {
@@ -57,9 +57,9 @@ contract UpgradeAccessControlTest is Test {
 
         SpokeVault impl2 = new SpokeVault();
 
-    address attacker = address(0xBEEF);
-    vm.prank(attacker);
-    vm.expectRevert();
-    IUUPS(proxy).upgradeTo(address(impl2));
+        address attacker = address(0xBEEF);
+        vm.prank(attacker);
+        vm.expectRevert();
+        IUUPS(proxy).upgradeTo(address(impl2));
     }
 }

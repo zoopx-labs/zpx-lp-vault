@@ -41,15 +41,15 @@ contract Router is
     event FeeSplitUpdated(uint16 protocolShareBps, uint16 lpShareBps);
     event FeeCollectorUpdated(address feeCollector);
     event FeeApplied(
-    address asset,
-    uint256 grossAmount,
-    uint256 relayerFee,
-    uint256 protocolFee,
-    uint256 protocolToTreasury,
-    uint256 protocolToLPs,
-    address to,
-    address relayerAddr,
-    address feeCollector
+        address asset,
+        uint256 grossAmount,
+        uint256 relayerFee,
+        uint256 protocolFee,
+        uint256 protocolToTreasury,
+        uint256 protocolToLPs,
+        address to,
+        address relayerAddr,
+        address feeCollector
     );
 
     struct Day {
@@ -70,7 +70,7 @@ contract Router is
     function initialize(address vault_, address adapter_, address admin_, address feeCollector_) public initializer {
         vault = ISpokeVault(vault_);
         adapter = IMessagingAdapter(adapter_);
-    feeCollector = feeCollector_;
+        feeCollector = feeCollector_;
 
         // fee defaults
         protocolFeeBps = 0;
@@ -88,9 +88,9 @@ contract Router is
 
     // --- Fee setters ---
     function setProtocolFeeBps(uint16 bps) external onlyRole(DEFAULT_ADMIN_ROLE) {
-    require(bps <= 5, "ProtocolFee>5bps");
-    protocolFeeBps = bps;
-    emit ProtocolFeeUpdated(bps);
+        require(bps <= 5, "ProtocolFee>5bps");
+        protocolFeeBps = bps;
+        emit ProtocolFeeUpdated(bps);
     }
 
     function setRelayerFeeBps(uint16 bps) external onlyRole(DEFAULT_ADMIN_ROLE) {
@@ -106,9 +106,9 @@ contract Router is
     }
 
     function setFeeCollector(address collector) external onlyRole(DEFAULT_ADMIN_ROLE) {
-    // allow clearing collector only if protocol fee is zero
-    require(collector != address(0) || protocolFeeBps == 0, "FeeCollector=0");
-    feeCollector = collector;
+        // allow clearing collector only if protocol fee is zero
+        require(collector != address(0) || protocolFeeBps == 0, "FeeCollector=0");
+        feeCollector = collector;
         emit FeeCollectorUpdated(collector);
     }
 
@@ -125,7 +125,7 @@ contract Router is
     }
 
     function avg7d() public view returns (uint256) {
-    uint256 s = 0;
+        uint256 s = 0;
         for (uint256 i = 0; i < 7; i++) {
             s += daysBuf[i].tvl;
         }
@@ -153,16 +153,16 @@ contract Router is
         uint16 h = healthBps();
         emit RebalanceSuggested(cur, avg, h, lastRebalanceAt);
         bytes memory payload = abi.encode(dstChainId, address(vault), vault.totalAssets(), cur, h);
-    // record timestamp before external adapter call to reduce reentrancy window
-    lastRebalanceAt = uint64(block.timestamp);
-    // capture adapter nonce to avoid ignoring return value
-    uint64 _nonce = adapter.send(dstChainId, hubAddr, payload);
+        // record timestamp before external adapter call to reduce reentrancy window
+        lastRebalanceAt = uint64(block.timestamp);
+        // capture adapter nonce to avoid ignoring return value
+        uint64 _nonce = adapter.send(dstChainId, hubAddr, payload);
     }
 
     function fill(address to, uint256 amount) external onlyRole(RELAYER_ROLE) nonReentrant whenNotPaused {
         // compute fees
-    uint256 protocolFee = Math.mulDiv(uint256(amount), uint256(protocolFeeBps), 10000);
-    uint256 relayerFee = Math.mulDiv(uint256(amount), uint256(relayerFeeBps), 10000);
+        uint256 protocolFee = Math.mulDiv(uint256(amount), uint256(protocolFeeBps), 10000);
+        uint256 relayerFee = Math.mulDiv(uint256(amount), uint256(relayerFeeBps), 10000);
 
         uint256 net;
         if (protocolFee + relayerFee >= amount) {
@@ -175,51 +175,43 @@ contract Router is
         uint256 toTreasury = 0;
         uint256 toLPs = 0;
 
-    // handle protocol split and transfers by borrowing from vault to recipients
+        // handle protocol split and transfers by borrowing from vault to recipients
         if (protocolFee > 0) {
             require(feeCollector != address(0), "FeeCollector=0");
             toTreasury = Math.mulDiv(protocolFee, uint256(protocolShareBps), 10000);
             toLPs = protocolFee - toTreasury;
             // send treasury its share by borrowing from the vault (capture returned debt for clarity)
             if (toTreasury > 0) {
-        uint256 _debt = vault.borrow(toTreasury, feeCollector);
-        // use _debt to avoid ignoring return value
-        if (_debt == type(uint256).max) revert();
+                uint256 _debt = vault.borrow(toTreasury, feeCollector);
+                // use _debt to avoid ignoring return value
+                if (_debt == type(uint256).max) revert();
             }
             // toLPs remains in the vault (no action) to benefit LPs
         }
 
         // pay relayer from vault via borrow
         if (relayerFee > 0) {
-        uint256 _debt = vault.borrow(relayerFee, msg.sender);
-        if (_debt == type(uint256).max) revert();
+            uint256 _debt = vault.borrow(relayerFee, msg.sender);
+            if (_debt == type(uint256).max) revert();
         }
 
         // deliver net to user from vault
         if (net > 0) {
-        uint256 _debt = vault.borrow(net, to);
-        if (_debt == type(uint256).max) revert();
+            uint256 _debt = vault.borrow(net, to);
+            if (_debt == type(uint256).max) revert();
         }
 
         // emit enriched fee application event
         emit FeeApplied(
-            address(vault.asset()),
-            amount,
-            relayerFee,
-            protocolFee,
-            toTreasury,
-            toLPs,
-            to,
-            msg.sender,
-            feeCollector
+            address(vault.asset()), amount, relayerFee, protocolFee, toTreasury, toLPs, to, msg.sender, feeCollector
         );
         emit FillExecuted(to, amount);
     }
 
     function repay(uint256 amount) external nonReentrant whenNotPaused {
         IERC20(vault.asset()).safeTransferFrom(msg.sender, address(vault), amount);
-    uint256 newDebt = vault.repay(amount);
-    emit Repaid(amount, newDebt);
+        uint256 newDebt = vault.repay(amount);
+        emit Repaid(amount, newDebt);
     }
 
     function setAdapter(address a) external onlyRole(DEFAULT_ADMIN_ROLE) {

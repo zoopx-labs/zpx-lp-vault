@@ -57,20 +57,20 @@ contract FactorySmoke is Test {
         assertTrue(SpokeVault(v).hasRole(role, r));
 
         // both should be paused by default
-    // try unpause by intended admin (this test contract) - should succeed because Factory transferred roles
-    SpokeVault(v).unpause();
-    Router(r).unpause();
+        // try unpause by intended admin (this test contract) - should succeed because Factory transferred roles
+        SpokeVault(v).unpause();
+        Router(r).unpause();
 
-    // Factory should have renounced admin roles on deployed proxies
-    // attempting to grant role as Factory (f) should revert; we simulate by calling hasRole for Factory should be false
-    bytes32 adminRole = SpokeVault(v).DEFAULT_ADMIN_ROLE();
-    assertFalse(SpokeVault(v).hasRole(adminRole, address(f)));
-    assertFalse(Router(r).hasRole(Router(r).DEFAULT_ADMIN_ROLE(), address(f)));
+        // Factory should have renounced admin roles on deployed proxies
+        // attempting to grant role as Factory (f) should revert; we simulate by calling hasRole for Factory should be false
+        bytes32 adminRole = SpokeVault(v).DEFAULT_ADMIN_ROLE();
+        assertFalse(SpokeVault(v).hasRole(adminRole, address(f)));
+        assertFalse(Router(r).hasRole(Router(r).DEFAULT_ADMIN_ROLE(), address(f)));
 
-    // Router should be initialized with provided feeCollector (address(0) was passed) and adapter set to provided adapter
-    // adapter stored should equal address(0x2) per initializer call above
-    // read adapter slot via public accessor
-    // note: Router.adapter() returns IMessagingAdapter, compare as address
-    assertEq(address(Router(r).adapter()), address(0x2));
+        // Router should be initialized with provided feeCollector (address(0) was passed) and adapter set to provided adapter
+        // adapter stored should equal address(0x2) per initializer call above
+        // read adapter slot via public accessor
+        // note: Router.adapter() returns IMessagingAdapter, compare as address
+        assertEq(address(Router(r).adapter()), address(0x2));
     }
 }

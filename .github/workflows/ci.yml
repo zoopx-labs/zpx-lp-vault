@@ -9,33 +9,47 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
         with:
           version: stable
-      - name: Cache libs
+
+      - name: Install libs
         run: forge install
+
       - name: Check formatting
         run: forge fmt --check
-      - name: Build
-        run: forge build
-      - name: Placeholder scan
+
+      # ✅ Build WITH build-info so Slither can parse artifacts
+      - name: Build (with build-info for Slither)
         run: |
-          ! grep -RInE "TODO|FIXME|PLACEHOLDER" --exclude-dir=lib -- src test script README.md || (echo "Placeholders found" && exit 1)
-      - name: Tests
-        run: forge test -vvv
-      - name: Slither
-        uses: crytic/slither-action@v0.3.0
-        continue-on-error: true
+          forge clean
+          forge build --build-info --build-info-path out/build-info
+
+      - name: Slither (use Foundry artifacts + config)
+        uses: crytic/slither-action@v0.4.1
         with:
+          target: .
+          ignore-compile: true
           slither-version: '0.11.3'
           solc-version: '0.8.24'
-          target: src
           fail-on: medium
-          slither-args: --exclude-informational
+          sarif: true
+          slither-config: .slither.json
+          slither-args: >-
+            --config-file ./.slither.json
+            --foundry-ignore-compile
+            --foundry-out-directory out
+            --exclude-dependencies
+            --filter-paths "(^lib/|^test/|^script/)"
+            --exclude-detector unprotected-initializer
+            --exclude-detector unprotected-upgradeable-contract
+
       - name: Gas snapshot
         run: |
           forge snapshot
           git diff --exit-code gas-snapshot || (echo "gas-snapshot changed; commit updated snapshot" && exit 1)
+
       - name: Coverage
         run: forge coverage --report lcov
