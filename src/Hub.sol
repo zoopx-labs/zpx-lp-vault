@@ -8,6 +8,7 @@ import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/Pau
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 import "./USDzy.sol";
@@ -167,21 +168,26 @@ contract Hub is
         require(c.enabled, "asset disabled");
         uint256 amt6 = _scaleTo6(amount, c.decimals);
         uint256 px6 = _px6(asset);
-        uint256 gross = (amt6 * px6) / 1_000_000;
-        if (!applyHaircut) return gross;
-        uint256 cut = (gross * c.haircutBps) / 10_000;
-        return gross - cut;
+    uint256 gross = Math.mulDiv(amt6, px6, 1_000_000);
+    if (!applyHaircut) return gross;
+    uint256 cut = Math.mulDiv(gross, c.haircutBps, 10_000);
+    return gross - cut;
     }
 
     /// @notice Total assets across configured tokens, summed in USD6. INTERNAL USE: does not re-apply haircuts beyond quoteUSD6 behavior.
     function totalAssetsUsd6() public view returns (uint256 sum) {
-        for (uint256 i = 0; i < listedTokens.length; i++) {
+        uint256 len = listedTokens.length;
+        for (uint256 i = 0; i < len; i++) {
             address t = listedTokens[i];
             AssetConfig memory c = assetCfg[t];
             if (!c.enabled) continue;
             uint256 bal = IERC20(t).balanceOf(address(this));
             if (bal == 0) continue;
-            sum += quoteUsd6(t, bal, false); // internal mode: NO haircut
+            // fetch price once per token to avoid repeated external calls in loops
+            uint256 px6 = _px6(t);
+            uint256 amt6 = _scaleTo6(bal, c.decimals);
+            uint256 gross = Math.mulDiv(amt6, px6, 1_000_000);
+            sum += gross;
         }
     }
 
@@ -208,10 +214,12 @@ contract Hub is
     function requestWithdraw(uint256 shares) external nonReentrant {
         require(shares > 0, "zero");
         uint256 usdOwed6 = (shares * pps6()) / 1_000_000;
-        usdzy.burn(msg.sender, shares);
+        // update state before external call to reduce reentrancy window
         uint64 readyAt = uint64(block.timestamp + withdrawDelay);
         requests.push(WithdrawReq({owner: msg.sender, usdOwed6: uint128(usdOwed6), readyAt: readyAt, claimed: false}));
         emit WithdrawRequested(requests.length - 1, msg.sender, shares, usdOwed6, readyAt);
+        // burn after enqueuing the request to avoid reentrancy triggered by burn hooks
+        usdzy.burn(msg.sender, shares);
     }
 
     function requestsCount() external view returns (uint256) {

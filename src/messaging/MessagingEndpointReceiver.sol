@@ -70,4 +70,7 @@ contract MessagingEndpointReceiver is Initializable, OwnableUpgradeable {
         require(_markUsed(key), "REPLAY");
         return key;
     }
+
+    // storage gap for upgrade safety
+    uint256[50] private __gap;
 }

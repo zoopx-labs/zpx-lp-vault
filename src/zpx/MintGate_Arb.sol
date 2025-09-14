@@ -10,7 +10,7 @@ import {ZPXArb} from "./ZPXArb.sol";
  * @dev Gate contract that mints ZPXArb on verified cross-chain messages from Base.
  */
 contract MintGate_Arb is Ownable {
-    address public zpx;
+    address public immutable zpx;
     mapping(bytes32 => bool) public used;
     address public allowedSrc;
     uint64 public allowedSrcChainId;
@@ -19,10 +19,12 @@ contract MintGate_Arb is Ownable {
     event MintOnMessage(address indexed recipient, uint256 amount, bytes32 purpose, uint256 nonce);
 
     constructor(address zpx_) Ownable(msg.sender) {
+        require(zpx_ != address(0), "ZPX=0");
         zpx = zpx_;
     }
 
     function setEndpoint(uint64 srcChainId, address srcContract) external onlyOwner {
+    require(srcContract != address(0), "SRC=0");
         allowedSrcChainId = srcChainId;
         allowedSrc = srcContract;
         emit EndpointUpdated(srcChainId, srcContract);

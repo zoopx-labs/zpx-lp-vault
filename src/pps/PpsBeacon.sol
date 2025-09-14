@@ -32,4 +32,7 @@ contract PpsBeacon is Initializable, UUPSUpgradeable, AccessControlUpgradeable, 
     }
 
     function _authorizeUpgrade(address) internal override onlyRole(DEFAULT_ADMIN_ROLE) {}
+
+    // storage gap for future upgrades
+    uint256[50] private __gap;
 }

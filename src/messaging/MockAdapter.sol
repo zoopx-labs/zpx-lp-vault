@@ -2,9 +2,10 @@
 pragma solidity ^0.8.24;
 
 import {IMessagingAdapter} from "../interfaces/IMessagingAdapter.sol";
+import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
-contract MockAdapter is IMessagingAdapter {
-    address public owner;
+contract MockAdapter is IMessagingAdapter, ReentrancyGuard {
+    address public immutable owner;
     uint64 public nonce;
 
     event EndpointSet(uint64 chainId, address endpoint, bool allowed);
@@ -21,7 +22,8 @@ contract MockAdapter is IMessagingAdapter {
         emit EndpointSet(chainId, endpoint, allowed);
     }
 
-    function send(uint64 dstChainId, address dst, bytes calldata payload) external returns (uint64) {
+    function send(uint64 dstChainId, address dst, bytes calldata payload) external nonReentrant returns (uint64) {
+        require(dst != address(0), "DST=0");
         nonce++;
         emit MessageSent(dstChainId, dst, payload, nonce);
         // In tests, if dst is a contract with onMessage, call it directly to simulate delivery

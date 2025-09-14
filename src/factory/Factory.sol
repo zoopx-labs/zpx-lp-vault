@@ -3,12 +3,13 @@ pragma solidity ^0.8.24;
 
 import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
 import {SpokeVault} from "../spoke/SpokeVault.sol";
 import {Router} from "../router/Router.sol";
 
-contract Factory is Initializable, AccessControlUpgradeable {
+contract Factory is Initializable, AccessControlUpgradeable, ReentrancyGuardUpgradeable {
     event SpokeDeployed(uint64 chainId, address asset, address vault, address router);
 
     // cached implementations (can be rotated by admin)
@@ -19,6 +20,7 @@ contract Factory is Initializable, AccessControlUpgradeable {
 
     function initialize(address admin) public initializer {
         __AccessControl_init();
+    __ReentrancyGuard_init();
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
     }
 
@@ -43,7 +45,7 @@ contract Factory is Initializable, AccessControlUpgradeable {
         address routerAdmin,
         address adapter,
         address feeCollector
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) returns (address vault, address router) {
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) nonReentrant returns (address vault, address router) {
         // determine implementations to use (cached if set, otherwise deploy new impls)
         address implVAddr = spokeVaultImpl;
         if (implVAddr == address(0)) {

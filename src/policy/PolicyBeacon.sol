@@ -73,4 +73,7 @@ contract PolicyBeacon is Initializable, UUPSUpgradeable, AccessControlUpgradeabl
     }
 
     function _authorizeUpgrade(address) internal override onlyRole(DEFAULT_ADMIN_ROLE) {}
+
+    // storage gap for upgrade safety
+    uint256[50] private __gap;
 }
