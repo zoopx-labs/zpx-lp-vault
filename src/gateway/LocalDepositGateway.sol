@@ -1,0 +1,128 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.24;
+
+import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
+import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+
+import {IPpsSource} from "../pps/IPpsSource.sol";
+import {IUSDzy} from "../usdzy/IUSDzy.sol";
+
+interface IUSDzyRemoteMinter {
+    function mintFromGateway(address to, uint256 shares) external;
+}
+
+interface IFeed {
+    function latestAnswer() external view returns (int256);
+    function latestTimestamp() external view returns (uint256);
+}
+
+interface ISpokeVault {
+    function asset() external view returns (address);
+}
+
+contract LocalDepositGateway is
+    Initializable,
+    UUPSUpgradeable,
+    AccessControlUpgradeable,
+    PausableUpgradeable,
+    ReentrancyGuardUpgradeable
+{
+    using SafeERC20 for IERC20;
+
+    bytes32 public constant GATEWAY_ADMIN = keccak256("GATEWAY_ADMIN");
+
+    struct AssetCfg {
+        bool enabled;
+        address token;
+        address feed;
+        uint8 tokenDecimals;
+        uint8 priceDecimals;
+        uint16 haircutBps;
+    }
+
+    mapping(address => AssetCfg) public cfg;
+    uint64 public maxStaleness;
+
+    IUSDzyRemoteMinter public minter;
+    IPpsSource public ppsMirror;
+    ISpokeVault public spoke;
+
+    event Deposited(address indexed user, address indexed asset, uint256 amount, uint256 usd6, uint256 shares);
+
+    function initialize(address minter_, address ppsMirror_, address spoke_, address admin_, uint64 maxStaleness_)
+        public
+        initializer
+    {
+        __AccessControl_init();
+        __Pausable_init();
+        __ReentrancyGuard_init();
+        _grantRole(DEFAULT_ADMIN_ROLE, admin_);
+        _grantRole(GATEWAY_ADMIN, admin_);
+        minter = IUSDzyRemoteMinter(minter_);
+        ppsMirror = IPpsSource(ppsMirror_);
+        spoke = ISpokeVault(spoke_);
+        maxStaleness = maxStaleness_;
+    }
+
+    function setAssetConfig(
+        address token,
+        address feed,
+        uint8 tokenDecimals,
+        uint8 priceDecimals,
+        uint16 haircutBps,
+        bool enabled
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        cfg[token] = AssetCfg(enabled, token, feed, tokenDecimals, priceDecimals, haircutBps);
+    }
+
+    function setMaxStaleness(uint64 s) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        maxStaleness = s;
+    }
+
+    function deposit(address asset, uint256 amount) external nonReentrant whenNotPaused {
+        AssetCfg memory c = cfg[asset];
+        require(c.enabled, "ASSET_DISABLED");
+        IERC20(asset).safeTransferFrom(msg.sender, address(this), amount);
+
+        // read price
+        IFeed feed = IFeed(c.feed);
+        int256 price = feed.latestAnswer();
+        require(price > 0, "BAD_PRICE");
+        uint256 ts = feed.latestTimestamp();
+        require(block.timestamp - ts <= maxStaleness, "PRICE_STALE");
+
+        // price scaling: priceDecimals -> USD6; tokenDecimals -> token units
+        // compute usd6 = amount * price * (10^(6 - priceDecimals)) / (10^tokenDecimals)
+        uint256 usd6 = (uint256(price) * amount);
+        if (c.priceDecimals > 6) usd6 = usd6 / (10 ** (c.priceDecimals - 6));
+        else if (c.priceDecimals < 6) usd6 = usd6 * (10 ** (6 - c.priceDecimals));
+        if (c.tokenDecimals > 0) usd6 = usd6 / (10 ** c.tokenDecimals);
+
+        // apply haircut
+        uint256 haircut = (usd6 * c.haircutBps) / 10000;
+        uint256 usd6After = usd6 >= haircut ? usd6 - haircut : 0;
+
+        // read pps
+        (uint256 pps6, uint64 ppsAsOf) = ppsMirror.latestPps6();
+        require(block.timestamp - ppsAsOf <= maxStaleness, "PPS_STALE");
+        require(pps6 > 0, "BAD_PPS");
+
+        uint256 shares = (usd6After * 1e6) / pps6;
+        require(shares > 0, "ZERO_SHARES");
+
+        // mint shares via minter
+        minter.mintFromGateway(msg.sender, shares);
+
+        // forward asset into spoke vault (assume spoke accepts tokens via transfer)
+        IERC20(asset).safeTransfer(address(spoke), amount);
+
+        emit Deposited(msg.sender, asset, amount, usd6After, shares);
+    }
+
+    function _authorizeUpgrade(address) internal override onlyRole(DEFAULT_ADMIN_ROLE) {}
+}

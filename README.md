@@ -19,6 +19,21 @@ Key properties: UUPS upgradeability, role-gated admin surfaces (OpenZeppelin Acc
 - Roadmap & versioning
 - License & contact
 
+New components
+
+- PolicyBeacon (per-chain policy poster/persist)
+- PpsBeacon (Hub), PpsMirror (Spoke)
+- LocalDepositGateway (per-spoke deposit gateway)
+- SharesAggregator (global shares accounting)
+
+Environment variables (examples)
+
+- POLICY_BEACON_ADMIN, POLICY_POSTER
+- PPS_BEACON_ADMIN, PPS_POSTER
+- SHARES_AGGREGATOR_ADMIN, SHARES_AGGREGATOR_ADAPTER
+- PPS_MIRROR_ADMIN_<CHAIN>, PPS_MIRROR_POSTER_<CHAIN>
+- USDZY_REMOTE_MINTER_<CHAIN>, SPOKE_VAULT_<CHAIN>, GATEWAY_ADMIN_<CHAIN>
+
 ## Architecture at a glance
 
 Phase-1 → Phase-1.5 → Phase-2
@@ -167,6 +182,21 @@ Adapter (`src/messaging/MockAdapter.sol` or production adapter) -> MessagingEndp
 | `KEEPER_ADDR` | Keeper address for scheduled `pokeTvlSnapshot` / rebalance |
 
 ### Core commands
+
+### Phase-2 fee configuration (Router)
+
+- `FEE_COLLECTOR` — optional address passed to `script/Deploy_Phase2_Spoke.s.sol`; when set the deploy script will configure the router with this collector and any additional fee envs described below.
+- `PROTOCOL_FEE_BPS` — optional basis-points (out of 10_000) charged as a protocol fee on `Router.fill()` (destination-side). The setter enforces a maximum of 5 bps (0.05%). Default: `0`.
+- `RELAYER_FEE_BPS` — optional basis-points paid to the relayer that executes `fill()` on the destination. Default: `0`.
+- `PROTOCOL_SHARE_BPS` — optional basis-points (out of 10_000) representing the share of the protocol fee that is paid out to the protocol treasury (fee collector). The LP share is `10000 - PROTOCOL_SHARE_BPS`. Default: `2500` (25% treasury / 75% LPs).
+
+Behavior summary
+
+- Fees are applied on the destination chain inside `Router.fill()` and computed as `protocolFee = amount * protocolFeeBps / 10000` and `relayerFee = amount * relayerFeeBps / 10000`.
+- The protocol treasury portion (`protocolFee * protocolShareBps / 10000`) is paid out by borrowing from the `SpokeVault` to the configured `FEE_COLLECTOR` address.
+- The protocol LP portion (the remainder of the protocol fee) is retained in the `SpokeVault` (benefits LPs by increasing idle liquidity).
+- The relayer is paid by borrowing from the `SpokeVault` to the relayer address (the caller of `fill()`). The user receives `amount - protocolFee - relayerFee`.
+
 
 ```bash
 forge build

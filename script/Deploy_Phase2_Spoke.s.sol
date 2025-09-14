@@ -32,5 +32,25 @@ contract DeployPhase2Spoke is Script {
             vm.stopBroadcast();
             console.log("Granted KEEPER to %s", keeper);
         }
+
+        // Optional: configure router fees via env vars
+        address feeCollectorEnv = vm.envAddress("FEE_COLLECTOR");
+        uint256 protocolFee = vm.envOr("PROTOCOL_FEE_BPS", uint256(0));
+        uint256 relayerFee = vm.envOr("RELAYER_FEE_BPS", uint256(0));
+        uint256 protocolShare = vm.envOr("PROTOCOL_SHARE_BPS", uint256(2500));
+        if (feeCollectorEnv != address(0)) {
+            vm.startBroadcast();
+            Router(r).setFeeCollector(feeCollectorEnv);
+            if (protocolFee > 0) Router(r).setProtocolFeeBps(uint16(protocolFee));
+            if (relayerFee > 0) Router(r).setRelayerFeeBps(uint16(relayerFee));
+            if (protocolShare != 0) Router(r).setFeeSplit(uint16(protocolShare), uint16(10000 - protocolShare));
+            vm.stopBroadcast();
+            console.log(
+                "Configured router fees: protocol=%s relayer=%s protocolShare=%s",
+                protocolFee,
+                relayerFee,
+                protocolShare
+            );
+        }
     }
 }

@@ -37,6 +37,7 @@ contract SpokeVault is
 
     event Borrowed(uint256 amount, address to, uint256 debtAfter);
     event Repaid(uint256 amount, uint256 debtAfter);
+    event IdleSent(address to, uint256 amount);
     event BorrowCapUpdated(uint256 newCap);
     event MaxUtilizationUpdated(uint16 newMax);
 
@@ -126,6 +127,13 @@ contract SpokeVault is
     function idleLiquidity() external view returns (uint256) {
         uint256 bal = IERC20(asset()).balanceOf(address(this));
         return bal >= debt ? bal - debt : 0;
+    }
+
+    function sendIdle(address to, uint256 amount) external onlyRole(DEFAULT_ADMIN_ROLE) whenNotPaused {
+        uint256 idle = this.idleLiquidity();
+        require(amount <= idle, "OVER_IDLE");
+        IERC20(asset()).safeTransfer(to, amount);
+        emit IdleSent(to, amount);
     }
 
     function utilizationBps() external view returns (uint16) {

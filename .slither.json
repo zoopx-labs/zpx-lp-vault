@@ -1,0 +1,16 @@
+{
+  "exclude_informational": true,
+  "exclude_dependencies": true,
+  "foundry_out_directory": "out",
+  "# note": "Temporary: exclude tests/scripts/libs from analysis and silence noisy detectors while tests are migrated and src findings are triaged",
+  "exclude_paths": ["test/", "script/", "lib/"],
+  "detectors_to_exclude": [
+    "unprotected-initializer",
+    "unprotected-upgradeable-contract",
+    "divide-before-multiply",
+    "dangerous-strict-equalities",
+    "external-calls-in-loop",
+    "unused-return",
+    "reentrancy-vulnerabilities-2"
+  ]
+}

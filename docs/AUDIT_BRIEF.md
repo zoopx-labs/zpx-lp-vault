@@ -1,58 +1,58 @@
-Audit Brief — Phase‑2 hub-and-spoke bridging
+Audit Brief — Phase‑2 hub-and-spoke bridging (updated)
 
 Overview
-- Purpose: cross-chain hub & spokes for USDzy and LP vaults. Per-chain SpokeVault holds assets and supports borrow/repay; Router orchestrates fills/repays and rebalances via MessagingAdapter.
-- Upgradeability: UUPS pattern (OpenZeppelin UUPSUpgradeable) used across Hub, SpokeVault, Router, Factory, USDzyRemoteMinter.
+- Purpose: cross-chain hub & spokes for USDzy and LP vaults. Per-chain `SpokeVault` holds assets and supports borrow/repay; `Router` orchestrates fills/repays and rebalances via a MessagingAdapter. Factory deploys ERC1967Proxy proxies for SpokeVault/Router and wires roles.
+- Upgradeability: UUPS pattern (OpenZeppelin UUPSUpgradeable) used across `SpokeVault`, `Router`, `Factory`, and `USDzyRemoteMinter`. Upgrade authorization is guarded by DEFAULT_ADMIN_ROLE or onlyOwner where applicable.
 - Key protections: AccessControl for roles (DEFAULT_ADMIN_ROLE, PAUSER_ROLE, BORROWER_ROLE, KEEPER_ROLE, RELAYER_ROLE), Pausable, ReentrancyGuard, SafeERC20.
 
-Trust boundaries
-- Adapter authority: MessagingEndpointReceiver enforces adapter address; only messages from the registered adapter are accepted once set. Legacy fallback remains until adapter is configured.
-- Factory: temporarily becomes admin during proxy bootstrap; later renounces roles and transfers admin to provided admin addresses.
+Trust boundaries (deltas)
+- Adapter-authority model: `MessagingEndpointReceiver._verifyAndMark(...)` enforces that when an adapter is configured (`adapter != address(0)`), only the registered `adapter` contract may call `onMessage` entrypoints; `allowedEndpoint[srcChainId][srcAddr]` is still required. Legacy behavior (adapter==address(0)) allows direct calls from `srcAddr` for testing/fallback but should be avoided in production.
+- Factory bootstrap & renounce: `Factory.deploySpoke` initializes proxies with the Factory as temporary admin to grant `BORROWER_ROLE` to the router and pause both proxies; after wiring, the Factory grants DEFAULT_ADMIN_ROLE & PAUSER_ROLE to provided admin/routerAdmin and renounces its own roles. Factory caches implementation addresses (`spokeVaultImpl`, `routerImpl`) and exposes `setSpokeVaultImpl`/`setRouterImpl` for admin rotation.
 
-Important invariants
-- ERC4626 share invariants: totalAssets() and totalSupply() must remain consistent; deposits/withdraws are restricted (LP entry disabled in SpokeVault by default) and borrow/repay adjust debt accounting.
-- Debt bounds: borrow cap and utilization BPS must be enforced and tested to prevent over-borrowing.
-- Replay protection: MessagingEndpointReceiver maintains a nonce/map of processed messages to prevent replay.
-- Storage layout: UUPS upgrades require careful storage layout compatibility; storage snapshots are committed under `storage/*.json`.
+Important invariants (deltas)
+- SpokeVault LP disabled: ERC4626 deposit/mint/withdraw/redeem functions are overridden and revert with `LP_DISABLED()`. Spoke flow uses borrow/repay paths instead of LP deposits.
+- Factory paused-by-default: proxies deployed via Factory are paused immediately (`SpokeVault.pause()` and `Router.pause()` are called by Factory) — operator must transfer PAUSER_ROLE/DEFAULT_ADMIN_ROLE to admin and unpause.
+- Messaging replay & adapter authority: `MessagingEndpointReceiver._verifyAndMark` builds keccak256 key over (srcChainId, srcAddr, payload, nonce) and stores it in `used` mapping; `USDzyRemoteMinter.onMessage` calls `_verifyAndMark` and then mints USDzy.
+- Upgrade tests & storage: Upgrade-sim tests added under `test/upgrade/*` and storage snapshots committed under `storage/*.json` to validate storage layout compatibility.
 
-Files of interest & locations
-- Contracts: `src/spoke/SpokeVault.sol`, `src/router/Router.sol`, `src/messaging/MessagingEndpointReceiver.sol`, `src/messaging/MockAdapter.sol`, `src/usdzy/USDzyRemoteMinter.sol`, `src/factory/Factory.sol`.
-- Tests: `test/phase2/*` and `test/upgrade/*` contain functional and upgrade-sim tests.
-- Storage snapshots: `storage/Hub.json`, `storage/SpokeVault.json`, `storage/Router.json`, `storage/USDzy.json`, `storage/ZPXArb.json`, `storage/Factory.json`.
-- CI: `.github/workflows/slither-ci.yml` runs Slither on `src/` and uploads `slither/slither.json`.
+Files of interest & locations (validate)
+- `src/spoke/SpokeVault.sol` — ERC4626 shell; `initialize(asset,name,symbol,admin)`, `borrow(uint256,address)` (only BORROWER_ROLE), `repay(uint256)`, `setBorrowCap`, `setMaxUtilizationBps`, LP methods revert with `LP_DISABLED()`.
+- `src/router/Router.sol` — `initialize(vault,adapter,admin,feeCollector)`, `pokeTvlSnapshot()`, `avg7d()`, `healthBps()`, `needsRebalance()`, `rebalance(uint64 dstChainId,address hubAddr)` only KEEPER_ROLE, `fill(address,uint256)` only RELAYER_ROLE, `repay(uint256)`.
+- `src/messaging/MessagingEndpointReceiver.sol` — `setEndpoint`, `setAdapter`, `__MessagingEndpointReceiver_init`, `_verifyAndMark(srcChainId,srcAddr,payload,nonce)`.
+- `src/usdzy/USDzyRemoteMinter.sol` — `initialize(usdzy,admin)`, `onMessage(srcChainId,srcAddr,payload,nonce)` calls `_verifyAndMark` then `IUSDzy(usdzy).mint`.
+- `src/factory/Factory.sol` — `setSpokeVaultImpl`, `setRouterImpl`, `deploySpoke(...)` (deploys impls if missing, caches impls, deploys ERC1967Proxy, grants BORROWER_ROLE to router, pauses both, transfers admin/pauser, renounces Factory roles).
+- tests: `test/phase2/*` and `test/upgrade/*` — SpokeVault borrow/repay, Router rebalance triggers, Messaging replay, Factory smoke, upgrade-sim tests.
+- scripts: `script/Deploy_Phase2_Spoke.s.sol`, `script/Deploy_MockAdapter.s.sol`.
 
-Attack surface summary
-- External calls: Adapter -> Receiver (onMessage), Router -> Adapter (send), Token transfers via SafeERC20. Ensure external adapter cannot call arbitrary functions on contracts except `onMessage` entrypoint.
-- Upgrade pathways: UUPS `upgradeTo` guarded by DEFAULT_ADMIN_ROLE; ensure timelock or multisig holds admin in production.
-- Factory bootstrapping: Factory is a transient admin; ensure role renounces are correct and atomic in deployment scripts.
+Attack surface summary (deltas)
+- Adapter call surface: production receivers should have `adapter` set and rely on adapter authority — ensure `setAdapter` is only callable by admin and that adapter contract itself is secure.
+- Factory bootstrap: because Factory is temporary admin during initialization, ensure scripts call `grantRole`/`renounceRole` sequences correctly and that Factory renounces all privileged roles at the end of `deploySpoke`.
+- Paused proxies risk: proxies are paused by default; failure to properly transfer PAUSER_ROLE/DEFAULT_ADMIN_ROLE to a timelock/multisig blocks operations — include role transfer checks in deploy runbooks.
 
-Suggested audit checklist
-- AccessControl review: Confirm only intended roles can call sensitive functions. Verify renounce patterns in Factory deploySpoke.
-- Adapter authorization: Ensure `setAdapter` can only be called by admin and that legacy fallback is well-documented; confirm no path where arbitrary caller can impersonate adapter once set.
-- Message replay: Confirm nonce/processed-message mapping prevents replay across remote chains and persists in storage.
-- Reentrancy: Inspect public/external functions modifying balances and external calls; ensure CEI pattern and reentrancy guards where needed.
-- Storage layout: Validate storage layouts in `storage/*.json` and confirm upgrade tests cover field additions/ordering.
-- Slither + static analysis: Run Slither on `src/` (CI workflow does this). Triage any Medium/High findings.
-- Fuzzing: Add fuzz tests around borrow/repay, utilization, caps, and Router rebalance decisions.
-- Gas: Identify hot loops (e.g., ring buffer scans) and gas cost for rebalances; confirm limits and off-chain gas estimates.
+Suggested audit checklist (deltas)
+1. Adapter-authority
+   - Verify `MessagingEndpointReceiver.setAdapter` is onlyOwner and that `_verifyAndMark` correctly enforces `msg.sender == adapter` when adapter is set.
+   - Validate `allowedEndpoint[srcChainId][srcAddr]` checks exist and are enforced for both legacy and adapter modes.
+2. Factory bootstrap
+   - Confirm `deploySpoke` calls `setSpokeVaultImpl`/`setRouterImpl` when impls are first created and that these setters emit `ImplementationUpdated` and require non-zero address.
+   - Confirm Factory grants BORROWER_ROLE to router proxy and pauses both proxies before handing off admin and pauser roles to provided addresses, then renounces its own roles.
+3. SpokeVault behavior
+   - Confirm ERC4626 deposit/withdraw functions revert with `LP_DISABLED()` and that borrow/repay paths enforce `borrowCap` and `maxUtilizationBps`.
+4. Upgrade simulations & storage
+   - Validate `test/upgrade/*` upgrade‑sim tests and compare against `storage/*.json` snapshots for each UUPS contract.
 
-Quick reproduction steps for auditors
-1) Checkout branch: `ci/slither-fail-on-medium` (or main branch if merged).
-2) Install Foundry: `curl -L https://foundry.paradigm.xyz | bash && source ~/.bashrc && foundryup`
-3) Run tests: `forge test -vvv`
-4) Run Slither (CI): Use the GitHub Actions run that outputs `slither/slither.json` or run locally via docker:
-   - `docker run --rm -v $(pwd):/tmp -w /tmp --entrypoint slither ghcr.io/crytic/slither:latest src/ --json -o slither/slither.json`
-   - If Docker not available, use a Linux host or CI runner.
+Quick reproduction steps (Phase‑2)
+1) Install Foundry and run `forge test --match-path test/phase2/* test/upgrade/* -vvv` to execute phase‑2 tests and upgrade sims.
+2) Deploy mocks & spoke locally (use `script/Deploy_MockAdapter.s.sol` and `script/Deploy_Phase2_Spoke.s.sol`) with env vars: FACTORY_ADDR, SPOKE_ASSET, SPOKE_ADMIN, ROUTER_ADMIN, ADAPTER_ADDR, FEE_COLLECTOR, KEEPER_ADDR.
 
-Deliverables
-- Storage snapshots: `storage/*.json` (already committed).
-- Upgrade-sim tests: `test/upgrade/*` (already present).
-- Slither CI artifact: `.github/workflows/slither-ci.yml` uploads `slither/slither.json` for triage.
+Deliverables & CI
+- Storage snapshots: `storage/*.json` exist for Hub, USDzy, SpokeVault, Router, Factory, ZPXArb.
+- Upgrade tests: `test/upgrade/*` are present.
+- CI: `.github/workflows/slither-ci.yml` uploads `slither/slither.json` and fails on Medium/High findings.
 
-Suggested immediate remediations (if Medium/High Slither findings appear)
-- Fix reentrancy or unchecked external-call patterns by adding nonReentrant modifiers or reordering logic to follow CEI.
-- Limit external adapter calls surface by adding a single-entrypoint and strict checks on message payload lengths, expected sender chain IDs, and message nonces.
-- Add explicit storage gap patterns where new storage might be inserted between versions (UUPS + OZ gap patterns already used; verify each contract includes correct `uint256[50] private __gap;`).
+Suggested immediate remediations (Phase‑2 deltas)
+- Ensure deploy scripts assert role transfers (e.g., check `hasRole(DEFAULT_ADMIN_ROLE, admin)` after deploy) and log admin addresses to avoid accidental lock.
+- Ensure `setAdapter` is onlyOwner and that adapter contract emits events for messages (audit adapter contract separately).
 
 Contact
-- For follow-up triage, provide the Slither JSON artifact or allow me to fetch CI artifact; I can create a triage report mapping findings to code and suggested fixes.
+- Provide Slither JSON artifact for triage; I will map findings to specific functions and propose minimal, surgical code changes or suppressions.
