@@ -7,6 +7,7 @@ import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/acce
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 import {ISpokeVault} from "../interfaces/ISpokeVault.sol";
 import {IMessagingAdapter} from "../interfaces/IMessagingAdapter.sol";
@@ -22,9 +23,31 @@ contract Router is
     bytes32 public constant RELAYER_ROLE = keccak256("RELAYER_ROLE");
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
 
+    using SafeERC20 for IERC20;
+
     ISpokeVault public vault;
     IMessagingAdapter public adapter;
     address public feeCollector;
+
+    // fees are in basis points (10000 = 100%)
+    uint16 public protocolFeeBps; // capped at 5 bps (0.05%)
+    uint16 public relayerFeeBps; // no hard cap (ops-defined)
+    uint16 public protocolShareBps; // default 2500 (25%)
+    uint16 public lpShareBps; // default 7500 (75%)
+
+    event ProtocolFeeUpdated(uint16 bps);
+    event RelayerFeeUpdated(uint16 bps);
+    event FeeSplitUpdated(uint16 protocolShareBps, uint16 lpShareBps);
+    event FeeCollectorUpdated(address feeCollector);
+    event FeeApplied(
+        address indexed to,
+        uint256 grossAmount,
+        uint256 protocolFee,
+        uint256 relayerFee,
+        uint256 protocolToTreasury,
+        uint256 protocolToLPs,
+        uint256 netToUser
+    );
 
     struct Day {
         uint64 day;
@@ -45,12 +68,44 @@ contract Router is
         vault = ISpokeVault(vault_);
         adapter = IMessagingAdapter(adapter_);
         feeCollector = feeCollector_;
+
+        // fee defaults
+        protocolFeeBps = 0;
+        relayerFeeBps = 0;
+        protocolShareBps = 2500;
+        lpShareBps = 7500;
+
         __AccessControl_init();
         __Pausable_init();
         __ReentrancyGuard_init();
         _grantRole(DEFAULT_ADMIN_ROLE, admin_);
         // give the admin pauser capability by default for safer ops
         _grantRole(PAUSER_ROLE, admin_);
+    }
+
+    // --- Fee setters ---
+    function setProtocolFeeBps(uint16 bps) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        require(bps <= 5, "ProtocolFee>5bps");
+        protocolFeeBps = bps;
+        emit ProtocolFeeUpdated(bps);
+    }
+
+    function setRelayerFeeBps(uint16 bps) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        relayerFeeBps = bps;
+        emit RelayerFeeUpdated(bps);
+    }
+
+    function setFeeSplit(uint16 protocolShare, uint16 lpShare) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        require(uint256(protocolShare) + uint256(lpShare) == 10000, "Split!=100%");
+        protocolShareBps = protocolShare;
+        lpShareBps = lpShare;
+        emit FeeSplitUpdated(protocolShare, lpShare);
+    }
+
+    function setFeeCollector(address collector) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        require(collector != address(0), "FeeCollector=0");
+        feeCollector = collector;
+        emit FeeCollectorUpdated(collector);
     }
 
     function tvl() public view returns (uint256) {
@@ -99,22 +154,53 @@ contract Router is
     }
 
     function fill(address to, uint256 amount) external onlyRole(RELAYER_ROLE) nonReentrant whenNotPaused {
-        vault.borrow(amount, to);
+        // compute fees
+        uint256 protocolFee = (uint256(amount) * uint256(protocolFeeBps)) / 10000;
+        uint256 relayerFee = (uint256(amount) * uint256(relayerFeeBps)) / 10000;
+
+        uint256 net;
+        if (protocolFee + relayerFee >= amount) {
+            // protect against zero/negative net
+            net = 0;
+        } else {
+            net = amount - protocolFee - relayerFee;
+        }
+
+        uint256 toTreasury = 0;
+        uint256 toLPs = 0;
+
+        // handle protocol split and transfers by borrowing from vault to recipients
+        if (protocolFee > 0) {
+            require(feeCollector != address(0), "FeeCollector=0");
+            toTreasury = (protocolFee * uint256(protocolShareBps)) / 10000;
+            toLPs = protocolFee - toTreasury;
+            // send treasury its share by borrowing from the vault
+            if (toTreasury > 0) vault.borrow(toTreasury, feeCollector);
+            // toLPs remains in the vault (no action) to benefit LPs
+        }
+
+        // pay relayer from vault via borrow
+        if (relayerFee > 0) {
+            vault.borrow(relayerFee, msg.sender);
+        }
+
+        // deliver net to user from vault
+        if (net > 0) {
+            vault.borrow(net, to);
+        }
+
+        emit FeeApplied(to, amount, protocolFee, relayerFee, toTreasury, toLPs, net);
         emit FillExecuted(to, amount);
     }
 
     function repay(uint256 amount) external nonReentrant whenNotPaused {
-        IERC20(vault.asset()).transferFrom(msg.sender, address(vault), amount);
+        IERC20(vault.asset()).safeTransferFrom(msg.sender, address(vault), amount);
         vault.repay(amount);
         emit Repaid(amount, 0);
     }
 
     function setAdapter(address a) external onlyRole(DEFAULT_ADMIN_ROLE) {
         adapter = IMessagingAdapter(a);
-    }
-
-    function setFeeCollector(address f) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        feeCollector = f;
     }
 
     function pause() external onlyRole(PAUSER_ROLE) {

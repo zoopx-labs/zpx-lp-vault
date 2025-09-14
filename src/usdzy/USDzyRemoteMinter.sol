@@ -20,11 +20,20 @@ contract USDzyRemoteMinter is
 {
     address public usdzy;
     address public admin;
+    bytes32 public constant GATEWAY_ROLE = keccak256("GATEWAY_ROLE");
+
+    event GatewayMinted(address indexed to, uint256 shares);
 
     function initialize(address usdzy_, address admin_) public initializer {
         usdzy = usdzy_;
         admin = admin_;
         __MessagingEndpointReceiver_init(admin_);
+        _grantRole(DEFAULT_ADMIN_ROLE, admin_);
+    }
+
+    function mintFromGateway(address to, uint256 shares) external onlyRole(GATEWAY_ROLE) whenNotPaused {
+        IUSDzy(usdzy).mint(to, shares);
+        emit GatewayMinted(to, shares);
     }
 
     // onMessage called by MessagingAdapter in tests
