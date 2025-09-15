@@ -121,7 +121,8 @@ contract Router is
 
     function pokeTvlSnapshot() public {
         uint64 day = uint64(block.timestamp / 1 days);
-        if (day == lastSnapDay) return; // idempotent
+        // if we've already recorded for this day or a later day, skip
+        if (day <= lastSnapDay) return; // idempotent and resilient to clock skew
         lastSnapDay = day;
         idx = uint8((uint256(idx) + 1) % 7);
         daysBuf[idx] = Day({day: day, tvl: tvl()});
@@ -145,7 +146,8 @@ contract Router is
 
     function needsRebalance() public view returns (bool) {
         if (healthBps() < 4000) return true;
-        if (block.timestamp - lastRebalanceAt >= 1 days) return true;
+        // use an explicit delta comparison to avoid underflow and reduce reliance on exact equality
+        if (block.timestamp >= lastRebalanceAt + 1 days) return true;
         return false;
     }
 
