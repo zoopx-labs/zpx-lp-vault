@@ -158,6 +158,10 @@ contract Hub is
     function _px6(address asset) internal view returns (uint256) {
         AssetConfig memory c = assetCfg[asset];
         if (asset == address(0) || c.feed == address(0)) revert NoFeed(asset);
+        // NOTE: This function uses `block.timestamp` to check feed freshness.
+        // Minor timestamp manipulation by miners is an accepted risk here because
+        // the `maxStaleness` guard limits exposure. For higher security, consider
+        // block-anchored or signed oracle data to reduce reliance on block time.
         (int256 p, uint256 ts) = IDIAFeed(c.feed).latestValue();
         if (p <= 0) revert("bad price");
         uint256 age = block.timestamp - ts;
@@ -179,11 +183,15 @@ contract Hub is
     /// @notice Total assets across configured tokens, summed in USD6. INTERNAL USE: does not re-apply haircuts beyond quoteUSD6 behavior.
     function totalAssetsUsd6() public view returns (uint256 sum) {
         uint256 len = listedTokens.length;
+        // NOTE: This loop performs external calls (ERC20.balanceOf and price feed via `_px6`) per token.
+        // Static analyzers flag this as `external-calls-in-loop`. A long-term fix would cache
+        // price values off-chain or via a dedicated on-chain updater to avoid repeated external calls.
         for (uint256 i = 0; i < len; i++) {
             address t = listedTokens[i];
             AssetConfig memory c = assetCfg[t];
             if (!c.enabled) continue;
             uint256 bal = IERC20(t).balanceOf(address(this));
+            // Skip tokens with zero balance to avoid unnecessary price queries.
             if (bal == 0) continue;
             // fetch price once per token to avoid repeated external calls in loops
             uint256 px6 = _px6(t);
@@ -232,6 +240,10 @@ contract Hub is
         WithdrawReq storage r = requests[id];
         require(!r.claimed, "claimed");
         require(r.owner == msg.sender, "not owner");
+        // Uses `block.timestamp` to enforce withdraw readiness. This is acceptable here
+        // because `readyAt` is set with a reasonable delay; miners have only limited
+        // ability to influence timestamps and this check is not security-critical beyond
+        // enforcing the withdraw delay window.
         require(block.timestamp >= r.readyAt, "not ready");
         AssetConfig memory c = assetCfg[payoutAsset];
         require(c.enabled, "asset disabled");

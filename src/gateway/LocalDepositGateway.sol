@@ -7,6 +7,7 @@ import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/acce
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 import {IPpsSource} from "../pps/IPpsSource.sol";
@@ -54,6 +55,7 @@ contract LocalDepositGateway is
 
     event Deposited(address indexed user, address indexed asset, uint256 amount, uint256 usd6, uint256 shares);
 
+    // `initializer` prevents re-execution when deployed behind a proxy (OZ pattern).
     function initialize(address minter_, address ppsMirror_, address spoke_, address admin_, uint64 maxStaleness_)
         public
         initializer
@@ -100,15 +102,15 @@ contract LocalDepositGateway is
         uint256 ts = feed.latestTimestamp();
         require(block.timestamp - ts <= maxStaleness, "PRICE_STALE");
 
-        // price scaling: priceDecimals -> USD6; tokenDecimals -> token units
-        // compute usd6 = amount * price * (10^(6 - priceDecimals)) / (10^tokenDecimals)
-        uint256 usd6 = (uint256(price) * amount);
+        // Compute usd6 with precision using mulDiv where useful.
+        // usd6 = amount * price * 10^(6 - priceDecimals) / 10^(tokenDecimals)
+        uint256 usd6 = uint256(price) * amount;
         if (c.priceDecimals > 6) usd6 = usd6 / (10 ** (c.priceDecimals - 6));
         else if (c.priceDecimals < 6) usd6 = usd6 * (10 ** (6 - c.priceDecimals));
-        if (c.tokenDecimals > 0) usd6 = usd6 / (10 ** c.tokenDecimals);
+        if (c.tokenDecimals > 0) usd6 = Math.mulDiv(usd6, 1, 10 ** c.tokenDecimals);
 
-        // apply haircut
-        uint256 haircut = (usd6 * c.haircutBps) / 10000;
+        // apply haircut using mulDiv for precision
+        uint256 haircut = Math.mulDiv(usd6, c.haircutBps, 10000);
         uint256 usd6After = usd6 >= haircut ? usd6 - haircut : 0;
 
         // read pps
@@ -116,7 +118,7 @@ contract LocalDepositGateway is
         require(block.timestamp - ppsAsOf <= maxStaleness, "PPS_STALE");
         require(pps6 > 0, "BAD_PPS");
 
-        uint256 shares = (usd6After * 1e6) / pps6;
+        uint256 shares = Math.mulDiv(usd6After, 1e6, pps6);
         require(shares > 0, "ZERO_SHARES");
 
         // mint shares via minter
