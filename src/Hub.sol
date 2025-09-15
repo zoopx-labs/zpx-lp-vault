@@ -84,6 +84,10 @@ contract Hub is
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {}
 
+    /**
+     * @dev Initializer for Hub. The OpenZeppelin `initializer` modifier
+     * provides protection against re-initialization when used with a proxy.
+     */
     function initialize(address usdzy_, address admin) public initializer {
         __Context_init_unchained();
         __AccessControl_init_unchained();

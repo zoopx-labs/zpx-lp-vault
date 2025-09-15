@@ -55,7 +55,10 @@ contract LocalDepositGateway is
 
     event Deposited(address indexed user, address indexed asset, uint256 amount, uint256 usd6, uint256 shares);
 
-    // `initializer` prevents re-execution when deployed behind a proxy (OZ pattern).
+    /**
+     * @dev Initializer for LocalDepositGateway. The `initializer` modifier
+     * from OpenZeppelin prevents this function from being re-run on a proxy.
+     */
     function initialize(address minter_, address ppsMirror_, address spoke_, address admin_, uint64 maxStaleness_)
         public
         initializer

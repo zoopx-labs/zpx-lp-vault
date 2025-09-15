@@ -67,10 +67,15 @@ contract Router is
     event FillExecuted(address to, uint256 amount);
     event Repaid(uint256 amount, uint256 debtAfter);
 
+    /**
+     * @dev Initializer. The OpenZeppelin `initializer` modifier ensures this
+     * function can only be called once when used with a proxy deployment.
+     */
     function initialize(address vault_, address adapter_, address admin_, address feeCollector_) public initializer {
         require(vault_ != address(0), "vault zero");
         require(adapter_ != address(0), "adapter zero");
         require(admin_ != address(0), "admin zero");
+        require(feeCollector_ != address(0), "feeCollector zero");
         vault = ISpokeVault(vault_);
         adapter = IMessagingAdapter(adapter_);
         feeCollector = feeCollector_;
@@ -138,6 +143,8 @@ contract Router is
 
     function healthBps() public view returns (uint16) {
         uint256 a = avg7d();
+        // if the 7-day average is zero, return full health (100%) — this guards
+        // against division by zero and is an intentional edge-case handling.
         if (a == 0) return 10000;
         uint256 h = (tvl() * 10000) / a;
         if (h > 65535) return 65535;
