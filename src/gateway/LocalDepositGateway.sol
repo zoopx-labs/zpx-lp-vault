@@ -141,4 +141,7 @@ contract LocalDepositGateway is
     }
 
     function _authorizeUpgrade(address) internal override onlyRole(DEFAULT_ADMIN_ROLE) {}
+
+    // Storage gap for upgrade safety
+    uint256[50] private __gap;
 }
