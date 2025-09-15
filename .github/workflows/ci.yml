@@ -42,7 +42,6 @@ jobs:
             --foundry-ignore-compile
             --foundry-out-directory out
             --exclude-dependencies
-            --filter-paths "^(src/|lib/)"
 
       - name: Gas snapshot
         run: |

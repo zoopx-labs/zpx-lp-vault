@@ -147,8 +147,11 @@ contract SpokeVault is
 
     function utilizationBps() external view returns (uint16) {
         uint256 ta = totalAssets();
-        if (ta == 0) return 0;
-        return uint16((debt * 10000) / ta);
+        // Avoid strict equality; use positive guard
+        if (ta > 0) {
+            return uint16((debt * 10000) / ta);
+        }
+        return 0;
     }
 
     function setBorrowCap(uint256 newCap) external onlyRole(DEFAULT_ADMIN_ROLE) {

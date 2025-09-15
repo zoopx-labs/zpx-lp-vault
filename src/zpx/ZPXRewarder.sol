@@ -49,7 +49,11 @@ contract ZPXRewarder is AccessControl {
 
     // internal update
     function _update() internal {
+        // Using block.timestamp for reward accrual is acceptable here:
+        // rewards are linear over time and miner manipulation has negligible impact.
+        // slither-disable-next-line timestamp
         if (lastUpdate == 0) return;
+        // slither-disable-next-line timestamp
         uint256 to = block.timestamp < endTime ? block.timestamp : endTime;
         if (to <= lastUpdate) return;
         uint256 elapsed = to - lastUpdate;

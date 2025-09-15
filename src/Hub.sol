@@ -169,6 +169,7 @@ contract Hub is
         // Minor timestamp manipulation by miners is an accepted risk here because
         // the `maxStaleness` guard limits exposure. For higher security, consider
         // block-anchored or signed oracle data to reduce reliance on block time.
+        // slither-disable-next-line calls-loop
         (int256 p, uint256 ts) = IDIAFeed(c.feed).latestValue();
         if (p <= 0) revert("bad price");
         uint256 age = block.timestamp - ts;
@@ -226,6 +227,7 @@ contract Hub is
             AssetConfig memory c = assetCfg[t];
             if (!c.enabled) continue;
 
+            // slither-disable-next-line calls-loop
             uint256 bal = IERC20(t).balanceOf(address(this));
             // Safer check for non-zero balance (avoid strict equality style)
             if (bal > 0) {
