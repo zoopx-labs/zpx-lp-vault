@@ -32,11 +32,7 @@ contract USDzy is
 
     // The `initializer` modifier ensures this function can only be called once
     // (prevents re-initialization attacks on upgradeable contracts when used correctly).
-    function initialize(
-        string memory name_,
-        string memory symbol_,
-        address admin
-    ) public initializer {
+    function initialize(string memory name_, string memory symbol_, address admin) public initializer {
         __ERC20_init(name_, symbol_);
         __AccessControl_init_unchained();
         __Pausable_init_unchained();

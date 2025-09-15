@@ -71,12 +71,10 @@ contract Router is
      * @dev Initializer. The OpenZeppelin `initializer` modifier ensures this
      * function can only be called once when used with a proxy deployment.
      */
-    function initialize(
-        address vault_,
-        address messagingEndpoint_,
-        address admin,
-        address feeCollector_
-    ) public initializer {
+    function initialize(address vault_, address messagingEndpoint_, address admin, address feeCollector_)
+        public
+        initializer
+    {
         __Context_init_unchained();
         __AccessControl_init_unchained();
         __ReentrancyGuard_init_unchained();

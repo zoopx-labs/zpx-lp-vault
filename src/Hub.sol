@@ -264,7 +264,11 @@ contract Hub is
     }
 
     // --- Deposit / Withdraw flows ---
-    function deposit(address asset, uint256 amount, uint256 currentTotalAssetsUsd6) external nonReentrant whenNotPaused {
+    function deposit(address asset, uint256 amount, uint256 currentTotalAssetsUsd6)
+        external
+        nonReentrant
+        whenNotPaused
+    {
         AssetConfig memory c = assetCfg[asset];
         require(c.enabled, "asset disabled");
         SafeERC20.safeTransferFrom(IERC20(asset), msg.sender, address(this), amount);

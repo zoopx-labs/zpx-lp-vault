@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 
-import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initial    function utilizationBps() public view returns (uint16) {
+import {Initializable} from
+    "@openzeppelin/contracts-upgradeable/proxy/utils/Initial    function utilizationBps() public view returns (uint16) {
         uint256 ta = totalAssets();
         if (ta == 0) return 0;
         return uint16((debt() * 10_000) / ta);
