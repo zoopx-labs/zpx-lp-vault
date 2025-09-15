@@ -27,21 +27,30 @@ jobs:
           forge clean
           forge build --build-info --build-info-path out/build-info
 
-      - name: Slither (use Foundry artifacts + config, src only)
-        uses: crytic/slither-action@v0.4.1
+      - name: Setup Python
+        uses: actions/setup-python@v5
         with:
-          target: src
-          ignore-compile: true
-          slither-version: '0.11.3'
-          solc-version: '0.8.24'
-          fail-on: medium
-          sarif: true
-          slither-config: .slither.json
-          slither-args: >-
-            --config-file ./.slither.json
-            --foundry-ignore-compile
-            --foundry-out-directory out
-            --exclude-dependencies
+          python-version: '3.11'
+
+      - name: Install Slither 0.11.3
+        run: |
+          python -m pip install --upgrade pip
+          pip install slither-analyzer==0.11.3
+
+      - name: Slither (src, Foundry artifacts + config)
+        run: |
+          slither src \
+            --config-file ./.slither.json \
+            --foundry-ignore-compile \
+            --foundry-out-directory out \
+            --exclude-dependencies \
+            --sarif slither.sarif
+
+      - name: Upload Slither SARIF
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: slither.sarif
 
       - name: Gas snapshot
         run: |
