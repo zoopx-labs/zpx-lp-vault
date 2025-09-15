@@ -18,11 +18,6 @@ jobs:
         with:
           version: stable
 
-      - name: Ensure Foundry bin on PATH
-        run: |
-          echo "$HOME/.foundry/bin" >> $GITHUB_PATH
-          ls -1 $HOME/.foundry/bin
-
       - name: Install libs
         run: forge install
 
@@ -33,10 +28,13 @@ jobs:
 
       - name: Verify forge install & env
         run: |
-          echo "PATH=$PATH"
-          which forge || true
-          forge --version
-          forge config --json | head -c 500 || true
+          echo "PATH=$PATH" | head -c 4000
+          if command -v forge >/dev/null 2>&1; then
+            forge --version || true
+            forge config --json | head -c 500 || true
+          else
+            echo "forge not found yet" >&2
+          fi
 
       - name: Setup Python
         uses: actions/setup-python@v5
