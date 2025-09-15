@@ -19,6 +19,7 @@ contract ZPXRewarder is AccessControl {
 
     uint256 public totalStaked;
     uint256 public accPerShare; // 1e18
+    uint256 public rewardsAccrued;
 
     uint64 public startTime;
     uint64 public endTime;
@@ -51,7 +52,7 @@ contract ZPXRewarder is AccessControl {
         uint256 to = block.timestamp < endTime ? block.timestamp : endTime;
         if (to <= lastUpdate) return;
         uint256 elapsed = to - lastUpdate;
-        uint256 newRewards = elapsed * rate;
+        uint256 newRewards = elapsed * rewardRatePerSec;
         rewardsAccrued += newRewards;
         lastUpdate = to;
     }

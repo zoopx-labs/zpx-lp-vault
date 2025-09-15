@@ -12,6 +12,7 @@ import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
 
 import {ISpokeVault} from "../interfaces/ISpokeVault.sol";
 import {IMessagingAdapter} from "../interfaces/IMessagingAdapter.sol";
+import {IMessagingEndpoint} from "../messaging/IMessagingEndpoint.sol";
 
 contract Router is
     Initializable,
@@ -23,11 +24,13 @@ contract Router is
     bytes32 public constant KEEPER_ROLE = keccak256("KEEPER_ROLE");
     bytes32 public constant RELAYER_ROLE = keccak256("RELAYER_ROLE");
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
+    bytes32 public constant REBALANCER_ROLE = keccak256("REBALANCER_ROLE");
 
     using SafeERC20 for IERC20;
 
     ISpokeVault public vault;
     IMessagingAdapter public adapter;
+    IMessagingEndpoint public messagingEndpoint;
     address public feeCollector;
 
     // fees are in basis points (10000 = 100%)
@@ -81,7 +84,7 @@ contract Router is
         __Pausable_init_unchained();
         __UUPSUpgradeable_init();
 
-        vault = SpokeVault(vault_);
+        vault = ISpokeVault(vault_);
         messagingEndpoint = IMessagingEndpoint(messagingEndpoint_);
         feeCollector = feeCollector_;
 
@@ -123,6 +126,10 @@ contract Router is
 
     function tvl() public view returns (uint256) {
         return vault.totalAssets();
+    }
+
+    function available() public view returns (uint256) {
+        return IERC20(vault.asset()).balanceOf(address(vault));
     }
 
     function pokeTvlSnapshot() public {

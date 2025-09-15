@@ -6,10 +6,11 @@ import {ZPXArb} from "./ZPXArb.sol";
 // V2 placeholder: base ZPXArb already includes burnable behavior in V1.
 contract ZPXArbV2_Burnable is ZPXArb {
     /// @custom:oz-upgrades-unsafe-allow constructor
-    constructor() {}
+    constructor() {
+        _disableInitializers();
+    }
 
     function initializeV2_Burnable() public reinitializer(2) {
-        __ZPXArbV2_Burnable_init();
     }
 
     // leave space for future variables

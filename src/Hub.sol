@@ -213,27 +213,21 @@ contract Hub is
 
     /**
      * @notice Total assets across configured tokens, summed in USD6.
-     * @dev This function is refactored to be internal to prevent external calls in a loop.
-     * It now requires balances and prices to be passed in as arguments.
-     * The check `bal > 0` is a safer alternative to `bal == 0`.
-     * @param balances An array of token balances, corresponding to `listedTokens`.
-     * @param prices6 An array of prices scaled to 1e6, corresponding to `listedTokens`.
-     * @return sum The total value of assets in USD, scaled to 1e6.
+     * @dev Iterates listed tokens and sums balance*price. This is a view-only
+     * path and may be gas-expensive with many assets. We avoid strict equality
+     * checks and skip zero balances using a positive check to address linting.
      */
-    function totalAssetsUsd6(uint256[] memory balances, uint256[] memory prices6) internal view returns (uint256 sum) {
+    function totalAssetsUsd6() public view returns (uint256 sum) {
         uint256 len = listedTokens.length;
-        require(balances.length == len, "balances length mismatch");
-        require(prices6.length == len, "prices length mismatch");
-
         for (uint256 i = 0; i < len; i++) {
             address t = listedTokens[i];
             AssetConfig memory c = assetCfg[t];
             if (!c.enabled) continue;
 
-            uint256 bal = balances[i];
-            // Safer check for non-zero balance
+            uint256 bal = IERC20(t).balanceOf(address(this));
+            // Safer check for non-zero balance (avoid strict equality style)
             if (bal > 0) {
-                uint256 px6 = prices6[i];
+                uint256 px6 = _px6(t);
                 uint256 amt6 = _scaleTo6(bal, c.decimals);
                 uint256 gross = Math.mulDiv(amt6, px6, 1_000_000);
                 sum += gross;
@@ -242,46 +236,27 @@ contract Hub is
     }
 
     /// @notice PPS scaled to 1e6 (USD per share). Returns 1e6 when supply==0.
-    function pps6() internal view returns (uint256) {
+    function pps6() public view returns (uint256) {
         uint256 supply = IERC20(address(usdzy)).totalSupply();
         if (supply == 0) return 1_000_000;
-        // This is a placeholder for the full calculation, which is now complex for on-chain view.
-        // A keeper or off-chain system would call the new `totalAssetsUsd6` with required data.
-        // For on-chain use, this will likely revert due to gas if many tokens are listed.
-        // To make this function usable on-chain, a snapshot mechanism for totalAssetsUsd6 would be needed.
-        revert("pps6() is deprecated for on-chain view due to high gas costs. Use off-chain computation.");
-    }
-
-    /**
-     * @notice Calculates PPS scaled to 1e6 (USD per share) given a total asset value.
-     * @param assets The total value of assets in USD, scaled to 1e6.
-     * @return The price per share, scaled to 1e6.
-     */
-    function pps6(uint256 assets) internal view returns (uint256) {
-        uint256 supply = IERC20(address(usdzy)).totalSupply();
-        if (supply == 0) return 1_000_000;
-        return (assets * 1_000_000) / supply;
+        return Math.mulDiv(totalAssetsUsd6(), 1_000_000, supply);
     }
 
     // --- Deposit / Withdraw flows ---
-    function deposit(address asset, uint256 amount, uint256 currentTotalAssetsUsd6)
-        external
-        nonReentrant
-        whenNotPaused
-    {
+    function deposit(address asset, uint256 amount) external nonReentrant whenNotPaused {
         AssetConfig memory c = assetCfg[asset];
         require(c.enabled, "asset disabled");
         SafeERC20.safeTransferFrom(IERC20(asset), msg.sender, address(this), amount);
         uint256 usd6 = quoteUsd6(asset, amount, true); // haircut on deposit
-        uint256 shares = (usd6 * 1_000_000) / pps6(currentTotalAssetsUsd6);
+        uint256 shares = Math.mulDiv(usd6, 1_000_000, pps6());
         require(shares > 0, "zero shares");
         usdzy.mint(msg.sender, shares);
         emit Deposited(msg.sender, asset, amount, usd6, shares);
     }
 
-    function requestWithdraw(uint256 shares, uint256 currentTotalAssetsUsd6) external nonReentrant {
+    function requestWithdraw(uint256 shares) external nonReentrant {
         require(shares > 0, "zero");
-        uint256 usdOwed6 = (shares * pps6(currentTotalAssetsUsd6)) / 1_000_000;
+        uint256 usdOwed6 = Math.mulDiv(shares, pps6(), 1_000_000);
         // update state before external call to reduce reentrancy window
         uint64 readyAt = uint64(block.timestamp + withdrawDelay);
         requests.push(WithdrawReq({owner: msg.sender, usdOwed6: uint128(usdOwed6), readyAt: readyAt, claimed: false}));
