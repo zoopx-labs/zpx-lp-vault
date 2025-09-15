@@ -83,6 +83,10 @@ contract Router is
         __ReentrancyGuard_init_unchained();
         __Pausable_init_unchained();
         __UUPSUpgradeable_init();
+        require(vault_ != address(0), "vault=0");
+        require(messagingEndpoint_ != address(0), "endpoint=0");
+        // allow feeCollector_ to be zero only if protocolFeeBps will remain zero until set non-zero
+        require(feeCollector_ != address(0), "feeCollector=0");
 
         vault = ISpokeVault(vault_);
         messagingEndpoint = IMessagingEndpoint(messagingEndpoint_);
@@ -174,8 +178,8 @@ contract Router is
         bytes memory payload = abi.encode(dstChainId, address(vault), vault.totalAssets(), cur, h);
         // record timestamp before external adapter call to reduce reentrancy window
         lastRebalanceAt = uint64(block.timestamp);
-        // capture adapter nonce to avoid ignoring return value
-        uint64 _nonce = adapter.send(dstChainId, hubAddr, payload);
+    // send message; ignoring returned nonce is acceptable here
+    adapter.send(dstChainId, hubAddr, payload);
     }
 
     function fill(address to, uint256 amount) external onlyRole(RELAYER_ROLE) nonReentrant whenNotPaused {

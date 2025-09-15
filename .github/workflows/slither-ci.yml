@@ -15,11 +15,11 @@ jobs:
           echo "$HOME/.foundry/bin" >> $GITHUB_PATH
       - name: Install jq
         run: sudo apt-get update && sudo apt-get install -y jq
-      - name: Run Slither (container) on src/
+      - name: Run Slither (container) with config
         run: |
           mkdir -p slither
-          docker run --rm -v "${{ github.workspace }}":/src -w /src ghcr.io/crytic/slither:latest \
-            sh -c "slither src --json slither/slither.json || true"
+          docker run --rm -v "${{ github.workspace }}":/src -w /src ghcr.io/crytic/slither:0.11.3 \
+            slither . --config-file ./.slither.json --foundry-ignore-compile --foundry-out-directory out
       - name: Upload Slither report
         uses: actions/upload-artifact@v4
         with:

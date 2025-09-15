@@ -7,7 +7,6 @@ import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/acce
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 import {MessagingEndpointReceiver} from "../messaging/MessagingEndpointReceiver.sol";
-import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 interface IUSDzy {
     function mint(address to, uint256 amount) external;
@@ -29,6 +28,9 @@ contract USDzyRemoteMinter is
     function initialize(address usdzy_, address admin_) public initializer {
         __MessagingEndpointReceiver_init(address(0)); // will be set by admin
         __UUPSUpgradeable_init();
+
+        require(usdzy_ != address(0), "usdzy=0");
+        require(admin_ != address(0), "admin=0");
 
         usdzy = usdzy_;
         _grantRole(DEFAULT_ADMIN_ROLE, admin_);
