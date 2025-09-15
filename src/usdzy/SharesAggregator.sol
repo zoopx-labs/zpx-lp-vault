@@ -6,6 +6,11 @@ import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/U
 import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 
 contract SharesAggregator is Initializable, UUPSUpgradeable, AccessControlUpgradeable {
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
+
     uint256 public totalGlobalShares;
     mapping(uint64 => uint256) public perChainShares;
     address public adapter;

@@ -26,6 +26,11 @@ contract SpokeVault is
     AccessControlUpgradeable,
     ISpokeVault
 {
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
+
     using SafeERC20 for IERC20;
 
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");

@@ -8,6 +8,11 @@ import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/acce
 import "../pps/IPpsSource.sol";
 
 contract PpsBeacon is Initializable, UUPSUpgradeable, AccessControlUpgradeable, IPpsSource {
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
+
     bytes32 public constant POSTER_ROLE = keccak256("POSTER_ROLE");
 
     uint256 public pps6;

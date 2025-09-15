@@ -21,6 +21,11 @@ contract Router is
     PausableUpgradeable,
     ReentrancyGuardUpgradeable
 {
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
+
     bytes32 public constant KEEPER_ROLE = keccak256("KEEPER_ROLE");
     bytes32 public constant RELAYER_ROLE = keccak256("RELAYER_ROLE");
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
@@ -32,6 +37,7 @@ contract Router is
     IMessagingAdapter public adapter;
     IMessagingEndpoint public messagingEndpoint;
     address public feeCollector;
+    uint64 public lastSendNonce;
 
     // fees are in basis points (10000 = 100%)
     uint16 public protocolFeeBps; // capped at 5 bps (0.05%)
@@ -178,8 +184,8 @@ contract Router is
         bytes memory payload = abi.encode(dstChainId, address(vault), vault.totalAssets(), cur, h);
         // record timestamp before external adapter call to reduce reentrancy window
         lastRebalanceAt = uint64(block.timestamp);
-        // send message; ignoring returned nonce is acceptable here
-        adapter.send(dstChainId, hubAddr, payload);
+        // send message and record nonce for traceability
+        lastSendNonce = adapter.send(dstChainId, hubAddr, payload);
     }
 
     function fill(address to, uint256 amount) external onlyRole(RELAYER_ROLE) nonReentrant whenNotPaused {

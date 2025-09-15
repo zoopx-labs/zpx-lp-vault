@@ -33,6 +33,11 @@ contract LocalDepositGateway is
     PausableUpgradeable,
     ReentrancyGuardUpgradeable
 {
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
+
     using SafeERC20 for IERC20;
 
     bytes32 public constant GATEWAY_ADMIN = keccak256("GATEWAY_ADMIN");

@@ -8,6 +8,11 @@ import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/acce
 import "../policy/IPolicySource.sol";
 
 contract PolicyBeacon is Initializable, UUPSUpgradeable, AccessControlUpgradeable, IPolicySource {
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
+
     bytes32 public constant POSTER_ROLE = keccak256("POSTER_ROLE");
 
     struct Record {

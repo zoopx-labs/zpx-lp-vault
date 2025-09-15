@@ -18,7 +18,8 @@ contract ZPXRewarder is AccessControl {
     IERC20 public immutable rewardToken; // ZPXArb
 
     uint256 public totalStaked;
-    uint256 public accPerShare; // 1e18
+    // Explicit init for clarity/static analyzers
+    uint256 public accPerShare = 0; // 1e18
     uint256 public rewardsAccrued;
 
     uint64 public startTime;

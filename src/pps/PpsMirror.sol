@@ -15,6 +15,11 @@ contract PpsMirror is
     MessagingEndpointReceiver,
     IPpsSource
 {
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
+
     bytes32 public constant POSTER_ROLE = keccak256("POSTER_ROLE");
 
     uint256 public pps6;

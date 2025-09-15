@@ -2,7 +2,7 @@
   "exclude_informational": true,
   "exclude_dependencies": true,
   "foundry_out_directory": "out",
-  "filter_paths": "^(test/|script/|lib/)",
-  "json": "slither/slither.json",
+  "filter_paths": "test/|script/|lib/",
+  "json": "slither.json",
   "fail_on": "medium"
 }

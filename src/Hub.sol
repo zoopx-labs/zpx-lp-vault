@@ -82,7 +82,9 @@ contract Hub is
     error NoFeed(address asset);
 
     /// @custom:oz-upgrades-unsafe-allow constructor
-    constructor() {}
+    constructor() {
+        _disableInitializers();
+    }
 
     /**
      * @dev Initializer for Hub. The OpenZeppelin `initializer` modifier

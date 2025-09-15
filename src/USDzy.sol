@@ -31,7 +31,9 @@ contract USDzy is
     event Upgraded(address indexed who, address indexed newImpl);
 
     /// @custom:oz-upgrades-unsafe-allow constructor
-    constructor() {}
+    constructor() {
+        _disableInitializers();
+    }
 
     // The `initializer` modifier ensures this function can only be called once
     // (prevents re-initialization attacks on upgradeable contracts when used correctly).

@@ -20,6 +20,11 @@ contract USDzyRemoteMinter is
     ReentrancyGuardUpgradeable,
     MessagingEndpointReceiver
 {
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
+
     address public usdzy;
     bytes32 public constant GATEWAY_ROLE = keccak256("GATEWAY_ROLE");
 
