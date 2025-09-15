@@ -178,8 +178,8 @@ contract Router is
         bytes memory payload = abi.encode(dstChainId, address(vault), vault.totalAssets(), cur, h);
         // record timestamp before external adapter call to reduce reentrancy window
         lastRebalanceAt = uint64(block.timestamp);
-    // send message; ignoring returned nonce is acceptable here
-    adapter.send(dstChainId, hubAddr, payload);
+        // send message; ignoring returned nonce is acceptable here
+        adapter.send(dstChainId, hubAddr, payload);
     }
 
     function fill(address to, uint256 amount) external onlyRole(RELAYER_ROLE) nonReentrant whenNotPaused {
