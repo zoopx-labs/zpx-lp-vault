@@ -8,7 +8,13 @@ import {MessagingEndpointReceiver} from "../messaging/MessagingEndpointReceiver.
 
 import "../pps/IPpsSource.sol";
 
-contract PpsMirror is Initializable, UUPSUpgradeable, AccessControlUpgradeable, MessagingEndpointReceiver, IPpsSource {
+contract PpsMirror is
+    Initializable,
+    UUPSUpgradeable,
+    AccessControlUpgradeable,
+    MessagingEndpointReceiver,
+    IPpsSource
+{
     bytes32 public constant POSTER_ROLE = keccak256("POSTER_ROLE");
 
     uint256 public pps6;

@@ -10,8 +10,7 @@ contract ZPXArbV2_Burnable is ZPXArb {
         _disableInitializers();
     }
 
-    function initializeV2_Burnable() public reinitializer(2) {
-    }
+    function initializeV2_Burnable() public reinitializer(2) {}
 
     // leave space for future variables
     uint256[50] private __gap_v2;
