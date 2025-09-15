@@ -18,12 +18,10 @@ contract PpsMirror is Initializable, UUPSUpgradeable, AccessControlUpgradeable, 
 
     // `initializer` prevents this function from being re-run and is the intended access
     // control for upgradeable contract initialization when used with OZ patterns.
-    function initialize(address admin, uint64 maxStaleness_) public initializer {
-        require(admin != address(0), "admin zero");
-        __AccessControl_init();
-        _grantRole(DEFAULT_ADMIN_ROLE, admin);
-        _grantRole(POSTER_ROLE, admin);
-        maxStaleness = maxStaleness_;
+    function initialize(address endpoint_, uint64 remoteChainId_) public initializer {
+        __MessagingEndpointReceiver_init(endpoint_);
+        __UUPSUpgradeable_init();
+        remoteChainId = remoteChainId_;
     }
 
     function post(uint256 newPps6, uint64 nowTs) external onlyRole(POSTER_ROLE) {

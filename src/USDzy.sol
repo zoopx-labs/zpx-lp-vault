@@ -32,17 +32,20 @@ contract USDzy is
 
     // The `initializer` modifier ensures this function can only be called once
     // (prevents re-initialization attacks on upgradeable contracts when used correctly).
-    function initialize(string memory name_, string memory symbol_, address admin) public initializer {
-        require(admin != address(0), "admin zero");
-        __Context_init_unchained();
+    function initialize(
+        string memory name_,
+        string memory symbol_,
+        address admin
+    ) public initializer {
         __ERC20_init(name_, symbol_);
-        __ERC20Permit_init(name_);
         __AccessControl_init_unchained();
+        __Pausable_init_unchained();
         __UUPSUpgradeable_init();
 
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
-        _setRoleAdmin(MINTER_ROLE, DEFAULT_ADMIN_ROLE);
-        _setRoleAdmin(BURNER_ROLE, DEFAULT_ADMIN_ROLE);
+        _grantRole(PAUSER_ROLE, admin);
+        _grantRole(MINTER_ROLE, admin);
+        _grantRole(BURNER_ROLE, admin);
     }
 
     /**

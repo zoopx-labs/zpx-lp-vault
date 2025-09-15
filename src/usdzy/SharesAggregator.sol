@@ -16,8 +16,9 @@ contract SharesAggregator is Initializable, UUPSUpgradeable, AccessControlUpgrad
     // `initializer` prevents accidental or malicious re-execution. Follow OZ proxy deployment
     // patterns to ensure this protection holds on deployed proxies.
     function initialize(address admin) public initializer {
-        require(admin != address(0), "admin zero");
-        __AccessControl_init();
+        __Context_init_unchained();
+        __AccessControl_init_unchained();
+        __UUPSUpgradeable_init();
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
     }
 

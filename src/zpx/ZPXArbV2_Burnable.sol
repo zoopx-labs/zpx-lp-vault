@@ -9,7 +9,7 @@ contract ZPXArbV2_Burnable is ZPXArb {
     constructor() {}
 
     function initializeV2_Burnable() public reinitializer(2) {
-        // No-op: V1 already initialized ERC20Burnable. Kept for upgrade scaffolding.
+        __ZPXArbV2_Burnable_init();
     }
 
     // leave space for future variables

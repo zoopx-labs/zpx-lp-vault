@@ -47,18 +47,13 @@ contract ZPXRewarder is AccessControl {
 
     // internal update
     function _update() internal {
-        uint256 from = lastUpdate == 0 ? startTime : lastUpdate;
+        if (lastUpdate == 0) return;
         uint256 to = block.timestamp < endTime ? block.timestamp : endTime;
-        if (to <= from) {
-            lastUpdate = block.timestamp;
-            return;
-        }
-        uint256 elapsed = to - from;
-        if (totalStaked > 0) {
-            uint256 reward = elapsed * rewardRatePerSec;
-            accPerShare += (reward * 1e18) / totalStaked;
-        }
-        lastUpdate = block.timestamp;
+        if (to <= lastUpdate) return;
+        uint256 elapsed = to - lastUpdate;
+        uint256 newRewards = elapsed * rate;
+        rewardsAccrued += newRewards;
+        lastUpdate = to;
     }
 
     function deposit(uint256 amt) external {

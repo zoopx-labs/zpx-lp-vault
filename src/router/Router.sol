@@ -71,27 +71,30 @@ contract Router is
      * @dev Initializer. The OpenZeppelin `initializer` modifier ensures this
      * function can only be called once when used with a proxy deployment.
      */
-    function initialize(address vault_, address adapter_, address admin_, address feeCollector_) public initializer {
-        require(vault_ != address(0), "vault zero");
-        require(adapter_ != address(0), "adapter zero");
-        require(admin_ != address(0), "admin zero");
-        require(feeCollector_ != address(0), "feeCollector zero");
-        vault = ISpokeVault(vault_);
-        adapter = IMessagingAdapter(adapter_);
+    function initialize(
+        address vault_,
+        address messagingEndpoint_,
+        address admin,
+        address feeCollector_
+    ) public initializer {
+        __Context_init_unchained();
+        __AccessControl_init_unchained();
+        __ReentrancyGuard_init_unchained();
+        __Pausable_init_unchained();
+        __UUPSUpgradeable_init();
+
+        vault = SpokeVault(vault_);
+        messagingEndpoint = IMessagingEndpoint(messagingEndpoint_);
         feeCollector = feeCollector_;
 
-        // fee defaults
-        protocolFeeBps = 0;
-        relayerFeeBps = 0;
-        protocolShareBps = 2500;
-        lpShareBps = 7500;
+        _grantRole(DEFAULT_ADMIN_ROLE, admin);
+        _grantRole(PAUSER_ROLE, admin);
+        _grantRole(RELAYER_ROLE, admin);
+        _grantRole(REBALANCER_ROLE, admin);
 
-        __AccessControl_init();
-        __Pausable_init();
-        __ReentrancyGuard_init();
-        _grantRole(DEFAULT_ADMIN_ROLE, admin_);
-        // give the admin pauser capability by default for safer ops
-        _grantRole(PAUSER_ROLE, admin_);
+        _setRoleAdmin(PAUSER_ROLE, DEFAULT_ADMIN_ROLE);
+        _setRoleAdmin(RELAYER_ROLE, DEFAULT_ADMIN_ROLE);
+        _setRoleAdmin(REBALANCER_ROLE, DEFAULT_ADMIN_ROLE);
     }
 
     // --- Fee setters ---
@@ -141,14 +144,13 @@ contract Router is
         return s / 7;
     }
 
-    function healthBps() public view returns (uint16) {
-        uint256 a = avg7d();
-        // if the 7-day average is zero, return full health (100%) — this guards
-        // against division by zero and is an intentional edge-case handling.
-        if (a == 0) return 10000;
-        uint256 h = (tvl() * 10000) / a;
-        if (h > 65535) return 65535;
-        return uint16(h);
+    function healthBps() public view returns (uint16 h) {
+        uint256 a = available();
+        uint256 t = tvl();
+        if (t == 0) return 65535; // max health
+        uint256 h_ = (a * 65535) / t;
+        if (h_ > 65535) return 65535;
+        h = uint16(h_);
     }
 
     function needsRebalance() public view returns (bool) {

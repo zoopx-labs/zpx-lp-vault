@@ -28,14 +28,12 @@ contract USDzyRemoteMinter is
 
     // Note: the `initializer` modifier prevents re-initialization; ensure deployments use
     // upgradeable proxy patterns so this protects against external re-initializers.
-    function initialize(address usdzy_, address admin_) public initializer {
-        require(usdzy_ != address(0), "usdzy zero");
-        require(admin_ != address(0), "admin zero");
-        usdzy = usdzy_;
-        admin = admin_;
-        __MessagingEndpointReceiver_init(admin_);
-        __ReentrancyGuard_init();
-        _grantRole(DEFAULT_ADMIN_ROLE, admin_);
+    function initialize(address usdzy_, address admin) public initializer {
+        __MessagingEndpointReceiver_init(address(0)); // will be set by admin
+        __UUPSUpgradeable_init();
+
+        usdzy = IERC20(usdzy_);
+        _grantRole(DEFAULT_ADMIN_ROLE, admin);
     }
 
     function mintFromGateway(address to, uint256 shares) external onlyRole(GATEWAY_ROLE) whenNotPaused nonReentrant {
