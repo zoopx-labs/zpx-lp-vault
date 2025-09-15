@@ -16,6 +16,8 @@ contract PpsMirror is Initializable, UUPSUpgradeable, AccessControlUpgradeable, 
 
     event PpsMirrored(uint256 pps6, uint64 asOf);
 
+    // `initializer` prevents this function from being re-run and is the intended access
+    // control for upgradeable contract initialization when used with OZ patterns.
     function initialize(address admin, uint64 maxStaleness_) public initializer {
         require(admin != address(0), "admin zero");
         __AccessControl_init();

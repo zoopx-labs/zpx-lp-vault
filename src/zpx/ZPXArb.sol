@@ -29,6 +29,7 @@ contract ZPXArb is
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {}
 
+    // `initializer` restricts this setup function to a single call when used with a proxy.
     function initialize(string memory name_, string memory symbol_, address admin) public initializer {
         __ERC20_init(name_, symbol_);
         __ERC20Permit_init(name_);

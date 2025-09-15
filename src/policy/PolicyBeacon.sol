@@ -37,6 +37,8 @@ contract PolicyBeacon is Initializable, UUPSUpgradeable, AccessControlUpgradeabl
         bool persisted
     );
 
+    // `initializer` protects this setup function from being called more than once.
+    // Ensure deployment follows OZ upgradeable patterns (proxy + initializer) so this is effective.
     function initialize(address admin) public initializer {
         require(admin != address(0), "admin zero");
         __AccessControl_init();

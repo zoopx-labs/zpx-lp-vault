@@ -58,6 +58,8 @@ contract SpokeVault is
         return ERC4626Upgradeable.totalAssets();
     }
 
+    // The `initializer` modifier ensures this function can only be executed once when
+    // used correctly with a proxy. Keep this pattern to prevent unprotected initialization.
     function initialize(address asset_, string memory name_, string memory symbol_, address admin_)
         public
         initializer

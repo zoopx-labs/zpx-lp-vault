@@ -236,9 +236,12 @@ contract Hub is
         AssetConfig memory c = assetCfg[payoutAsset];
         require(c.enabled, "asset disabled");
         uint256 px6 = _px6(payoutAsset);
-        uint256 amt6 = (uint256(r.usdOwed6) * 1_000_000) / px6;
-        uint256 amountOut =
-            (c.decimals == 6) ? amt6 : (c.decimals > 6 ? amt6 * 10 ** (c.decimals - 6) : amt6 / 10 ** (6 - c.decimals));
+        // compute amt6 using full precision
+        uint256 amt6 = Math.mulDiv(uint256(r.usdOwed6), 1_000_000, px6);
+        // scale amt6 to token decimals preserving precision where possible
+        uint256 amountOut = (c.decimals == 6)
+            ? amt6
+            : (c.decimals > 6 ? Math.mulDiv(amt6, 10 ** (c.decimals - 6), 1) : Math.mulDiv(amt6, 1, 10 ** (6 - c.decimals)));
         require(IERC20(payoutAsset).balanceOf(address(this)) >= amountOut, "insufficient liquidity");
         r.claimed = true;
         SafeERC20.safeTransfer(IERC20(payoutAsset), r.owner, amountOut);

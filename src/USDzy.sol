@@ -30,6 +30,8 @@ contract USDzy is
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {}
 
+    // The `initializer` modifier ensures this function can only be called once
+    // (prevents re-initialization attacks on upgradeable contracts when used correctly).
     function initialize(string memory name_, string memory symbol_, address admin) public initializer {
         require(admin != address(0), "admin zero");
         __Context_init_unchained();

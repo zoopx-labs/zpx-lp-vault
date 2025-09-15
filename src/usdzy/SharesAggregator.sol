@@ -13,6 +13,8 @@ contract SharesAggregator is Initializable, UUPSUpgradeable, AccessControlUpgrad
     event ReportMint(uint64 chainId, uint256 shares);
     event ReportBurn(uint64 chainId, uint256 shares);
 
+    // `initializer` prevents accidental or malicious re-execution. Follow OZ proxy deployment
+    // patterns to ensure this protection holds on deployed proxies.
     function initialize(address admin) public initializer {
         require(admin != address(0), "admin zero");
         __AccessControl_init();

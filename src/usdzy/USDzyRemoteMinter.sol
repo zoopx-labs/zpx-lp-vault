@@ -26,6 +26,8 @@ contract USDzyRemoteMinter is
 
     event GatewayMinted(address indexed to, uint256 shares);
 
+    // Note: the `initializer` modifier prevents re-initialization; ensure deployments use
+    // upgradeable proxy patterns so this protects against external re-initializers.
     function initialize(address usdzy_, address admin_) public initializer {
         require(usdzy_ != address(0), "usdzy zero");
         require(admin_ != address(0), "admin zero");

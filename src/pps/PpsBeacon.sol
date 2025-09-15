@@ -15,6 +15,9 @@ contract PpsBeacon is Initializable, UUPSUpgradeable, AccessControlUpgradeable, 
 
     event PpsUpdated(uint256 pps6, uint64 asOf);
 
+    // `initializer` prevents this function from being re-run. The OZ Initializable pattern
+    // must be followed when deploying upgradeable implementations to avoid unprotected
+    // initialization vulnerabilities.
     function initialize(address admin) public initializer {
         require(admin != address(0), "admin zero");
         __AccessControl_init();
