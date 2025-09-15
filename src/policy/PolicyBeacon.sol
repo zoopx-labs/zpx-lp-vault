@@ -38,6 +38,7 @@ contract PolicyBeacon is Initializable, UUPSUpgradeable, AccessControlUpgradeabl
     );
 
     function initialize(address admin) public initializer {
+        require(admin != address(0), "admin zero");
         __AccessControl_init();
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
         _grantRole(POSTER_ROLE, admin);

@@ -91,6 +91,8 @@ contract Hub is
         __Pausable_init_unchained();
         __UUPSUpgradeable_init();
 
+        require(usdzy_ != address(0), "usdzy zero");
+        require(admin != address(0), "admin zero");
         usdzy = USDzy(usdzy_);
 
         _grantRole(DEFAULT_ADMIN_ROLE, admin);

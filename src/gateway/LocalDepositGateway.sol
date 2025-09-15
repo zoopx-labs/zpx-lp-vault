@@ -58,6 +58,10 @@ contract LocalDepositGateway is
         public
         initializer
     {
+        require(minter_ != address(0), "minter zero");
+        require(ppsMirror_ != address(0), "ppsMirror zero");
+        require(spoke_ != address(0), "spoke zero");
+        require(admin_ != address(0), "admin zero");
         __AccessControl_init();
         __Pausable_init();
         __ReentrancyGuard_init();

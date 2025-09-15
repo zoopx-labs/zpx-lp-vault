@@ -31,6 +31,7 @@ contract USDzy is
     constructor() {}
 
     function initialize(string memory name_, string memory symbol_, address admin) public initializer {
+        require(admin != address(0), "admin zero");
         __Context_init_unchained();
         __ERC20_init(name_, symbol_);
         __ERC20Permit_init(name_);

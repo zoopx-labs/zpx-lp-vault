@@ -4,6 +4,8 @@ pragma solidity ^0.8.24;
 import "forge-std/Test.sol";
 import {SpokeVault} from "../../src/spoke/SpokeVault.sol";
 import {ERC20} from "lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol";
+import {IERC20} from "lib/openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
+import {SafeERC20} from "lib/openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol";
 
 contract MockToken is ERC20 {
     constructor(string memory n, string memory s, uint8 d) ERC20(n, s) {
@@ -23,7 +25,7 @@ contract SpokeVaultTest is Test {
 
     function testBorrowRepay() public {
         // transfer some liquidity to vault
-        token.transfer(address(vault), 1_000_000e6);
+        SafeERC20.safeTransfer(IERC20(address(token)), address(vault), 1_000_000e6);
         vault.setBorrowCap(500_000e6);
         // grant borrower to this test
         vault.grantRole(keccak256("BORROWER_ROLE"), address(this));

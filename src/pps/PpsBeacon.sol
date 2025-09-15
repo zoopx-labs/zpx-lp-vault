@@ -16,6 +16,7 @@ contract PpsBeacon is Initializable, UUPSUpgradeable, AccessControlUpgradeable, 
     event PpsUpdated(uint256 pps6, uint64 asOf);
 
     function initialize(address admin) public initializer {
+        require(admin != address(0), "admin zero");
         __AccessControl_init();
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
         _grantRole(POSTER_ROLE, admin);

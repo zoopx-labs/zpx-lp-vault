@@ -62,6 +62,8 @@ contract SpokeVault is
         public
         initializer
     {
+        require(asset_ != address(0), "asset zero");
+        require(admin_ != address(0), "admin zero");
         __ERC20_init(name_, symbol_);
         __ERC20Permit_init(name_);
         __ERC4626_init(IERC20(asset_));

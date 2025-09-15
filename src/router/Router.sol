@@ -68,6 +68,9 @@ contract Router is
     event Repaid(uint256 amount, uint256 debtAfter);
 
     function initialize(address vault_, address adapter_, address admin_, address feeCollector_) public initializer {
+        require(vault_ != address(0), "vault zero");
+        require(adapter_ != address(0), "adapter zero");
+        require(admin_ != address(0), "admin zero");
         vault = ISpokeVault(vault_);
         adapter = IMessagingAdapter(adapter_);
         feeCollector = feeCollector_;

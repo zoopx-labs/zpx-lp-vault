@@ -6,6 +6,8 @@ import {Router} from "../../src/router/Router.sol";
 import {SpokeVault} from "../../src/spoke/SpokeVault.sol";
 import {MockAdapter} from "../../src/messaging/MockAdapter.sol";
 import {ERC20} from "lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol";
+import {IERC20} from "lib/openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
+import {SafeERC20} from "lib/openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol";
 
 contract MockToken is ERC20 {
     constructor() ERC20("T", "T") {
@@ -29,14 +31,14 @@ contract RouterTest is Test {
     }
 
     function testPokeAndRebalanceTrigger() public {
-        token.transfer(address(vault), 1_000_000e18);
+        SafeERC20.safeTransfer(IERC20(address(token)), address(vault), 1_000_000e18);
         // populate 7 days
         for (uint256 i = 0; i < 7; i++) {
             vm.warp(block.timestamp + 1 days);
             router.pokeTvlSnapshot();
         }
         // now drop TVL and ensure needsRebalance
-        token.transfer(address(vault), 0); // no-op
+        SafeERC20.safeTransfer(IERC20(address(token)), address(vault), 0); // no-op
         // simulate low TVL by reducing vault balance
         // cannot directly reduce token balance; but we can simulate by borrowing to remove liquidity
         vault.grantRole(keccak256("BORROWER_ROLE"), address(this));

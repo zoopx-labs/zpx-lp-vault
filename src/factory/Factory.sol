@@ -19,6 +19,7 @@ contract Factory is Initializable, AccessControlUpgradeable, ReentrancyGuardUpgr
     event ImplementationUpdated(bytes32 what, address impl);
 
     function initialize(address admin) public initializer {
+        require(admin != address(0), "admin zero");
         __AccessControl_init();
         __ReentrancyGuard_init();
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
