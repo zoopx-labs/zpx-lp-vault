@@ -34,6 +34,9 @@ contract PpsMirror is
     function initialize(address endpoint_, uint64 remoteChainId_) public initializer {
         __MessagingEndpointReceiver_init(endpoint_);
         __UUPSUpgradeable_init();
+        // grant admin and poster to deployer so tests and deployments can grant further roles
+        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        _grantRole(POSTER_ROLE, msg.sender);
         remoteChainId = remoteChainId_;
     }
 

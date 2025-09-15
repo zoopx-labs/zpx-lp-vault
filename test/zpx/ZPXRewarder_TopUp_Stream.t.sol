@@ -6,6 +6,8 @@ import {ZPXArb} from "src/zpx/ZPXArb.sol";
 import {MintGate_Arb} from "src/zpx/MintGate_Arb.sol";
 import {ZPXRewarder} from "src/zpx/ZPXRewarder.sol";
 import {USDzy} from "src/USDzy.sol";
+import {ProxyUtils} from "../utils/ProxyUtils.sol";
+import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import {MockERC20} from "src/mocks/MockERC20.sol";
 
 contract ZPXRewarderTest is Test {
@@ -16,8 +18,10 @@ contract ZPXRewarderTest is Test {
     MockERC20 staker;
 
     function setUp() public {
-        usdzy = new USDzy();
-        usdzy.initialize("USDzy", "USZY", address(this));
+        USDzy zimpl = new USDzy();
+        address zproxy =
+            ProxyUtils.deployProxy(address(zimpl), abi.encodeCall(USDzy.initialize, ("USDzy", "USZY", address(this))));
+        usdzy = USDzy(zproxy);
         // allow this test contract to mint USDzy for staking
         usdzy.grantRole(usdzy.MINTER_ROLE(), address(this));
 
@@ -41,7 +45,7 @@ contract ZPXRewarderTest is Test {
     function testTopUpAndClaim() public {
         // gate mints to rewarder and notifies topup (gate is TOPUP_ROLE)
         gate.setEndpoint(1, address(0x1234));
-        // mint 100 ZPX to rewarder
+        // mint 100 ZPX to rewarder so it has funds
         gate.consumeAndMint(1, address(0x1234), 1, address(rewarder), 100e18, bytes32("REWARD_TOPUP"));
         // notify for 100 seconds as gate (prank)
         vm.prank(address(gate));
@@ -61,7 +65,7 @@ contract ZPXRewarderTest is Test {
         uint256 bal = zpx.balanceOf(address(this));
         assertEq(bal, expectedReward);
 
-        // top-up mid-flight: mint another 100 and extend
+        // top-up mid-flight: mint another 100 and extend (ensure tokens are at rewarder before notify)
         gate.consumeAndMint(1, address(0x1234), 2, address(rewarder), 100e18, bytes32("REWARD_TOPUP"));
         vm.prank(address(gate));
         rewarder.notifyTopUp(100e18, 100);

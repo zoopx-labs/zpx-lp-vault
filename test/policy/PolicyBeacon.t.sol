@@ -3,13 +3,18 @@ pragma solidity ^0.8.24;
 
 import "forge-std/Test.sol";
 import {PolicyBeacon, IPolicySource} from "../../src/policy/PolicyBeacon.sol";
+import {ProxyUtils} from "../utils/ProxyUtils.sol";
+import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
 contract PolicyBeaconTest is Test {
     PolicyBeacon beacon;
 
     function setUp() public {
-        beacon = new PolicyBeacon();
-        beacon.initialize(address(this));
+        PolicyBeacon impl = new PolicyBeacon();
+        address proxy = ProxyUtils.deployProxy(address(impl), abi.encodeCall(PolicyBeacon.initialize, (address(this))));
+        beacon = PolicyBeacon(proxy);
+        // grant POSTER_ROLE to this test account to call post
+        beacon.grantRole(beacon.POSTER_ROLE(), address(this));
     }
 
     function testPostAndLatest() public {

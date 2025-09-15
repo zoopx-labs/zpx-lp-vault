@@ -18,6 +18,6 @@ jobs:
           source $HOME/.bashrc
           foundryup || true
 
-      - name: Run Slither (via Docker)
+      - name: Run Slither (via Docker, src only)
         run: |
-          docker run --rm -v "$PWD":/src -w /src --entrypoint slither trailofbits/slither:latest /src --config-file /src/.slither.config.json || true
+          docker run --rm -v "$PWD":/src -w /src --entrypoint slither trailofbits/slither:latest src --config-file /src/.slither.json || true

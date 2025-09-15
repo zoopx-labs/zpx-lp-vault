@@ -4,6 +4,8 @@ pragma solidity ^0.8.24;
 import {Test} from "forge-std/Test.sol";
 import {Hub} from "src/Hub.sol";
 import {USDzy} from "src/USDzy.sol";
+import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
+import {ProxyUtils} from "./utils/ProxyUtils.sol";
 import {MockERC20} from "src/mocks/MockERC20.sol";
 import {MockDIAFeed} from "src/mocks/MockDIAFeed.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -15,11 +17,16 @@ contract HubPauseTest is Test {
     MockDIAFeed feedUsdc;
 
     function setUp() public {
-        usdzy = new USDzy();
-        usdzy.initialize("USDzy", "USZY", address(this));
+        USDzy usdzyImpl = new USDzy();
+        address usdzyProxy = ProxyUtils.deployProxy(
+            address(usdzyImpl), abi.encodeCall(USDzy.initialize, ("USDzy", "USZY", address(this)))
+        );
+        usdzy = USDzy(usdzyProxy);
 
-        hub = new Hub();
-        hub.initialize(address(usdzy), address(this));
+        Hub impl = new Hub();
+        address proxy =
+            ProxyUtils.deployProxy(address(impl), abi.encodeCall(Hub.initialize, (address(usdzy), address(this))));
+        hub = Hub(proxy);
 
         usdzy.grantRole(usdzy.MINTER_ROLE(), address(hub));
         usdzy.grantRole(usdzy.BURNER_ROLE(), address(hub));

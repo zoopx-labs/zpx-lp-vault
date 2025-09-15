@@ -71,11 +71,15 @@ contract Factory is Initializable, AccessControlUpgradeable, ReentrancyGuardUpgr
         vault = address(new ERC1967Proxy(implVAddr, initV));
 
         // initialize router with this Factory as temporary admin so we can wire roles and pause it
+        // Note: Router.initialize takes messagingEndpoint, not adapter. We'll set adapter explicitly below.
         bytes memory initR = abi.encodeCall(Router.initialize, (vault, adapter, address(this), feeCollector));
         router = address(new ERC1967Proxy(implRAddr, initR));
 
         // grant BORROWER_ROLE on vault to router proxy (Factory is temporary admin so this will succeed)
         SpokeVault(vault).grantRole(SpokeVault(vault).BORROWER_ROLE(), router);
+
+        // set adapter on the router now that it's deployed (Factory is temporary admin)
+        Router(router).setAdapter(adapter);
 
         // keep vault & router paused by default for safety (we are temporary admin)
         SpokeVault(vault).pause();

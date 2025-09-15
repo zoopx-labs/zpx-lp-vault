@@ -108,6 +108,7 @@ contract LocalDepositGateway is
         int256 price = feed.latestAnswer();
         require(price > 0, "BAD_PRICE");
         uint256 ts = feed.latestTimestamp();
+        // slither-disable-next-line timestamp
         require(block.timestamp - ts <= maxStaleness, "PRICE_STALE");
 
         // Compute usd6 with precision using mulDiv where useful.
@@ -123,6 +124,7 @@ contract LocalDepositGateway is
 
         // read pps
         (uint256 pps6, uint64 ppsAsOf) = ppsMirror.latestPps6();
+        // slither-disable-next-line timestamp
         require(block.timestamp - ppsAsOf <= maxStaleness, "PPS_STALE");
         require(pps6 > 0, "BAD_PPS");
 

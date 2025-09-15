@@ -22,7 +22,7 @@ contract FactorySmoke is Test {
         f.setRouterImpl(implR);
 
         (address v, address r) = f.deploySpoke(
-            uint64(block.chainid), address(0x1), "sv", "sv", address(this), address(this), address(0x2), address(0)
+            uint64(block.chainid), address(0x1), "sv", "sv", address(this), address(this), address(0x2), address(0xFEE)
         );
         // ensure deployed addresses are contracts
         uint256 sizeV;
@@ -44,7 +44,14 @@ contract FactorySmoke is Test {
 
         // implementations should be cached in Factory (calling deploy again should reuse impls)
         (address v2, address r2) = f.deploySpoke(
-            uint64(block.chainid), address(0x1), "sv2", "sv2", address(this), address(this), address(0x2), address(0)
+            uint64(block.chainid),
+            address(0x1),
+            "sv2",
+            "sv2",
+            address(this),
+            address(this),
+            address(0x2),
+            address(0xFEE)
         );
         bytes32 implVSlot2 = vm.load(v2, implSlot);
         bytes32 implRSlot2 = vm.load(r2, implSlot);

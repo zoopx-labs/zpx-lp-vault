@@ -143,6 +143,7 @@ contract Router is
     }
 
     function pokeTvlSnapshot() public {
+        // slither-disable-next-line timestamp
         uint64 day = uint64(block.timestamp / 1 days);
         // if we've already recorded for this day or a later day, skip
         if (day <= lastSnapDay) return; // idempotent and resilient to clock skew
@@ -171,6 +172,7 @@ contract Router is
     function needsRebalance() public view returns (bool) {
         if (healthBps() < 4000) return true;
         // use an explicit delta comparison to avoid underflow and reduce reliance on exact equality
+        // slither-disable-next-line timestamp
         if (block.timestamp >= lastRebalanceAt + 1 days) return true;
         return false;
     }

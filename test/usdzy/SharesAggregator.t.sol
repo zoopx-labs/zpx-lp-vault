@@ -3,13 +3,17 @@ pragma solidity ^0.8.24;
 
 import "forge-std/Test.sol";
 import {SharesAggregator} from "../../src/usdzy/SharesAggregator.sol";
+import {ProxyUtils} from "../utils/ProxyUtils.sol";
+import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
 contract SharesAggregatorTest is Test {
     SharesAggregator sa;
 
     function setUp() public {
-        sa = new SharesAggregator();
-        sa.initialize(address(this));
+        SharesAggregator impl = new SharesAggregator();
+        address proxy =
+            ProxyUtils.deployProxy(address(impl), abi.encodeCall(SharesAggregator.initialize, (address(this))));
+        sa = SharesAggregator(proxy);
         sa.setAdapter(address(this));
     }
 

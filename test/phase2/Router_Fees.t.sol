@@ -5,6 +5,8 @@ import "forge-std/Test.sol";
 import {MockERC20} from "../..//src/mocks/MockERC20.sol";
 import {SpokeVault} from "../../src/spoke/SpokeVault.sol";
 import {Router} from "../../src/router/Router.sol";
+import {ProxyUtils} from "../utils/ProxyUtils.sol";
+import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
 contract RouterFeesTest is Test {
     MockERC20 token;
@@ -17,11 +19,16 @@ contract RouterFeesTest is Test {
 
     function setUp() public {
         token = new MockERC20("Tkn", "TKN");
-        // deploy vault and router implementations and proxies minimal by direct deployment for test
-        vault = new SpokeVault();
-        vault.initialize(address(token), "svT", "svT", admin);
-        router = new Router();
-        router.initialize(address(vault), address(0x1), admin, address(0));
+        SpokeVault vImpl = new SpokeVault();
+        address vProxy = ProxyUtils.deployProxy(
+            address(vImpl), abi.encodeCall(SpokeVault.initialize, (address(token), "svT", "SVT", admin))
+        );
+        vault = SpokeVault(vProxy);
+        Router rImpl = new Router();
+        address rProxy = ProxyUtils.deployProxy(
+            address(rImpl), abi.encodeCall(Router.initialize, (address(vault), address(0x1), admin, address(0xBEEF)))
+        );
+        router = Router(rProxy);
 
         // fund vault with tokens to allow borrows
         token.mint(address(vault), 1_000_000e6);

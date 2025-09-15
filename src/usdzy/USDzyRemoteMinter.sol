@@ -31,7 +31,8 @@ contract USDzyRemoteMinter is
     event GatewayMinted(address indexed to, uint256 shares);
 
     function initialize(address usdzy_, address admin_) public initializer {
-        __MessagingEndpointReceiver_init(address(0)); // will be set by admin
+        // initialize with a non-zero owner (admin) to satisfy OwnableUpgradeable
+        __MessagingEndpointReceiver_init(admin_);
         __UUPSUpgradeable_init();
 
         require(usdzy_ != address(0), "usdzy=0");

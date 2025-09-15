@@ -6,6 +6,8 @@ import {MockERC20} from "../..//src/mocks/MockERC20.sol";
 import {MockUSDC} from "../../src/mocks/MockUSDC.sol";
 import {SpokeVault} from "../../src/spoke/SpokeVault.sol";
 import {Router} from "../../src/router/Router.sol";
+import {ProxyUtils} from "../utils/ProxyUtils.sol";
+import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
 contract RouterEndToEndFees is Test {
     MockUSDC token;
@@ -26,13 +28,19 @@ contract RouterEndToEndFees is Test {
     function setUp() public {
         // use a 6-decimal USDC-like mock for stablecoin behavior
         token = new MockUSDC("Mock USDC", "mUSDC");
-        vault = new SpokeVault();
-        vault.initialize(address(token), "svT", "svT", admin);
+        SpokeVault vImpl = new SpokeVault();
+        address vProxy = ProxyUtils.deployProxy(
+            address(vImpl), abi.encodeCall(SpokeVault.initialize, (address(token), "svT", "SVT", admin))
+        );
+        vault = SpokeVault(vProxy);
         // allow high utilization for the test so repeated borrows succeed
         vm.prank(admin);
         vault.setMaxUtilizationBps(65000);
-        router = new Router();
-        router.initialize(address(vault), address(0x1), admin, address(0));
+        Router rImpl = new Router();
+        address rProxy = ProxyUtils.deployProxy(
+            address(rImpl), abi.encodeCall(Router.initialize, (address(vault), address(0x1), admin, treasury))
+        );
+        router = Router(rProxy);
 
         // mint a much larger balance into the vault to cover repeated fills
         uint256 amount = 5000 ether; // treat 1 token ~= $1 for the test
@@ -180,13 +188,19 @@ contract RouterEndToEndFees is Test {
     function _runRebalanceScenario(uint256 daysRun) internal returns (uint256, uint256, uint256, uint256) {
         // create fresh instances for each scenario to isolate state
         MockUSDC t = new MockUSDC("Mock USDC", "mUSDC");
-        SpokeVault v = new SpokeVault();
-        v.initialize(address(t), "svT", "svT", admin);
+        SpokeVault vImpl2 = new SpokeVault();
+        address vProxy2 = ProxyUtils.deployProxy(
+            address(vImpl2), abi.encodeCall(SpokeVault.initialize, (address(t), "svT", "SVT", admin))
+        );
+        SpokeVault v = SpokeVault(vProxy2);
         // allow higher utilization for scenario vaults so repeated borrows within a day succeed
         vm.prank(admin);
         v.setMaxUtilizationBps(65000);
-        Router r = new Router();
-        r.initialize(address(v), address(0x1), admin, address(0));
+        Router rImpl2 = new Router();
+        address rProxy2 = ProxyUtils.deployProxy(
+            address(rImpl2), abi.encodeCall(Router.initialize, (address(v), address(0x1), admin, treasury))
+        );
+        Router r = Router(rProxy2);
 
         // roles
         vm.startPrank(admin);

@@ -3,9 +3,13 @@ pragma solidity ^0.8.24;
 
 import "forge-std/Test.sol";
 import {LocalDepositGateway} from "../../src/gateway/LocalDepositGateway.sol";
+import {ProxyUtils} from "../utils/ProxyUtils.sol";
+import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import {MockERC20} from "../../src/mocks/MockERC20.sol";
 import {MockDIAFeed} from "../../src/mocks/MockDIAFeed.sol";
 import {PpsBeacon} from "../../src/pps/PpsBeacon.sol";
+import {ProxyUtils} from "../utils/ProxyUtils.sol";
+import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
 contract MockMinter {
     event Minted(address to, uint256 shares);
@@ -23,14 +27,21 @@ contract LocalDepositGatewayEdges is Test {
 
     function setUp() public {
         token = new MockERC20("Tkn", "TKN");
-        pps = new PpsBeacon();
-        pps.initialize(address(this));
+        PpsBeacon pImpl = new PpsBeacon();
+        address pProxy = ProxyUtils.deployProxy(address(pImpl), abi.encodeCall(PpsBeacon.initialize, (address(this))));
+        pps = PpsBeacon(pProxy);
         pps.post(1e6, uint64(block.timestamp));
         feed = new MockDIAFeed(int256(1_000000), block.timestamp);
 
         MockMinter mock = new MockMinter();
-        gw = new LocalDepositGateway();
-        gw.initialize(address(mock), address(pps), address(0x1), address(this), 1000);
+        LocalDepositGateway impl = new LocalDepositGateway();
+        address proxy = ProxyUtils.deployProxy(
+            address(impl),
+            abi.encodeCall(
+                LocalDepositGateway.initialize, (address(mock), address(pps), address(0x1), address(this), 1000)
+            )
+        );
+        gw = LocalDepositGateway(proxy);
         // MockERC20 has 18 decimals; reflect that in the gateway config
         gw.setAssetConfig(address(token), address(feed), 18, 6, 100, true);
     }

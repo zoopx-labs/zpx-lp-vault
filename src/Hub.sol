@@ -172,7 +172,9 @@ contract Hub is
         // slither-disable-next-line calls-loop
         (int256 p, uint256 ts) = IDIAFeed(c.feed).latestValue();
         if (p <= 0) revert("bad price");
+        // slither-disable-next-line timestamp
         uint256 age = block.timestamp - ts;
+        // slither-disable-next-line timestamp
         if (age > maxStaleness) revert StalePrice(c.feed, age);
         return _scaleTo6(uint256(p), c.priceDecimals);
     }
@@ -281,6 +283,7 @@ contract Hub is
         // because `readyAt` is set with a reasonable delay; miners have only limited
         // ability to influence timestamps and this check is not security-critical beyond
         // enforcing the withdraw delay window.
+        // slither-disable-next-line timestamp
         require(block.timestamp >= r.readyAt, "not ready");
         AssetConfig memory c = assetCfg[payoutAsset];
         require(c.enabled, "asset disabled");

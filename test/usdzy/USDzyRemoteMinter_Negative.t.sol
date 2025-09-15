@@ -5,6 +5,7 @@ import "forge-std/Test.sol";
 import {USDzyRemoteMinter} from "../../src/usdzy/USDzyRemoteMinter.sol";
 import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import {USDzy} from "../../src/USDzy.sol";
+import {ProxyUtils} from "../utils/ProxyUtils.sol";
 
 contract USDzyRemoteMinterNegativeTest is Test {
     USDzy usdzy;
@@ -12,8 +13,10 @@ contract USDzyRemoteMinterNegativeTest is Test {
     address admin = address(0xABCD);
 
     function setUp() public {
-        usdzy = new USDzy();
-        usdzy.initialize("USDzy", "USZY", address(this));
+        USDzy implZ = new USDzy();
+        address pZ =
+            ProxyUtils.deployProxy(address(implZ), abi.encodeCall(USDzy.initialize, ("USDzy", "USZY", address(this))));
+        usdzy = USDzy(pZ);
 
         USDzyRemoteMinter impl = new USDzyRemoteMinter();
         ERC1967Proxy proxy =

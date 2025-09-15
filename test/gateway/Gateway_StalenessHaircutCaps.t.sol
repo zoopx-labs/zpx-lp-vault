@@ -3,6 +3,8 @@ pragma solidity ^0.8.24;
 
 import "forge-std/Test.sol";
 import {LocalDepositGateway} from "../../src/gateway/LocalDepositGateway.sol";
+import {ProxyUtils} from "../utils/ProxyUtils.sol";
+import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
 contract MockFeed {
     int256 public answer;
@@ -88,16 +90,28 @@ contract GatewayStalenessHaircutCapsTest is Test {
         uint64 staleTs64 = block.timestamp > 2 ? uint64(block.timestamp - 2) : uint64(0);
         stalePps = new MockPps(1e6, staleTs64);
 
-        g = new LocalDepositGateway();
-        g.initialize(address(minter), address(freshPps), address(0xBEEF), address(this), 1);
+        LocalDepositGateway impl = new LocalDepositGateway();
+        address proxy = ProxyUtils.deployProxy(
+            address(impl),
+            abi.encodeCall(
+                LocalDepositGateway.initialize, (address(minter), address(freshPps), address(0xBEEF), address(this), 1)
+            )
+        );
+        g = LocalDepositGateway(proxy);
         g.setAssetConfig(address(tkn), address(freshFeed), 6, 6, 100, true);
         tkn.setBalance(address(this), 1000);
     }
 
     function testPriceStaleReverts() public {
         // re-init gateway with maxStaleness = 0 to force price staleness
-        g = new LocalDepositGateway();
-        g.initialize(address(minter), address(freshPps), address(0xBEEF), address(this), 0);
+        LocalDepositGateway impl2 = new LocalDepositGateway();
+        address proxy2 = ProxyUtils.deployProxy(
+            address(impl2),
+            abi.encodeCall(
+                LocalDepositGateway.initialize, (address(minter), address(freshPps), address(0xBEEF), address(this), 0)
+            )
+        );
+        g = LocalDepositGateway(proxy2);
         g.setAssetConfig(address(tkn), address(staleFeed), 6, 6, 100, true);
         vm.expectRevert(bytes("PRICE_STALE"));
         g.deposit(address(tkn), 1);
@@ -105,8 +119,14 @@ contract GatewayStalenessHaircutCapsTest is Test {
 
     function testPpsStaleReverts() public {
         // initialize gateway with maxStaleness = 0 so stale PPS triggers
-        g = new LocalDepositGateway();
-        g.initialize(address(minter), address(stalePps), address(0xBEEF), address(this), 0);
+        LocalDepositGateway impl3 = new LocalDepositGateway();
+        address proxy3 = ProxyUtils.deployProxy(
+            address(impl3),
+            abi.encodeCall(
+                LocalDepositGateway.initialize, (address(minter), address(stalePps), address(0xBEEF), address(this), 0)
+            )
+        );
+        g = LocalDepositGateway(proxy3);
         g.setAssetConfig(address(tkn), address(freshFeed), 6, 6, 100, true);
         vm.expectRevert(bytes("PPS_STALE"));
         g.deposit(address(tkn), 1);
@@ -115,8 +135,14 @@ contract GatewayStalenessHaircutCapsTest is Test {
     function testTinyDepositRoundsToZero() public {
         // price = 1e6, pps = 2e6 -> tiny deposit will yield 0 shares
         MockPps pps2 = new MockPps(2e6, uint64(block.timestamp));
-        g = new LocalDepositGateway();
-        g.initialize(address(minter), address(pps2), address(0xBEEF), address(this), 1);
+        LocalDepositGateway impl4 = new LocalDepositGateway();
+        address proxy4 = ProxyUtils.deployProxy(
+            address(impl4),
+            abi.encodeCall(
+                LocalDepositGateway.initialize, (address(minter), address(pps2), address(0xBEEF), address(this), 1)
+            )
+        );
+        g = LocalDepositGateway(proxy4);
         g.setAssetConfig(address(tkn), address(freshFeed), 6, 6, 0, true);
         vm.expectRevert(bytes("ZERO_SHARES"));
         g.deposit(address(tkn), 1);

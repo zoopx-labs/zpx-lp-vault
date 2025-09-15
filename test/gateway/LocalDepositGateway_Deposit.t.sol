@@ -3,6 +3,8 @@ pragma solidity ^0.8.24;
 
 import "forge-std/Test.sol";
 import {LocalDepositGateway} from "../../src/gateway/LocalDepositGateway.sol";
+import {ProxyUtils} from "../utils/ProxyUtils.sol";
+import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
 contract MockFeed {
     int256 public answer;
@@ -90,9 +92,13 @@ contract GatewayDepositTest is Test {
         s = new MockSpoke(address(t));
         m = new MockMinter();
         f = new MockFeed(1e6); // price 1.0
-        gw = new LocalDepositGateway();
+        LocalDepositGateway impl = new LocalDepositGateway();
         MockPps mp = new MockPps(1e6);
-        gw.initialize(address(m), address(mp), address(s), address(this), 900);
+        address proxy = ProxyUtils.deployProxy(
+            address(impl),
+            abi.encodeCall(LocalDepositGateway.initialize, (address(m), address(mp), address(s), address(this), 900))
+        );
+        gw = LocalDepositGateway(proxy);
         gw.setAssetConfig(address(t), address(f), 6, 6, 100, true);
         t.setBalance(address(this), 1000);
     }

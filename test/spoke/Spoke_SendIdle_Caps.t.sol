@@ -3,6 +3,8 @@ pragma solidity ^0.8.24;
 
 import "forge-std/Test.sol";
 import {SpokeVault} from "../../src/spoke/SpokeVault.sol";
+import {ProxyUtils} from "../utils/ProxyUtils.sol";
+import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
 contract MockToken {
     mapping(address => uint256) public balanceOf;
@@ -36,8 +38,11 @@ contract SpokeSendIdleCapsTest is Test {
 
     function setUp() public {
         t = new MockToken();
-        sv = new SpokeVault();
-        sv.initialize(address(t), "Spk", "SPK", address(this));
+        SpokeVault impl = new SpokeVault();
+        address proxy = ProxyUtils.deployProxy(
+            address(impl), abi.encodeCall(SpokeVault.initialize, (address(t), "Spk", "SPK", address(this)))
+        );
+        sv = SpokeVault(proxy);
         t.setBalance(address(sv), 1000);
     }
 

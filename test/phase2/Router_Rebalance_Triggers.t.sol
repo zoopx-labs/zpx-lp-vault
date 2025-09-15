@@ -5,6 +5,8 @@ import "forge-std/Test.sol";
 import {Router} from "../../src/router/Router.sol";
 import {SpokeVault} from "../../src/spoke/SpokeVault.sol";
 import {MockAdapter} from "../../src/messaging/MockAdapter.sol";
+import {ProxyUtils} from "../utils/ProxyUtils.sol";
+import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import {ERC20} from "lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol";
 import {IERC20} from "lib/openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "lib/openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol";
@@ -23,11 +25,18 @@ contract RouterTest is Test {
 
     function setUp() public {
         token = new MockToken();
-        vault = new SpokeVault();
-        vault.initialize(address(token), "svT", "svT", address(this));
+        SpokeVault vImpl = new SpokeVault();
+        address vProxy = ProxyUtils.deployProxy(
+            address(vImpl), abi.encodeCall(SpokeVault.initialize, (address(token), "svT", "SVT", address(this)))
+        );
+        vault = SpokeVault(vProxy);
         adapter = new MockAdapter();
-        router = new Router();
-        router.initialize(address(vault), address(adapter), address(this), address(this));
+        Router rImpl = new Router();
+        address rProxy = ProxyUtils.deployProxy(
+            address(rImpl),
+            abi.encodeCall(Router.initialize, (address(vault), address(adapter), address(this), address(this)))
+        );
+        router = Router(rProxy);
     }
 
     function testPokeAndRebalanceTrigger() public {

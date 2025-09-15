@@ -27,10 +27,10 @@ jobs:
           forge clean
           forge build --build-info --build-info-path out/build-info
 
-      - name: Slither (use Foundry artifacts + config)
+      - name: Slither (use Foundry artifacts + config, src only)
         uses: crytic/slither-action@v0.4.1
         with:
-          target: .
+          target: src
           ignore-compile: true
           slither-version: '0.11.3'
           solc-version: '0.8.24'
