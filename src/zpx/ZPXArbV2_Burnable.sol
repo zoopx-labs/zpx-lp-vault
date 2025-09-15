@@ -3,7 +3,7 @@ pragma solidity 0.8.24;
 
 import {ZPXArb} from "./ZPXArb.sol";
 
-// V2 placeholder: base ZPXArb already includes burnable behavior in V1.
+// V2 note: base ZPXArb already includes burnable behavior in V1.
 contract ZPXArbV2_Burnable is ZPXArb {
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {

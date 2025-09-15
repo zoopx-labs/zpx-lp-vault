@@ -44,6 +44,14 @@ jobs:
             --exclude-dependencies \
             --sarif slither.sarif
 
+      - name: Debug SARIF gating context
+        if: always()
+        run: |
+          echo "event_name=$GITHUB_EVENT_NAME"
+          echo "repository=$GITHUB_REPOSITORY"
+          echo "head.repo.full_name=${{ github.event.pull_request.head.repo.full_name }}"
+          echo "Upload condition: ${{ (github.event_name == 'push') || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository) }}"
+
       - name: Upload Slither SARIF
         uses: github/codeql-action/upload-sarif@v3
         if: |
