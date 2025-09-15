@@ -20,7 +20,7 @@ contract UpgradeAccessControlTest is Test {
     function testNonAdminCannotUpgradeRouter() public {
         Router impl = new Router();
         address admin = address(this);
-        bytes memory init = abi.encodeCall(Router.initialize, (address(0x1), address(0x2), admin, address(0)));
+        bytes memory init = abi.encodeCall(Router.initialize, (address(0x1), address(0x2), admin, address(0xBEEF)));
         address proxy = _deployProxy(address(impl), init);
         Router router = Router(proxy);
 

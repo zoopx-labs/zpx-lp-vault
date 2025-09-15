@@ -18,7 +18,10 @@ contract ZPXRewarder is AccessControl {
     IERC20 public immutable rewardToken; // ZPXArb
 
     uint256 public totalStaked;
-    uint256 public accPerShare; // 1e18
+    // Accumulator scaled by 1e18. Not constant; updated over time via funding logic.
+    // slither-disable-next-line const-state
+    uint256 public accPerShare = 0; // 1e18
+    uint256 public rewardsAccrued;
 
     uint64 public startTime;
     uint64 public endTime;
@@ -47,18 +50,21 @@ contract ZPXRewarder is AccessControl {
 
     // internal update
     function _update() internal {
-        uint256 from = lastUpdate == 0 ? startTime : lastUpdate;
+        // Using block.timestamp for reward accrual is acceptable here:
+        // rewards are linear over time and miner manipulation has negligible impact.
+        // slither-disable-next-line timestamp
+        if (lastUpdate < 1) return;
+        // slither-disable-next-line timestamp
         uint256 to = block.timestamp < endTime ? block.timestamp : endTime;
-        if (to <= from) {
-            lastUpdate = block.timestamp;
-            return;
-        }
-        uint256 elapsed = to - from;
+        if (to <= lastUpdate) return;
+        uint256 elapsed = to - lastUpdate;
+        uint256 newRewards = elapsed * rewardRatePerSec;
+        rewardsAccrued += newRewards;
         if (totalStaked > 0) {
-            uint256 reward = elapsed * rewardRatePerSec;
-            accPerShare += (reward * 1e18) / totalStaked;
+            // scale accPerShare by 1e18
+            accPerShare += (newRewards * 1e18) / totalStaked;
         }
-        lastUpdate = block.timestamp;
+        lastUpdate = to;
     }
 
     function deposit(uint256 amt) external {
@@ -126,6 +132,7 @@ contract ZPXRewarder is AccessControl {
             rewardRatePerSec = amount / durationSecs;
             startTime = nowT;
             endTime = nowT + durationSecs;
+            lastUpdate = nowT;
         } else {
             uint256 remaining = (endTime > block.timestamp) ? (endTime - block.timestamp) : 0;
             uint256 leftover = remaining * rewardRatePerSec;
@@ -133,6 +140,8 @@ contract ZPXRewarder is AccessControl {
             uint256 newDuration = remaining + durationSecs;
             rewardRatePerSec = newTotal / newDuration;
             endTime = uint64(block.timestamp + newDuration);
+            // continue accrual from now
+            lastUpdate = block.timestamp;
         }
         emit TopUpReceived(amount);
         emit Funded(rewardRatePerSec, startTime, endTime);

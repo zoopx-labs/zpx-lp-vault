@@ -4,15 +4,22 @@ pragma solidity ^0.8.24;
 import "forge-std/Test.sol";
 import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import {Hub} from "../../src/Hub.sol";
+import {USDzy} from "../../src/USDzy.sol";
+import {ProxyUtils} from "../utils/ProxyUtils.sol";
 
 contract HubUpgrade is Test {
     function testUpgradeHubKeepsState() public {
-        Hub impl = new Hub();
         address admin = address(this);
-        // deploy proxy and initialize (usdzy arg set to zero for test simplicity)
-        bytes memory init = abi.encodeCall(Hub.initialize, (address(0), admin));
-        ERC1967Proxy proxy = new ERC1967Proxy(address(impl), init);
-        Hub hub = Hub(address(proxy));
+        // deploy USDzy via proxy (non-zero address required by Hub.initialize)
+        USDzy usdzyImpl = new USDzy();
+        address usdzyProxy =
+            ProxyUtils.deployProxy(address(usdzyImpl), abi.encodeCall(USDzy.initialize, ("USDzy", "USZY", admin)));
+
+        // deploy Hub via proxy and initialize
+        Hub impl = new Hub();
+        bytes memory init = abi.encodeCall(Hub.initialize, (address(usdzyProxy), admin));
+        address proxy = ProxyUtils.deployProxy(address(impl), init);
+        Hub hub = Hub(proxy);
 
         // set an asset config to create state
         address token = address(0x123);

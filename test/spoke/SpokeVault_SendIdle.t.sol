@@ -3,6 +3,8 @@ pragma solidity ^0.8.24;
 
 import "forge-std/Test.sol";
 import {SpokeVault} from "../../src/spoke/SpokeVault.sol";
+import {ProxyUtils} from "../utils/ProxyUtils.sol";
+import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract MockToken is IERC20 {
@@ -41,8 +43,12 @@ contract SpokeVaultIdleTest is Test {
 
     function setUp() public {
         t = new MockToken();
-        sv = new SpokeVault();
-        sv.initialize(address(t), "Spoke", "SPK", address(this));
+        // Deploy SpokeVault implementation and proxy-initialize
+        SpokeVault impl = new SpokeVault();
+        address proxy = ProxyUtils.deployProxy(
+            address(impl), abi.encodeCall(SpokeVault.initialize, (address(t), "Spoke", "SPK", address(this)))
+        );
+        sv = SpokeVault(proxy);
         // fund vault
         t.setBalance(address(sv), 1000);
     }

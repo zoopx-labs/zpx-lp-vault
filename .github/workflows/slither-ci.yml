@@ -1,41 +1,79 @@
 name: Slither Static Analysis
 
-on: [push, pull_request]
+on:
+  push:
+  pull_request:
 
 jobs:
   slither:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
     steps:
       - uses: actions/checkout@v4
-      - name: Install Foundry (foundryup)
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+
+      - name: Install libs
+        run: forge install
+
+      - name: Build (with build-info for Slither)
         run: |
-          sudo apt-get update && sudo apt-get install -y curl build-essential
-          curl -L https://foundry.paradigm.xyz | bash
-          $HOME/.foundry/bin/foundryup || true
-          echo "$HOME/.foundry/bin" >> $GITHUB_PATH
-      - name: Install jq
-        run: sudo apt-get update && sudo apt-get install -y jq
-      - name: Run Slither (container) on src/
+          forge clean
+          forge build --build-info --build-info-path out/build-info
+
+      - name: Verify forge install & env
         run: |
-          mkdir -p slither
-          docker run --rm -v "${{ github.workspace }}":/src -w /src ghcr.io/crytic/slither:latest \
-            sh -c "slither src --json slither/slither.json || true"
-      - name: Upload Slither report
+          echo "PATH=$PATH" | head -c 4000
+          if command -v forge >/dev/null 2>&1; then
+            forge --version || true
+            forge config --json | head -c 500 || true
+          else
+            echo "forge not found yet" >&2
+          fi
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Slither 0.11.3
+        run: |
+          python -m pip install --upgrade pip
+          pip install slither-analyzer==0.11.3
+
+      - name: Slither (src, Foundry artifacts + config)
+        run: |
+          slither src \
+            --config-file ./.slither.json \
+            --foundry-ignore-compile \
+            --foundry-out-directory out \
+            --exclude-dependencies \
+            --sarif slither.sarif
+
+      - name: Debug SARIF gating context
+        if: always()
+        run: |
+          echo "event_name=$GITHUB_EVENT_NAME"
+          echo "repository=$GITHUB_REPOSITORY"
+          echo "head.repo.full_name=${{ github.event.pull_request.head.repo.full_name }}"
+          echo "Upload condition: ${{ (github.event_name == 'push') || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository) }}"
+
+      - name: Upload Slither SARIF
+        uses: github/codeql-action/upload-sarif@v3
+        if: |
+          always() && (github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository))
+        with:
+          sarif_file: slither.sarif
+
+      - name: Upload SARIF as artifact (fallback for forks)
+        if: |
+          always() && github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository
         uses: actions/upload-artifact@v4
         with:
-          name: slither-report
-          path: slither/slither.json
-      - name: Fail on High/Medium findings
-        run: |
-          if [ -f slither/slither.json ]; then
-            echo "Parsing slither/slither.json for High/Medium findings"
-            if jq -e '.results.issues[]? | select(.severity=="High" or .severity=="Medium")' slither/slither.json > /dev/null; then
-              echo "High or Medium severity findings detected. Failing CI to force triage."
-              jq '.results.issues[]? | select(.severity=="High" or .severity=="Medium")' slither/slither.json | tee slither/high_or_medium.json
-              exit 1
-            else
-              echo "No High/Medium findings"
-            fi
-          else
-            echo "No slither report generated"
-          fi
+          name: slither-sarif
+          path: slither.sarif

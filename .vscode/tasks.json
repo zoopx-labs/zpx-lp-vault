@@ -1,0 +1,26 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "forge build with info",
+			"type": "shell",
+			"command": "bash -lc 'forge clean && forge build --build-info --build-info-path out/build-info'",
+			"isBackground": false,
+			"group": "build"
+		},
+		{
+			"label": "forge fmt check",
+			"type": "shell",
+			"command": "bash -lc 'forge fmt --check'",
+			"isBackground": false,
+			"group": "build"
+		},
+		{
+			"label": "forge fmt write",
+			"type": "shell",
+			"command": "bash -lc 'forge fmt'",
+			"isBackground": false,
+			"group": "build"
+		}
+	]
+}

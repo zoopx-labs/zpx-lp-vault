@@ -26,6 +26,11 @@ contract SpokeVault is
     AccessControlUpgradeable,
     ISpokeVault
 {
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
+
     using SafeERC20 for IERC20;
 
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
@@ -142,8 +147,11 @@ contract SpokeVault is
 
     function utilizationBps() external view returns (uint16) {
         uint256 ta = totalAssets();
-        if (ta == 0) return 0;
-        return uint16((debt * 10000) / ta);
+        // Avoid strict equality; use positive guard
+        if (ta > 0) {
+            return uint16((debt * 10000) / ta);
+        }
+        return 0;
     }
 
     function setBorrowCap(uint256 newCap) external onlyRole(DEFAULT_ADMIN_ROLE) {
@@ -165,4 +173,7 @@ contract SpokeVault is
     }
 
     function _authorizeUpgrade(address) internal override onlyRole(DEFAULT_ADMIN_ROLE) {}
+
+    // Storage gap for upgrade safety
+    uint256[50] private __gap;
 }

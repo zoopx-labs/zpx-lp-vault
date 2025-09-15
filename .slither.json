@@ -2,9 +2,7 @@
   "exclude_informational": true,
   "exclude_dependencies": true,
   "foundry_out_directory": "out",
-  "exclude_paths": ["test/", "script/", "lib/"],
-  "# note": "We exclude test/script/lib paths and keep detector exclusions minimal. Specific per-function exceptions can be added below.",
-  "exclude_detectors": {
-    "src/Hub.sol::totalAssetsUsd6": ["external-calls-in-loop"]
-  }
+  "filter_paths": "test/|script/|lib/",
+  "json": "slither.json",
+  "fail_on": "medium"
 }

@@ -6,6 +6,8 @@ import {SpokeVault} from "../../src/spoke/SpokeVault.sol";
 import {ERC20} from "lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol";
 import {IERC20} from "lib/openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "lib/openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol";
+import {ProxyUtils} from "../utils/ProxyUtils.sol";
+import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
 contract MockToken is ERC20 {
     constructor(string memory n, string memory s, uint8 d) ERC20(n, s) {
@@ -19,8 +21,11 @@ contract SpokeVaultTest is Test {
 
     function setUp() public {
         token = new MockToken("T", "T", 6);
-        vault = new SpokeVault();
-        vault.initialize(address(token), "svT", "svT", address(this));
+        SpokeVault impl = new SpokeVault();
+        address proxy = ProxyUtils.deployProxy(
+            address(impl), abi.encodeCall(SpokeVault.initialize, (address(token), "svT", "svT", address(this)))
+        );
+        vault = SpokeVault(proxy);
     }
 
     function testBorrowRepay() public {

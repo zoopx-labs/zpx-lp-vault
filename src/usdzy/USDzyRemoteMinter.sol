@@ -20,38 +20,39 @@ contract USDzyRemoteMinter is
     ReentrancyGuardUpgradeable,
     MessagingEndpointReceiver
 {
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
+
     address public usdzy;
-    address public admin;
     bytes32 public constant GATEWAY_ROLE = keccak256("GATEWAY_ROLE");
 
     event GatewayMinted(address indexed to, uint256 shares);
 
-    // Note: the `initializer` modifier prevents re-initialization; ensure deployments use
-    // upgradeable proxy patterns so this protects against external re-initializers.
     function initialize(address usdzy_, address admin_) public initializer {
-        require(usdzy_ != address(0), "usdzy zero");
-        require(admin_ != address(0), "admin zero");
-        usdzy = usdzy_;
-        admin = admin_;
+        // initialize with a non-zero owner (admin) to satisfy OwnableUpgradeable
         __MessagingEndpointReceiver_init(admin_);
-        __ReentrancyGuard_init();
+        __UUPSUpgradeable_init();
+
+        require(usdzy_ != address(0), "usdzy=0");
+        require(admin_ != address(0), "admin=0");
+
+        usdzy = usdzy_;
         _grantRole(DEFAULT_ADMIN_ROLE, admin_);
     }
 
     function mintFromGateway(address to, uint256 shares) external onlyRole(GATEWAY_ROLE) whenNotPaused nonReentrant {
-        // checks done by modifiers; perform mint as the last interaction
         IUSDzy(usdzy).mint(to, shares);
         emit GatewayMinted(to, shares);
     }
 
-    // onMessage called by MessagingAdapter in tests
     function onMessage(uint64 srcChainId, address srcAddr, bytes calldata payload, uint64 nonce)
         external
         nonReentrant
     {
         _verifyAndMark(srcChainId, srcAddr, payload, nonce);
         (address to, uint256 amount) = abi.decode(payload, (address, uint256));
-        // mint as the final external interaction
         IUSDzy(usdzy).mint(to, amount);
     }
 

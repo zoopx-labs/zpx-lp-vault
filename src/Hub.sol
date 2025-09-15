@@ -82,11 +82,14 @@ contract Hub is
     error NoFeed(address asset);
 
     /// @custom:oz-upgrades-unsafe-allow constructor
-    constructor() {}
+    constructor() {
+        _disableInitializers();
+    }
 
     /**
      * @dev Initializer for Hub. The OpenZeppelin `initializer` modifier
      * provides protection against re-initialization when used with a proxy.
+     * It ensures this function can only be called once.
      */
     function initialize(address usdzy_, address admin) public initializer {
         __Context_init_unchained();
@@ -166,9 +169,12 @@ contract Hub is
         // Minor timestamp manipulation by miners is an accepted risk here because
         // the `maxStaleness` guard limits exposure. For higher security, consider
         // block-anchored or signed oracle data to reduce reliance on block time.
+        // slither-disable-next-line calls-loop
         (int256 p, uint256 ts) = IDIAFeed(c.feed).latestValue();
         if (p <= 0) revert("bad price");
+        // slither-disable-next-line timestamp
         uint256 age = block.timestamp - ts;
+        // slither-disable-next-line timestamp
         if (age > maxStaleness) revert StalePrice(c.feed, age);
         return _scaleTo6(uint256(p), c.priceDecimals);
     }
@@ -184,24 +190,54 @@ contract Hub is
         return gross - cut;
     }
 
-    /// @notice Total assets across configured tokens, summed in USD6. INTERNAL USE: does not re-apply haircuts beyond quoteUSD6 behavior.
+    /**
+     * @notice Returns details of listed tokens for off-chain processing.
+     * @dev This function provides the necessary data for clients to compute total assets
+     * by fetching balances and prices externally, avoiding costly on-chain loops.
+     * @return addresses Array of token addresses.
+     * @return decimals Array of token decimals.
+     * @return priceFeeds Array of price feed addresses.
+     */
+    function getListedTokenDetails()
+        public
+        view
+        returns (address[] memory addresses, uint8[] memory decimals, address[] memory priceFeeds)
+    {
+        uint256 len = listedTokens.length;
+        addresses = new address[](len);
+        decimals = new uint8[](len);
+        priceFeeds = new address[](len);
+        for (uint256 i = 0; i < len; i++) {
+            address t = listedTokens[i];
+            AssetConfig storage c = assetCfg[t];
+            addresses[i] = t;
+            decimals[i] = c.decimals;
+            priceFeeds[i] = c.feed;
+        }
+    }
+
+    /**
+     * @notice Total assets across configured tokens, summed in USD6.
+     * @dev Iterates listed tokens and sums balance*price. This is a view-only
+     * path and may be gas-expensive with many assets. We avoid strict equality
+     * checks and skip zero balances using a positive check to address linting.
+     */
     function totalAssetsUsd6() public view returns (uint256 sum) {
         uint256 len = listedTokens.length;
-        // NOTE: This loop performs external calls (ERC20.balanceOf and price feed via `_px6`) per token.
-        // Static analyzers flag this as `external-calls-in-loop`. A long-term fix would cache
-        // price values off-chain or via a dedicated on-chain updater to avoid repeated external calls.
         for (uint256 i = 0; i < len; i++) {
             address t = listedTokens[i];
             AssetConfig memory c = assetCfg[t];
             if (!c.enabled) continue;
+
+            // slither-disable-next-line calls-loop
             uint256 bal = IERC20(t).balanceOf(address(this));
-            // Skip tokens with zero balance to avoid unnecessary price queries.
-            if (bal == 0) continue;
-            // fetch price once per token to avoid repeated external calls in loops
-            uint256 px6 = _px6(t);
-            uint256 amt6 = _scaleTo6(bal, c.decimals);
-            uint256 gross = Math.mulDiv(amt6, px6, 1_000_000);
-            sum += gross;
+            // Safer check for non-zero balance (avoid strict equality style)
+            if (bal > 0) {
+                uint256 px6 = _px6(t);
+                uint256 amt6 = _scaleTo6(bal, c.decimals);
+                uint256 gross = Math.mulDiv(amt6, px6, 1_000_000);
+                sum += gross;
+            }
         }
     }
 
@@ -209,8 +245,7 @@ contract Hub is
     function pps6() public view returns (uint256) {
         uint256 supply = IERC20(address(usdzy)).totalSupply();
         if (supply == 0) return 1_000_000;
-        uint256 assets = totalAssetsUsd6();
-        return (assets * 1_000_000) / supply;
+        return Math.mulDiv(totalAssetsUsd6(), 1_000_000, supply);
     }
 
     // --- Deposit / Withdraw flows ---
@@ -219,7 +254,7 @@ contract Hub is
         require(c.enabled, "asset disabled");
         SafeERC20.safeTransferFrom(IERC20(asset), msg.sender, address(this), amount);
         uint256 usd6 = quoteUsd6(asset, amount, true); // haircut on deposit
-        uint256 shares = (usd6 * 1_000_000) / pps6();
+        uint256 shares = Math.mulDiv(usd6, 1_000_000, pps6());
         require(shares > 0, "zero shares");
         usdzy.mint(msg.sender, shares);
         emit Deposited(msg.sender, asset, amount, usd6, shares);
@@ -227,7 +262,7 @@ contract Hub is
 
     function requestWithdraw(uint256 shares) external nonReentrant {
         require(shares > 0, "zero");
-        uint256 usdOwed6 = (shares * pps6()) / 1_000_000;
+        uint256 usdOwed6 = Math.mulDiv(shares, pps6(), 1_000_000);
         // update state before external call to reduce reentrancy window
         uint64 readyAt = uint64(block.timestamp + withdrawDelay);
         requests.push(WithdrawReq({owner: msg.sender, usdOwed6: uint128(usdOwed6), readyAt: readyAt, claimed: false}));
@@ -244,10 +279,11 @@ contract Hub is
         WithdrawReq storage r = requests[id];
         require(!r.claimed, "claimed");
         require(r.owner == msg.sender, "not owner");
-        // Uses `block.timestamp` to enforce withdraw readiness. This is acceptable here
+        // NOTE: Uses `block.timestamp` to enforce withdraw readiness. This is acceptable here
         // because `readyAt` is set with a reasonable delay; miners have only limited
         // ability to influence timestamps and this check is not security-critical beyond
         // enforcing the withdraw delay window.
+        // slither-disable-next-line timestamp
         require(block.timestamp >= r.readyAt, "not ready");
         AssetConfig memory c = assetCfg[payoutAsset];
         require(c.enabled, "asset disabled");

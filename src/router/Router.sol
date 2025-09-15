@@ -12,6 +12,7 @@ import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
 
 import {ISpokeVault} from "../interfaces/ISpokeVault.sol";
 import {IMessagingAdapter} from "../interfaces/IMessagingAdapter.sol";
+import {IMessagingEndpoint} from "../messaging/IMessagingEndpoint.sol";
 
 contract Router is
     Initializable,
@@ -20,15 +21,23 @@ contract Router is
     PausableUpgradeable,
     ReentrancyGuardUpgradeable
 {
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
+
     bytes32 public constant KEEPER_ROLE = keccak256("KEEPER_ROLE");
     bytes32 public constant RELAYER_ROLE = keccak256("RELAYER_ROLE");
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
+    bytes32 public constant REBALANCER_ROLE = keccak256("REBALANCER_ROLE");
 
     using SafeERC20 for IERC20;
 
     ISpokeVault public vault;
     IMessagingAdapter public adapter;
+    IMessagingEndpoint public messagingEndpoint;
     address public feeCollector;
+    uint64 public lastSendNonce;
 
     // fees are in basis points (10000 = 100%)
     uint16 public protocolFeeBps; // capped at 5 bps (0.05%)
@@ -71,27 +80,32 @@ contract Router is
      * @dev Initializer. The OpenZeppelin `initializer` modifier ensures this
      * function can only be called once when used with a proxy deployment.
      */
-    function initialize(address vault_, address adapter_, address admin_, address feeCollector_) public initializer {
-        require(vault_ != address(0), "vault zero");
-        require(adapter_ != address(0), "adapter zero");
-        require(admin_ != address(0), "admin zero");
-        require(feeCollector_ != address(0), "feeCollector zero");
+    function initialize(address vault_, address messagingEndpoint_, address admin, address feeCollector_)
+        public
+        initializer
+    {
+        __Context_init_unchained();
+        __AccessControl_init_unchained();
+        __ReentrancyGuard_init_unchained();
+        __Pausable_init_unchained();
+        __UUPSUpgradeable_init();
+        require(vault_ != address(0), "vault=0");
+        require(messagingEndpoint_ != address(0), "endpoint=0");
+        // allow feeCollector_ to be zero only if protocolFeeBps will remain zero until set non-zero
+        require(feeCollector_ != address(0), "feeCollector=0");
+
         vault = ISpokeVault(vault_);
-        adapter = IMessagingAdapter(adapter_);
+        messagingEndpoint = IMessagingEndpoint(messagingEndpoint_);
         feeCollector = feeCollector_;
 
-        // fee defaults
-        protocolFeeBps = 0;
-        relayerFeeBps = 0;
-        protocolShareBps = 2500;
-        lpShareBps = 7500;
+        _grantRole(DEFAULT_ADMIN_ROLE, admin);
+        _grantRole(PAUSER_ROLE, admin);
+        _grantRole(RELAYER_ROLE, admin);
+        _grantRole(REBALANCER_ROLE, admin);
 
-        __AccessControl_init();
-        __Pausable_init();
-        __ReentrancyGuard_init();
-        _grantRole(DEFAULT_ADMIN_ROLE, admin_);
-        // give the admin pauser capability by default for safer ops
-        _grantRole(PAUSER_ROLE, admin_);
+        _setRoleAdmin(PAUSER_ROLE, DEFAULT_ADMIN_ROLE);
+        _setRoleAdmin(RELAYER_ROLE, DEFAULT_ADMIN_ROLE);
+        _setRoleAdmin(REBALANCER_ROLE, DEFAULT_ADMIN_ROLE);
     }
 
     // --- Fee setters ---
@@ -124,7 +138,12 @@ contract Router is
         return vault.totalAssets();
     }
 
+    function available() public view returns (uint256) {
+        return IERC20(vault.asset()).balanceOf(address(vault));
+    }
+
     function pokeTvlSnapshot() public {
+        // slither-disable-next-line timestamp
         uint64 day = uint64(block.timestamp / 1 days);
         // if we've already recorded for this day or a later day, skip
         if (day <= lastSnapDay) return; // idempotent and resilient to clock skew
@@ -141,19 +160,19 @@ contract Router is
         return s / 7;
     }
 
-    function healthBps() public view returns (uint16) {
-        uint256 a = avg7d();
-        // if the 7-day average is zero, return full health (100%) — this guards
-        // against division by zero and is an intentional edge-case handling.
-        if (a == 0) return 10000;
-        uint256 h = (tvl() * 10000) / a;
-        if (h > 65535) return 65535;
-        return uint16(h);
+    function healthBps() public view returns (uint16 h) {
+        uint256 a = available();
+        uint256 t = tvl();
+        if (t == 0) return 65535; // max health
+        uint256 h_ = (a * 65535) / t;
+        if (h_ > 65535) return 65535;
+        h = uint16(h_);
     }
 
     function needsRebalance() public view returns (bool) {
         if (healthBps() < 4000) return true;
         // use an explicit delta comparison to avoid underflow and reduce reliance on exact equality
+        // slither-disable-next-line timestamp
         if (block.timestamp >= lastRebalanceAt + 1 days) return true;
         return false;
     }
@@ -167,8 +186,8 @@ contract Router is
         bytes memory payload = abi.encode(dstChainId, address(vault), vault.totalAssets(), cur, h);
         // record timestamp before external adapter call to reduce reentrancy window
         lastRebalanceAt = uint64(block.timestamp);
-        // capture adapter nonce to avoid ignoring return value
-        uint64 _nonce = adapter.send(dstChainId, hubAddr, payload);
+        // send message and record nonce for traceability
+        lastSendNonce = adapter.send(dstChainId, hubAddr, payload);
     }
 
     function fill(address to, uint256 amount) external onlyRole(RELAYER_ROLE) nonReentrant whenNotPaused {
@@ -239,4 +258,7 @@ contract Router is
     }
 
     function _authorizeUpgrade(address) internal override onlyRole(DEFAULT_ADMIN_ROLE) {}
+
+    // Storage gap for upgrade safety
+    uint256[50] private __gap;
 }

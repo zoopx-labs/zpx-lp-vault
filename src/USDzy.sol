@@ -8,6 +8,7 @@ import {ERC20PermitUpgradeable} from
 import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
+import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 
 /**
  * @title USDzy
@@ -20,29 +21,32 @@ contract USDzy is
     ERC20Upgradeable,
     ERC20PermitUpgradeable,
     AccessControlUpgradeable,
+    PausableUpgradeable,
     UUPSUpgradeable
 {
+    bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     bytes32 public constant BURNER_ROLE = keccak256("BURNER_ROLE");
 
     event Upgraded(address indexed who, address indexed newImpl);
 
     /// @custom:oz-upgrades-unsafe-allow constructor
-    constructor() {}
+    constructor() {
+        _disableInitializers();
+    }
 
     // The `initializer` modifier ensures this function can only be called once
     // (prevents re-initialization attacks on upgradeable contracts when used correctly).
     function initialize(string memory name_, string memory symbol_, address admin) public initializer {
-        require(admin != address(0), "admin zero");
-        __Context_init_unchained();
         __ERC20_init(name_, symbol_);
-        __ERC20Permit_init(name_);
         __AccessControl_init_unchained();
+        __Pausable_init_unchained();
         __UUPSUpgradeable_init();
 
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
-        _setRoleAdmin(MINTER_ROLE, DEFAULT_ADMIN_ROLE);
-        _setRoleAdmin(BURNER_ROLE, DEFAULT_ADMIN_ROLE);
+        _grantRole(PAUSER_ROLE, admin);
+        _grantRole(MINTER_ROLE, admin);
+        _grantRole(BURNER_ROLE, admin);
     }
 
     /**

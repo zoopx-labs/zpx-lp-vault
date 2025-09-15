@@ -8,16 +8,61 @@ jobs:
   slither:
     name: Run Slither static analysis
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
       - name: Install Foundry
-        run: |
-          curl -L https://foundry.paradigm.xyz | bash
-          source $HOME/.bashrc
-          foundryup || true
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
 
-      - name: Run Slither (via Docker)
+      - name: Build (artifacts for Slither)
         run: |
-          docker run --rm -v "$PWD":/src -w /src --entrypoint slither trailofbits/slither:latest /src --config-file /src/.slither.config.json || true
+          forge clean
+          forge build --build-info --build-info-path out/build-info
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Slither 0.11.3
+        run: |
+          python -m pip install --upgrade pip
+          pip install slither-analyzer==0.11.3
+
+      - name: Slither (src, Foundry artifacts + config)
+        run: |
+          slither src \
+            --config-file ./.slither.json \
+            --foundry-ignore-compile \
+            --foundry-out-directory out \
+            --exclude-dependencies \
+            --sarif slither.sarif
+
+      - name: Debug SARIF gating context
+        if: always()
+        run: |
+          echo "event_name=$GITHUB_EVENT_NAME"
+          echo "repository=$GITHUB_REPOSITORY"
+          echo "head.repo.full_name=${{ github.event.pull_request.head.repo.full_name }}"
+          echo "Upload condition: ${{ (github.event_name == 'push') || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository) }}"
+
+      - name: Upload Slither SARIF
+        uses: github/codeql-action/upload-sarif@v3
+        if: |
+          always() && (github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository))
+        with:
+          sarif_file: slither.sarif
+
+      - name: Upload SARIF as artifact (fallback for forks)
+        if: |
+          always() && github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository
+        uses: actions/upload-artifact@v4
+        with:
+          name: slither-sarif
+          path: slither.sarif

@@ -8,6 +8,11 @@ import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/acce
 import "../pps/IPpsSource.sol";
 
 contract PpsBeacon is Initializable, UUPSUpgradeable, AccessControlUpgradeable, IPpsSource {
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
+
     bytes32 public constant POSTER_ROLE = keccak256("POSTER_ROLE");
 
     uint256 public pps6;
@@ -19,8 +24,9 @@ contract PpsBeacon is Initializable, UUPSUpgradeable, AccessControlUpgradeable, 
     // must be followed when deploying upgradeable implementations to avoid unprotected
     // initialization vulnerabilities.
     function initialize(address admin) public initializer {
-        require(admin != address(0), "admin zero");
-        __AccessControl_init();
+        __Context_init_unchained();
+        __AccessControl_init_unchained();
+        __UUPSUpgradeable_init();
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
         _grantRole(POSTER_ROLE, admin);
     }

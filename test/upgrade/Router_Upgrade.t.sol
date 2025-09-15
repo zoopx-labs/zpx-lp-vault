@@ -9,7 +9,8 @@ contract RouterUpgrade is Test {
     function testUpgradeRouterKeepsState() public {
         Router impl = new Router();
         address admin = address(this);
-        bytes memory init = abi.encodeCall(Router.initialize, (address(0x1), address(0x2), admin, address(0)));
+        // set a non-zero feeCollector to satisfy initializer guard
+        bytes memory init = abi.encodeCall(Router.initialize, (address(0x1), address(0x2), admin, address(0xBEEF)));
         ERC1967Proxy proxy = new ERC1967Proxy(address(impl), init);
         Router router = Router(address(proxy));
 
