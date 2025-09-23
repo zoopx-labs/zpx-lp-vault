@@ -56,9 +56,6 @@ contract SuperchainAdapterTest is Test {
     uint256 constant CHAIN_B = 10_420;    // remote chain id example
 
     function setUp() public {
-        if (vm.envOr("SUPERCHAIN_TEST", uint256(0)) == 0) {
-            vm.skip(true);
-        }
         messenger = new MockMessenger();
         registry = new AdapterRegistry();
         endpoint = new DummyEndpoint();
