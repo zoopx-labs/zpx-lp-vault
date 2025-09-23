@@ -21,13 +21,24 @@ This document outlines the Hub & Spoke liquidity vault architecture, phased road
 
 ```mermaid
 flowchart TD
-    A["Month 1: Launch Phase"] --> B["Months 1–3: Public Onboarding"]
-    B --> C["Months 3–6: Growth & Expansion"]
-    C --> D["Hub Redeployment & TVL Scaling"]
-    A -->|Protocol-Owned LP + Initial Stable Spokes| B
-    B -->|Audited Vaults + Incentives + Smart Rebalancing| C
-    C -->|Cross-Chain Expansion (EVM + non-EVM) + Flywheel| D
+  M1[Month 1\nLaunch] --> M13[Months 1-3\nOnboarding]
+  M13 --> M36[Months 3-6\nExpansion]
+  M36 --> SCALE[Hub TVL\nScaling]
+  M1 -->|Seed LP +\nInitial Spokes| M13
+  M13 -->|Audits + Incentives +\nRebalancing| M36
+  M36 -->|Multi-chain + Flywheel| SCALE
 ```
+
+<details><summary>ASCII fallback (if Mermaid not rendered)</summary>
+
+```
+Month 1 (Launch) --> Months 1-3 (Onboarding) --> Months 3-6 (Expansion) --> Hub TVL Scaling
+   | Seed LP + Initial Spokes
+   | Audits + Incentives + Rebalancing
+   | Multi-chain + Flywheel
+```
+
+</details>
 
 ### Month 1: Launch Phase
 * Deploy Hub + initial Spoke Vaults (Superchain priority).
