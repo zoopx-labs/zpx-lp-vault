@@ -94,7 +94,4 @@ Formula references:
 * Curve & Velodrome liquidity pool depth metrics
 * Optimism Grants: How to Measure TVL – https://app.charmverse.io/op-grants/how-to-measure-tvl-7815580862836209
 
-## 9. Summary & Outlook
-Our six-month projection follows a clear, three-phase growth plan. We will launch by bootstrapping an initial **~1.2M OP** from Protocol owned liquidity. As we activate public incentives and smart rebalancing over the first three months, we project scaling to **~7.25M OP in TVL across Superchain ecosystem**. The subsequent three months are focused on aggressive expansion to new chains and integrating external order flow, driving growth to our six-month target of **~25M OP in TVL in expansion phase combining yield boost with expansion in major EVM and Non EVM networks and our smart liquidity routing to hub vault from spoke vaults**. This data-driven roadmap, centered on our capital-efficient Hub & Spoke architecture, provides a clear path to establishing ZoopX as a core piece of cross-chain infrastructure.
-
 ---
