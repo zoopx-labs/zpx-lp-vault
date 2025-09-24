@@ -14,7 +14,9 @@ contract MockMessenger is IL2ToL2CrossDomainMessenger {
     bytes public lastExtra;
     address public xSender;
 
-    function setXSender(address s) external { xSender = s; }
+    function setXSender(address s) external {
+        xSender = s;
+    }
 
     function sendMessage(
         uint256 destChainId,
@@ -37,8 +39,10 @@ contract MockMessenger is IL2ToL2CrossDomainMessenger {
 
 contract DummyEndpoint {
     event DummyCalled(bytes data);
+
     uint256 public calls;
     bytes public last;
+
     function echo(bytes calldata data) external {
         calls++;
         last = data;
@@ -53,7 +57,7 @@ contract SuperchainAdapterTest is Test {
     SuperchainAdapter adapterA; // local source adapter
     SuperchainAdapter adapterB; // remote dest adapter
 
-    uint256 constant CHAIN_B = 10_420;    // remote chain id example
+    uint256 constant CHAIN_B = 10_420; // remote chain id example
 
     function setUp() public {
         messenger = new MockMessenger();

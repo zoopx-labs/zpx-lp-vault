@@ -24,7 +24,8 @@ contract HubEdgeCaseTest is Test {
         );
         usdzy = USDzy(usdzyProxy);
         Hub impl = new Hub();
-        address proxy = ProxyUtils.deployProxy(address(impl), abi.encodeCall(Hub.initialize, (address(usdzy), address(this))));
+        address proxy =
+            ProxyUtils.deployProxy(address(impl), abi.encodeCall(Hub.initialize, (address(usdzy), address(this))));
         hub = Hub(proxy);
         usdzy.grantRole(usdzy.MINTER_ROLE(), address(hub));
         usdzy.grantRole(usdzy.BURNER_ROLE(), address(hub));

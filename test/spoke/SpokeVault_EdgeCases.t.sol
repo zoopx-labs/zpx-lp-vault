@@ -10,7 +10,9 @@ import {ProxyUtils} from "test/utils/ProxyUtils.sol";
 import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
 contract MockAsset is ERC20 {
-    constructor() ERC20("A", "A") { _mint(msg.sender, 1e30); }
+    constructor() ERC20("A", "A") {
+        _mint(msg.sender, 1e30);
+    }
 }
 
 contract SpokeVaultEdgeCaseTest is Test {

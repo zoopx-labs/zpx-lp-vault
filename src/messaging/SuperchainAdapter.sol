@@ -42,12 +42,11 @@ contract SuperchainAdapter is ReentrancyGuard {
         emit Paused(p);
     }
 
-    function send(
-        uint256 destChainId,
-        bytes calldata inner,
-        uint32 minGasLimit,
-        bytes calldata extraData
-    ) external nonReentrant returns (uint64 nonce) {
+    function send(uint256 destChainId, bytes calldata inner, uint32 minGasLimit, bytes calldata extraData)
+        external
+        nonReentrant
+        returns (uint64 nonce)
+    {
         require(!paused, "PAUSED");
         address remoteAdapter = registry.remoteAdapterOf(destChainId);
         require(remoteAdapter != address(0), "NO_REMOTE");

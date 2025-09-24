@@ -24,9 +24,8 @@ contract HubViewAdminCoverageTest is Test {
 
         // Deploy Hub proxy
         Hub hubImpl = new Hub();
-        address hubProxy = ProxyUtils.deployProxy(
-            address(hubImpl), abi.encodeCall(Hub.initialize, (address(usdzy), address(this)))
-        );
+        address hubProxy =
+            ProxyUtils.deployProxy(address(hubImpl), abi.encodeCall(Hub.initialize, (address(usdzy), address(this))));
         hub = Hub(hubProxy);
         usdzy.grantRole(usdzy.MINTER_ROLE(), address(hub));
         usdzy.grantRole(usdzy.BURNER_ROLE(), address(hub));

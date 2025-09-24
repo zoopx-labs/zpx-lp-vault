@@ -38,7 +38,8 @@ contract Deploy_SuperchainAdapter is Script {
             string memory csv = vm.envString("REMOTE_CHAINIDS");
             // parse simple comma-separated list
             bytes memory b = bytes(csv);
-            uint256 start = 0; uint256 i = 0;
+            uint256 start = 0;
+            uint256 i = 0;
             while (i <= b.length) {
                 if (i == b.length || b[i] == ",") {
                     if (i > start) {
@@ -52,7 +53,9 @@ contract Deploy_SuperchainAdapter is Script {
                     }
                     start = i + 1;
                 }
-                unchecked { ++i; }
+                unchecked {
+                    ++i;
+                }
             }
         }
 
@@ -83,10 +86,17 @@ contract Deploy_SuperchainAdapter is Script {
 
     function _uintToString(uint256 v) internal pure returns (string memory) {
         if (v == 0) return "0";
-        uint256 len; uint256 vv = v;
-        while (vv > 0) { len++; vv /= 10; }
+        uint256 len;
+        uint256 vv = v;
+        while (vv > 0) {
+            len++;
+            vv /= 10;
+        }
         bytes memory out = new bytes(len);
-        while (v > 0) { out[--len] = bytes1(uint8(48 + v % 10)); v /= 10; }
+        while (v > 0) {
+            out[--len] = bytes1(uint8(48 + v % 10));
+            v /= 10;
+        }
         return string(out);
     }
 }

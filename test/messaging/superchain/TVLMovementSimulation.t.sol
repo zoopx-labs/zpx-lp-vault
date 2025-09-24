@@ -9,6 +9,7 @@ import {IL2ToL2CrossDomainMessenger} from "src/messaging/interfaces/IL2ToL2Cross
 // This simulation abstracts TVL movement with a single shared endpoint representing logical shared state.
 contract MockMessenger2 is IL2ToL2CrossDomainMessenger {
     address public xSender;
+
     struct Pending {
         uint256 destChainId;
         address target;
@@ -17,9 +18,12 @@ contract MockMessenger2 is IL2ToL2CrossDomainMessenger {
         bytes extra;
         address originalSender; // adapter on source chain
     }
+
     Pending[] public queue;
 
-    function xDomainMessageSender() external view returns (address) { return xSender; }
+    function xDomainMessageSender() external view returns (address) {
+        return xSender;
+    }
 
     function sendMessage(
         uint256 destChainId,
@@ -38,11 +42,14 @@ contract MockMessenger2 is IL2ToL2CrossDomainMessenger {
     }
 
     // test helper to override sender
-    function setXSender(address sender_) external { xSender = sender_; }
+    function setXSender(address sender_) external {
+        xSender = sender_;
+    }
 }
 
 contract PseudoVaultEndpoint {
     mapping(uint256 => uint256) public chainBalances; // chainId => simulated TVL
+
     event BalanceMoved(uint256 fromChain, uint256 toChain, uint256 amount);
     event Seeded(uint256 chainId, uint256 amount);
 
@@ -64,7 +71,7 @@ contract TVLMovementSimulationTest is Test {
     AdapterRegistry registry;
     PseudoVaultEndpoint endpoint;
     SuperchainAdapter baseAdapter; // Base
-    SuperchainAdapter opAdapter;   // Optimism (placeholder id)
+    SuperchainAdapter opAdapter; // Optimism (placeholder id)
     SuperchainAdapter celoAdapter; // Celo (placeholder id)
 
     uint256 constant BASE = 8453;
@@ -79,7 +86,7 @@ contract TVLMovementSimulationTest is Test {
         registry = new AdapterRegistry();
         endpoint = new PseudoVaultEndpoint();
         baseAdapter = new SuperchainAdapter(address(messenger), address(registry), address(endpoint));
-        opAdapter   = new SuperchainAdapter(address(messenger), address(registry), address(endpoint));
+        opAdapter = new SuperchainAdapter(address(messenger), address(registry), address(endpoint));
         celoAdapter = new SuperchainAdapter(address(messenger), address(registry), address(endpoint));
         vm.startPrank(registry.owner());
         registry.setRemoteAdapter(OP, address(opAdapter));
@@ -98,8 +105,8 @@ contract TVLMovementSimulationTest is Test {
         uint256 amount1 = 250_000 ether; // Base -> OP
         uint256 amount2 = 100_000 ether; // OP -> CELO
 
-    // Initial seed (only once)
-    endpoint.seed(BASE, 1_000_000 ether);
+        // Initial seed (only once)
+        endpoint.seed(BASE, 1_000_000 ether);
 
         // Base -> OP
         baseAdapter.send(OP, _encodeMove(BASE, OP, amount1), 0, "");
@@ -107,13 +114,13 @@ contract TVLMovementSimulationTest is Test {
         assertEq(endpoint.chainBalances(BASE), 1_000_000 ether - amount1, "Base after first hop");
         assertEq(endpoint.chainBalances(OP), amount1, "OP after first hop");
 
-    // OP -> CELO (manually fabricate cross-chain packet since block.chainid cannot change in single EVM context)
-    bytes memory inner2 = _encodeMove(OP, CELO, amount2);
-    // fabricate packet: (srcChainId=OP, nonce=1, inner2)
-    bytes memory packet2 = abi.encode(OP, uint64(1), inner2);
-    messenger.setXSender(address(opAdapter));
-    vm.prank(address(messenger));
-    celoAdapter.onMessage(packet2);
+        // OP -> CELO (manually fabricate cross-chain packet since block.chainid cannot change in single EVM context)
+        bytes memory inner2 = _encodeMove(OP, CELO, amount2);
+        // fabricate packet: (srcChainId=OP, nonce=1, inner2)
+        bytes memory packet2 = abi.encode(OP, uint64(1), inner2);
+        messenger.setXSender(address(opAdapter));
+        vm.prank(address(messenger));
+        celoAdapter.onMessage(packet2);
         assertEq(endpoint.chainBalances(OP), amount1 - amount2, "OP after second hop");
         assertEq(endpoint.chainBalances(CELO), amount2, "CELO after second hop");
 

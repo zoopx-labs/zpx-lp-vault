@@ -6,21 +6,38 @@ import {SuperchainAdapter} from "src/messaging/SuperchainAdapter.sol";
 import {AdapterRegistry} from "src/messaging/AdapterRegistry.sol";
 import {IL2ToL2CrossDomainMessenger} from "src/messaging/interfaces/IL2ToL2CrossDomainMessenger.sol";
 
-interface IEndpointLike { function willRevert() external; }
+interface IEndpointLike {
+    function willRevert() external;
+}
 
 contract MockMessengerNeg is IL2ToL2CrossDomainMessenger {
     address public xSender;
     bytes public lastMessage;
     uint256 public lastDest;
     address public lastTarget;
-    function setXSender(address s) external { xSender = s; }
-    function sendMessage(uint256 destChainId, address target, bytes calldata message, uint32, bytes calldata) external payable {
-        lastDest = destChainId; lastTarget = target; lastMessage = message; }
-    function xDomainMessageSender() external view returns (address) { return xSender; }
+
+    function setXSender(address s) external {
+        xSender = s;
+    }
+
+    function sendMessage(uint256 destChainId, address target, bytes calldata message, uint32, bytes calldata)
+        external
+        payable
+    {
+        lastDest = destChainId;
+        lastTarget = target;
+        lastMessage = message;
+    }
+
+    function xDomainMessageSender() external view returns (address) {
+        return xSender;
+    }
 }
 
 contract EndpointReverting {
-    function willRevert() external pure { revert("EP_FAIL"); }
+    function willRevert() external pure {
+        revert("EP_FAIL");
+    }
 }
 
 contract SuperchainAdapterNegativeTest is Test {
@@ -39,8 +56,10 @@ contract SuperchainAdapterNegativeTest is Test {
         localAdapter = new SuperchainAdapter(address(messenger), address(registry), address(endpoint));
         remoteAdapter = new SuperchainAdapter(address(messenger), address(registry), address(endpoint));
         // map our local chain for receive auth and remote for outbound
-        vm.prank(registry.owner()); registry.setRemoteAdapter(block.chainid, address(localAdapter));
-        vm.prank(registry.owner()); registry.setRemoteAdapter(CHAIN_REMOTE, address(remoteAdapter));
+        vm.prank(registry.owner());
+        registry.setRemoteAdapter(block.chainid, address(localAdapter));
+        vm.prank(registry.owner());
+        registry.setRemoteAdapter(CHAIN_REMOTE, address(remoteAdapter));
     }
 
     function test_paused_send_reverts() public {
@@ -52,7 +71,8 @@ contract SuperchainAdapterNegativeTest is Test {
 
     function test_no_remote_reverts() public {
         // remove remote mapping
-        vm.prank(registry.owner()); registry.setRemoteAdapter(CHAIN_REMOTE, address(0));
+        vm.prank(registry.owner());
+        registry.setRemoteAdapter(CHAIN_REMOTE, address(0));
         vm.expectRevert(bytes("NO_REMOTE"));
         localAdapter.send(CHAIN_REMOTE, abi.encodePacked("y"), 0, "");
     }
@@ -63,14 +83,16 @@ contract SuperchainAdapterNegativeTest is Test {
         // craft packed message
         bytes memory packed = messenger.lastMessage();
         // UNCONFIGURED_SRC: remove mapping for src chain id (block.chainid)
-        vm.prank(registry.owner()); registry.setRemoteAdapter(block.chainid, address(0));
+        vm.prank(registry.owner());
+        registry.setRemoteAdapter(block.chainid, address(0));
         messenger.setXSender(address(localAdapter));
         vm.prank(address(messenger));
         vm.expectRevert(bytes("UNCONFIGURED_SRC"));
         remoteAdapter.onMessage(packed);
 
         // Re-map but wrong expected remote -> BAD_REMOTE
-        vm.prank(registry.owner()); registry.setRemoteAdapter(block.chainid, address(remoteAdapter)); // incorrect: expects remoteAdapter but xSender will be localAdapter
+        vm.prank(registry.owner());
+        registry.setRemoteAdapter(block.chainid, address(remoteAdapter)); // incorrect: expects remoteAdapter but xSender will be localAdapter
         messenger.setXSender(address(localAdapter));
         vm.prank(address(messenger));
         vm.expectRevert(bytes("BAD_REMOTE"));

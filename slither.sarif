@@ -1,0 +1,3825 @@
+{
+  "$schema": "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json",
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "Slither",
+          "informationUri": "https://github.com/crytic/slither",
+          "version": "0.11.3",
+          "rules": [
+            {
+              "id": "0-1-incorrect-exp",
+              "name": "incorrect-exp",
+              "properties": {
+                "precision": "high",
+                "security-severity": "8.0"
+              },
+              "shortDescription": {
+                "text": "Incorrect exponentiation"
+              },
+              "help": {
+                "text": "Use the correct operator `**` for exponentiation."
+              }
+            },
+            {
+              "id": "1-1-divide-before-multiply",
+              "name": "divide-before-multiply",
+              "properties": {
+                "precision": "high",
+                "security-severity": "4.0"
+              },
+              "shortDescription": {
+                "text": "Divide before multiply"
+              },
+              "help": {
+                "text": "Consider ordering multiplication before division."
+              }
+            },
+            {
+              "id": "1-1-unused-return",
+              "name": "unused-return",
+              "properties": {
+                "precision": "high",
+                "security-severity": "4.0"
+              },
+              "shortDescription": {
+                "text": "Unused return"
+              },
+              "help": {
+                "text": "Ensure that all the return values of the function calls are used."
+              }
+            },
+            {
+              "id": "2-0-shadowing-local",
+              "name": "shadowing-local",
+              "properties": {
+                "precision": "very-high",
+                "security-severity": "3.0"
+              },
+              "shortDescription": {
+                "text": "Local variable shadowing"
+              },
+              "help": {
+                "text": "Rename the local variables that shadow another component."
+              }
+            },
+            {
+              "id": "2-1-timestamp",
+              "name": "timestamp",
+              "properties": {
+                "precision": "high",
+                "security-severity": "3.0"
+              },
+              "shortDescription": {
+                "text": "Block timestamp"
+              },
+              "help": {
+                "text": "Avoid relying on `block.timestamp`."
+              }
+            },
+            {
+              "id": "3-0-assembly",
+              "name": "assembly",
+              "properties": {
+                "precision": "very-high",
+                "security-severity": "0.0"
+              },
+              "shortDescription": {
+                "text": "Assembly usage"
+              },
+              "help": {
+                "text": "Do not use `evm` assembly."
+              }
+            },
+            {
+              "id": "3-0-pragma",
+              "name": "pragma",
+              "properties": {
+                "precision": "very-high",
+                "security-severity": "0.0"
+              },
+              "shortDescription": {
+                "text": "Different pragma directives are used"
+              },
+              "help": {
+                "text": "Use one Solidity version."
+              }
+            },
+            {
+              "id": "3-0-solc-version",
+              "name": "solc-version",
+              "properties": {
+                "precision": "very-high",
+                "security-severity": "0.0"
+              },
+              "shortDescription": {
+                "text": "Incorrect versions of Solidity"
+              },
+              "help": {
+                "text": "\nDeploy with a recent version of Solidity (at least 0.8.0) with no known severe issues.\n\nUse a simple pragma version that allows any of these versions.\nConsider using the latest version of Solidity for testing."
+              }
+            },
+            {
+              "id": "3-0-low-level-calls",
+              "name": "low-level-calls",
+              "properties": {
+                "precision": "very-high",
+                "security-severity": "0.0"
+              },
+              "shortDescription": {
+                "text": "Low-level calls"
+              },
+              "help": {
+                "text": "Avoid low-level calls. Check the call success. If the call is meant for a contract, check for code existence."
+              }
+            },
+            {
+              "id": "3-0-missing-inheritance",
+              "name": "missing-inheritance",
+              "properties": {
+                "precision": "very-high",
+                "security-severity": "0.0"
+              },
+              "shortDescription": {
+                "text": "Missing inheritance"
+              },
+              "help": {
+                "text": "Inherit from the missing interface or contract."
+              }
+            },
+            {
+              "id": "3-0-naming-convention",
+              "name": "naming-convention",
+              "properties": {
+                "precision": "very-high",
+                "security-severity": "0.0"
+              },
+              "shortDescription": {
+                "text": "Conformance to Solidity naming conventions"
+              },
+              "help": {
+                "text": "Follow the Solidity [naming convention](https://solidity.readthedocs.io/en/v0.4.25/style-guide.html#naming-conventions)."
+              }
+            },
+            {
+              "id": "3-1-too-many-digits",
+              "name": "too-many-digits",
+              "properties": {
+                "precision": "high",
+                "security-severity": "0.0"
+              },
+              "shortDescription": {
+                "text": "Too many digits"
+              },
+              "help": {
+                "text": "\nUse:\n- [Ether suffix](https://solidity.readthedocs.io/en/latest/units-and-global-variables.html#ether-units),\n- [Time suffix](https://solidity.readthedocs.io/en/latest/units-and-global-variables.html#time-units), or\n- [The scientific notation](https://solidity.readthedocs.io/en/latest/types.html#rational-and-integer-literals)\n"
+              }
+            },
+            {
+              "id": "3-0-unused-state",
+              "name": "unused-state",
+              "properties": {
+                "precision": "very-high",
+                "security-severity": "0.0"
+              },
+              "shortDescription": {
+                "text": "Unused state variable"
+              },
+              "help": {
+                "text": "Remove unused state variables."
+              }
+            }
+          ]
+        }
+      },
+      "results": [
+        {
+          "ruleId": "0-1-incorrect-exp",
+          "message": {
+            "text": "Math.mulDiv(uint256,uint256,uint256) (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#204-275) has bitwise-xor operator ^ instead of the exponentiation operator **: \n\t - inverse = (3 * denominator) ^ 2 (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#257)\n",
+            "markdown": "[Math.mulDiv(uint256,uint256,uint256)](lib/openzeppelin-contracts/contracts/utils/math/Math.sol#L204-L275) has bitwise-xor operator ^ instead of the exponentiation operator **: \n\t - [inverse = (3 * denominator) ^ 2](lib/openzeppelin-contracts/contracts/utils/math/Math.sol#L257)\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts/contracts/utils/math/Math.sol"
+                },
+                "region": {
+                  "startLine": 204,
+                  "endLine": 275
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "fa559838d85a5e0ffb35e13dc1a95222d8c8c0eb91cd766551222241743fdc88"
+          }
+        },
+        {
+          "ruleId": "1-1-divide-before-multiply",
+          "message": {
+            "text": "Math.mulDiv(uint256,uint256,uint256) (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#204-275) performs a multiplication on the result of a division:\n\t- denominator = denominator / twos (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#242)\n\t- inverse *= 2 - denominator * inverse (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#265)\n",
+            "markdown": "[Math.mulDiv(uint256,uint256,uint256)](lib/openzeppelin-contracts/contracts/utils/math/Math.sol#L204-L275) performs a multiplication on the result of a division:\n\t- [denominator = denominator / twos](lib/openzeppelin-contracts/contracts/utils/math/Math.sol#L242)\n\t- [inverse *= 2 - denominator * inverse](lib/openzeppelin-contracts/contracts/utils/math/Math.sol#L265)\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts/contracts/utils/math/Math.sol"
+                },
+                "region": {
+                  "startLine": 204,
+                  "endLine": 275
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "1751aa053dc37b831e3519b0f0d874b898367ae23d538d0dcec8bbff3bd1e136"
+          }
+        },
+        {
+          "ruleId": "1-1-divide-before-multiply",
+          "message": {
+            "text": "Math.mulDiv(uint256,uint256,uint256) (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#204-275) performs a multiplication on the result of a division:\n\t- denominator = denominator / twos (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#242)\n\t- inverse = (3 * denominator) ^ 2 (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#257)\n",
+            "markdown": "[Math.mulDiv(uint256,uint256,uint256)](lib/openzeppelin-contracts/contracts/utils/math/Math.sol#L204-L275) performs a multiplication on the result of a division:\n\t- [denominator = denominator / twos](lib/openzeppelin-contracts/contracts/utils/math/Math.sol#L242)\n\t- [inverse = (3 * denominator) ^ 2](lib/openzeppelin-contracts/contracts/utils/math/Math.sol#L257)\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts/contracts/utils/math/Math.sol"
+                },
+                "region": {
+                  "startLine": 204,
+                  "endLine": 275
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "602686c39c340cba0f0f6452681cb8294f031eb1966bbdf7749f45e000dc25b1"
+          }
+        },
+        {
+          "ruleId": "1-1-divide-before-multiply",
+          "message": {
+            "text": "Math.mulDiv(uint256,uint256,uint256) (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#204-275) performs a multiplication on the result of a division:\n\t- low = low / twos (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#245)\n\t- result = low * inverse (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#272)\n",
+            "markdown": "[Math.mulDiv(uint256,uint256,uint256)](lib/openzeppelin-contracts/contracts/utils/math/Math.sol#L204-L275) performs a multiplication on the result of a division:\n\t- [low = low / twos](lib/openzeppelin-contracts/contracts/utils/math/Math.sol#L245)\n\t- [result = low * inverse](lib/openzeppelin-contracts/contracts/utils/math/Math.sol#L272)\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts/contracts/utils/math/Math.sol"
+                },
+                "region": {
+                  "startLine": 204,
+                  "endLine": 275
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "6dc8da0b560aeb8d9bbef2c9c46001283289715559c70b44929196343aa84bb8"
+          }
+        },
+        {
+          "ruleId": "1-1-divide-before-multiply",
+          "message": {
+            "text": "Math.invMod(uint256,uint256) (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#315-361) performs a multiplication on the result of a division:\n\t- quotient = gcd / remainder (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#337)\n\t- (gcd,remainder) = (remainder,gcd - remainder * quotient) (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#339-346)\n",
+            "markdown": "[Math.invMod(uint256,uint256)](lib/openzeppelin-contracts/contracts/utils/math/Math.sol#L315-L361) performs a multiplication on the result of a division:\n\t- [quotient = gcd / remainder](lib/openzeppelin-contracts/contracts/utils/math/Math.sol#L337)\n\t- [(gcd,remainder) = (remainder,gcd - remainder * quotient)](lib/openzeppelin-contracts/contracts/utils/math/Math.sol#L339-L346)\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts/contracts/utils/math/Math.sol"
+                },
+                "region": {
+                  "startLine": 315,
+                  "endLine": 361
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "7d324837f002ca8d69da59346220daf47a284f2b9c9b20b95fa6f3aedf0ea498"
+          }
+        },
+        {
+          "ruleId": "1-1-divide-before-multiply",
+          "message": {
+            "text": "Math.mulDiv(uint256,uint256,uint256) (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#204-275) performs a multiplication on the result of a division:\n\t- denominator = denominator / twos (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#242)\n\t- inverse *= 2 - denominator * inverse (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#263)\n",
+            "markdown": "[Math.mulDiv(uint256,uint256,uint256)](lib/openzeppelin-contracts/contracts/utils/math/Math.sol#L204-L275) performs a multiplication on the result of a division:\n\t- [denominator = denominator / twos](lib/openzeppelin-contracts/contracts/utils/math/Math.sol#L242)\n\t- [inverse *= 2 - denominator * inverse](lib/openzeppelin-contracts/contracts/utils/math/Math.sol#L263)\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts/contracts/utils/math/Math.sol"
+                },
+                "region": {
+                  "startLine": 204,
+                  "endLine": 275
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "9cfd0dd2b34ee2bc85034dff19f0cb40a18c65f00c5a8eff3fa8c4ec6c3e45bc"
+          }
+        },
+        {
+          "ruleId": "1-1-divide-before-multiply",
+          "message": {
+            "text": "Math.mulDiv(uint256,uint256,uint256) (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#204-275) performs a multiplication on the result of a division:\n\t- denominator = denominator / twos (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#242)\n\t- inverse *= 2 - denominator * inverse (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#261)\n",
+            "markdown": "[Math.mulDiv(uint256,uint256,uint256)](lib/openzeppelin-contracts/contracts/utils/math/Math.sol#L204-L275) performs a multiplication on the result of a division:\n\t- [denominator = denominator / twos](lib/openzeppelin-contracts/contracts/utils/math/Math.sol#L242)\n\t- [inverse *= 2 - denominator * inverse](lib/openzeppelin-contracts/contracts/utils/math/Math.sol#L261)\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts/contracts/utils/math/Math.sol"
+                },
+                "region": {
+                  "startLine": 204,
+                  "endLine": 275
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "9d18947e973b20a39e6077d41fb698675046886b7f09680445118a7d998b8393"
+          }
+        },
+        {
+          "ruleId": "1-1-divide-before-multiply",
+          "message": {
+            "text": "Math.mulDiv(uint256,uint256,uint256) (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#204-275) performs a multiplication on the result of a division:\n\t- denominator = denominator / twos (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#242)\n\t- inverse *= 2 - denominator * inverse (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#266)\n",
+            "markdown": "[Math.mulDiv(uint256,uint256,uint256)](lib/openzeppelin-contracts/contracts/utils/math/Math.sol#L204-L275) performs a multiplication on the result of a division:\n\t- [denominator = denominator / twos](lib/openzeppelin-contracts/contracts/utils/math/Math.sol#L242)\n\t- [inverse *= 2 - denominator * inverse](lib/openzeppelin-contracts/contracts/utils/math/Math.sol#L266)\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts/contracts/utils/math/Math.sol"
+                },
+                "region": {
+                  "startLine": 204,
+                  "endLine": 275
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "9e5ada402dfb451ce4de934a30ad850f752fa4f690f2891e401126f0ae1f712e"
+          }
+        },
+        {
+          "ruleId": "1-1-divide-before-multiply",
+          "message": {
+            "text": "Math.mulDiv(uint256,uint256,uint256) (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#204-275) performs a multiplication on the result of a division:\n\t- denominator = denominator / twos (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#242)\n\t- inverse *= 2 - denominator * inverse (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#264)\n",
+            "markdown": "[Math.mulDiv(uint256,uint256,uint256)](lib/openzeppelin-contracts/contracts/utils/math/Math.sol#L204-L275) performs a multiplication on the result of a division:\n\t- [denominator = denominator / twos](lib/openzeppelin-contracts/contracts/utils/math/Math.sol#L242)\n\t- [inverse *= 2 - denominator * inverse](lib/openzeppelin-contracts/contracts/utils/math/Math.sol#L264)\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts/contracts/utils/math/Math.sol"
+                },
+                "region": {
+                  "startLine": 204,
+                  "endLine": 275
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "bc50d69a04f7897c7c31b40fcad43993c2622747177635b6d108ece9cc631f49"
+          }
+        },
+        {
+          "ruleId": "1-1-divide-before-multiply",
+          "message": {
+            "text": "Math.mulDiv(uint256,uint256,uint256) (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#204-275) performs a multiplication on the result of a division:\n\t- denominator = denominator / twos (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#242)\n\t- inverse *= 2 - denominator * inverse (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#262)\n",
+            "markdown": "[Math.mulDiv(uint256,uint256,uint256)](lib/openzeppelin-contracts/contracts/utils/math/Math.sol#L204-L275) performs a multiplication on the result of a division:\n\t- [denominator = denominator / twos](lib/openzeppelin-contracts/contracts/utils/math/Math.sol#L242)\n\t- [inverse *= 2 - denominator * inverse](lib/openzeppelin-contracts/contracts/utils/math/Math.sol#L262)\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts/contracts/utils/math/Math.sol"
+                },
+                "region": {
+                  "startLine": 204,
+                  "endLine": 275
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "f5cb3423a82bf661e0fc6b94689567fe23f1f540a8fd2366e71c86b284dfe526"
+          }
+        },
+        {
+          "ruleId": "1-1-unused-return",
+          "message": {
+            "text": "ERC1967Utils.upgradeBeaconToAndCall(address,bytes) (lib/openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Utils.sol#157-166) ignores return value by Address.functionDelegateCall(IBeacon(newBeacon).implementation(),data) (lib/openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Utils.sol#162)\n",
+            "markdown": "[ERC1967Utils.upgradeBeaconToAndCall(address,bytes)](lib/openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Utils.sol#L157-L166) ignores return value by [Address.functionDelegateCall(IBeacon(newBeacon).implementation(),data)](lib/openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Utils.sol#L162)\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Utils.sol"
+                },
+                "region": {
+                  "startLine": 157,
+                  "endLine": 166
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "1861b2e607ad61d7607ca9af61c1a162dff3c1258001ab1c8feef80413f43781"
+          }
+        },
+        {
+          "ruleId": "1-1-unused-return",
+          "message": {
+            "text": "ERC1967Utils.upgradeToAndCall(address,bytes) (lib/openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Utils.sol#67-76) ignores return value by Address.functionDelegateCall(newImplementation,data) (lib/openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Utils.sol#72)\n",
+            "markdown": "[ERC1967Utils.upgradeToAndCall(address,bytes)](lib/openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Utils.sol#L67-L76) ignores return value by [Address.functionDelegateCall(newImplementation,data)](lib/openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Utils.sol#L72)\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Utils.sol"
+                },
+                "region": {
+                  "startLine": 67,
+                  "endLine": 76
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "6205fa896c333a3cd87351e7366fb7723a61a4319bb12b54867a21b6b2edb722"
+          }
+        },
+        {
+          "ruleId": "2-0-shadowing-local",
+          "message": {
+            "text": "ERC20PermitUpgradeable.__ERC20Permit_init(string).name (lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/ERC20PermitUpgradeable.sol#40) shadows:\n\t- ERC20Upgradeable.name() (lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol#70-73) (function)\n\t- IERC20Metadata.name() (lib/openzeppelin-contracts/contracts/token/ERC20/extensions/IERC20Metadata.sol#15) (function)\n",
+            "markdown": "[ERC20PermitUpgradeable.__ERC20Permit_init(string).name](lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/ERC20PermitUpgradeable.sol#L40) shadows:\n\t- [ERC20Upgradeable.name()](lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol#L70-L73) (function)\n\t- [IERC20Metadata.name()](lib/openzeppelin-contracts/contracts/token/ERC20/extensions/IERC20Metadata.sol#L15) (function)\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/ERC20PermitUpgradeable.sol"
+                },
+                "region": {
+                  "startLine": 40,
+                  "endLine": 40
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "0a43194dd1402db91ecb78e24c03ca2a106a2447c319ebf8a7ca688b6d022002"
+          }
+        },
+        {
+          "ruleId": "2-1-timestamp",
+          "message": {
+            "text": "ZPXRewarder.notifyTopUp(uint256,uint64) (src/zpx/ZPXRewarder.sol#125-148) uses timestamp for comparisons\n\tDangerous comparisons:\n\t- block.timestamp >= endTime (src/zpx/ZPXRewarder.sol#131)\n\t- (endTime > block.timestamp) (src/zpx/ZPXRewarder.sol#137)\n",
+            "markdown": "[ZPXRewarder.notifyTopUp(uint256,uint64)](src/zpx/ZPXRewarder.sol#L125-L148) uses timestamp for comparisons\n\tDangerous comparisons:\n\t- [block.timestamp >= endTime](src/zpx/ZPXRewarder.sol#L131)\n\t- [(endTime > block.timestamp)](src/zpx/ZPXRewarder.sol#L137)\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/zpx/ZPXRewarder.sol"
+                },
+                "region": {
+                  "startLine": 125,
+                  "endLine": 148
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "08ad66a514804e92852d7d5cd2ff9c08570ac8c17a05ceb9fdc7ecab929aa3a0"
+          }
+        },
+        {
+          "ruleId": "2-1-timestamp",
+          "message": {
+            "text": "ZPXRewarder.claim() (src/zpx/ZPXRewarder.sol#103-111) uses timestamp for comparisons\n\tDangerous comparisons:\n\t- require(bool,string)(pending > 0,no reward) (src/zpx/ZPXRewarder.sol#107)\n",
+            "markdown": "[ZPXRewarder.claim()](src/zpx/ZPXRewarder.sol#L103-L111) uses timestamp for comparisons\n\tDangerous comparisons:\n\t- [require(bool,string)(pending > 0,no reward)](src/zpx/ZPXRewarder.sol#L107)\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/zpx/ZPXRewarder.sol"
+                },
+                "region": {
+                  "startLine": 103,
+                  "endLine": 111
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "2b86f3aa41cacb0c8044e9ed8d9630a72f387cd64fe610c68e2e7bff5f6c8520"
+          }
+        },
+        {
+          "ruleId": "2-1-timestamp",
+          "message": {
+            "text": "ZPXRewarder.deposit(uint256) (src/zpx/ZPXRewarder.sol#70-85) uses timestamp for comparisons\n\tDangerous comparisons:\n\t- pending > 0 (src/zpx/ZPXRewarder.sol#75)\n",
+            "markdown": "[ZPXRewarder.deposit(uint256)](src/zpx/ZPXRewarder.sol#L70-L85) uses timestamp for comparisons\n\tDangerous comparisons:\n\t- [pending > 0](src/zpx/ZPXRewarder.sol#L75)\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/zpx/ZPXRewarder.sol"
+                },
+                "region": {
+                  "startLine": 70,
+                  "endLine": 85
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "53a23c2534fc99de5661fdbc280a3d7296f6ed75ae001dfa64d4d1c4272ae67d"
+          }
+        },
+        {
+          "ruleId": "2-1-timestamp",
+          "message": {
+            "text": "Router.pokeTvlSnapshot() (src/router/Router.sol#145-153) uses timestamp for comparisons\n\tDangerous comparisons:\n\t- day <= lastSnapDay (src/router/Router.sol#149)\n",
+            "markdown": "[Router.pokeTvlSnapshot()](src/router/Router.sol#L145-L153) uses timestamp for comparisons\n\tDangerous comparisons:\n\t- [day <= lastSnapDay](src/router/Router.sol#L149)\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/router/Router.sol"
+                },
+                "region": {
+                  "startLine": 145,
+                  "endLine": 153
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "571ec80322f0ca77753022e1b4ec5423a9c032b003d5e3f7af2988b86caff927"
+          }
+        },
+        {
+          "ruleId": "2-1-timestamp",
+          "message": {
+            "text": "ERC20PermitUpgradeable.permit(address,address,uint256,uint256,uint8,bytes32,bytes32) (lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/ERC20PermitUpgradeable.sol#47-70) uses timestamp for comparisons\n\tDangerous comparisons:\n\t- block.timestamp > deadline (lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/ERC20PermitUpgradeable.sol#56)\n",
+            "markdown": "[ERC20PermitUpgradeable.permit(address,address,uint256,uint256,uint8,bytes32,bytes32)](lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/ERC20PermitUpgradeable.sol#L47-L70) uses timestamp for comparisons\n\tDangerous comparisons:\n\t- [block.timestamp > deadline](lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/ERC20PermitUpgradeable.sol#L56)\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/ERC20PermitUpgradeable.sol"
+                },
+                "region": {
+                  "startLine": 47,
+                  "endLine": 70
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "7243621cd3fb70b484b83e0ee6106c8b6a11839c7cc6cda7d856f64bf5192a3a"
+          }
+        },
+        {
+          "ruleId": "2-1-timestamp",
+          "message": {
+            "text": "ZPXRewarder.withdraw(uint256) (src/zpx/ZPXRewarder.sol#87-101) uses timestamp for comparisons\n\tDangerous comparisons:\n\t- require(bool,string)(u.amount >= amt,insuff) (src/zpx/ZPXRewarder.sol#90)\n\t- pending > 0 (src/zpx/ZPXRewarder.sol#92)\n",
+            "markdown": "[ZPXRewarder.withdraw(uint256)](src/zpx/ZPXRewarder.sol#L87-L101) uses timestamp for comparisons\n\tDangerous comparisons:\n\t- [require(bool,string)(u.amount >= amt,insuff)](src/zpx/ZPXRewarder.sol#L90)\n\t- [pending > 0](src/zpx/ZPXRewarder.sol#L92)\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/zpx/ZPXRewarder.sol"
+                },
+                "region": {
+                  "startLine": 87,
+                  "endLine": 101
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "c193febb0feb5b1e997eb2e2c6616a6a2be7e85434ba86ae91ce52674fd3bece"
+          }
+        },
+        {
+          "ruleId": "3-0-assembly",
+          "message": {
+            "text": "Math.tryMul(uint256,uint256) (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#73-84) uses assembly\n\t- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#76-80)\n",
+            "markdown": "[Math.tryMul(uint256,uint256)](lib/openzeppelin-contracts/contracts/utils/math/Math.sol#L73-L84) uses assembly\n\t- [INLINE ASM](lib/openzeppelin-contracts/contracts/utils/math/Math.sol#L76-L80)\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts/contracts/utils/math/Math.sol"
+                },
+                "region": {
+                  "startLine": 73,
+                  "endLine": 84
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "0614eaa799c65c7a0dd915c72c766983762e740a48c1b88d4d9b80d132c5e1f7"
+          }
+        },
+        {
+          "ruleId": "3-0-assembly",
+          "message": {
+            "text": "StorageSlot.getAddressSlot(bytes32) (lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol#66-70) uses assembly\n\t- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol#67-69)\n",
+            "markdown": "[StorageSlot.getAddressSlot(bytes32)](lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol#L66-L70) uses assembly\n\t- [INLINE ASM](lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol#L67-L69)\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol"
+                },
+                "region": {
+                  "startLine": 66,
+                  "endLine": 70
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "0cb0950f0a0659779cfbb710140755d3c77f5a3e0cd20665f14e2c29ffa77241"
+          }
+        },
+        {
+          "ruleId": "3-0-assembly",
+          "message": {
+            "text": "ReentrancyGuardUpgradeable._getReentrancyGuardStorage() (lib/openzeppelin-contracts-upgradeable/contracts/utils/ReentrancyGuardUpgradeable.sol#49-53) uses assembly\n\t- INLINE ASM (lib/openzeppelin-contracts-upgradeable/contracts/utils/ReentrancyGuardUpgradeable.sol#50-52)\n",
+            "markdown": "[ReentrancyGuardUpgradeable._getReentrancyGuardStorage()](lib/openzeppelin-contracts-upgradeable/contracts/utils/ReentrancyGuardUpgradeable.sol#L49-L53) uses assembly\n\t- [INLINE ASM](lib/openzeppelin-contracts-upgradeable/contracts/utils/ReentrancyGuardUpgradeable.sol#L50-L52)\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts-upgradeable/contracts/utils/ReentrancyGuardUpgradeable.sol"
+                },
+                "region": {
+                  "startLine": 49,
+                  "endLine": 53
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "12195ba21c694b94cc0b37e53639c2767509cdb3852a78177d5dac707328a702"
+          }
+        },
+        {
+          "ruleId": "3-0-assembly",
+          "message": {
+            "text": "Math.mul512(uint256,uint256) (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#37-46) uses assembly\n\t- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#41-45)\n",
+            "markdown": "[Math.mul512(uint256,uint256)](lib/openzeppelin-contracts/contracts/utils/math/Math.sol#L37-L46) uses assembly\n\t- [INLINE ASM](lib/openzeppelin-contracts/contracts/utils/math/Math.sol#L41-L45)\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts/contracts/utils/math/Math.sol"
+                },
+                "region": {
+                  "startLine": 37,
+                  "endLine": 46
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "168b15c466213dab4f22538081a848ff5bb2677ed1f68f8a6e3c5cec40bb386c"
+          }
+        },
+        {
+          "ruleId": "3-0-assembly",
+          "message": {
+            "text": "Math.add512(uint256,uint256) (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#25-30) uses assembly\n\t- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#26-29)\n",
+            "markdown": "[Math.add512(uint256,uint256)](lib/openzeppelin-contracts/contracts/utils/math/Math.sol#L25-L30) uses assembly\n\t- [INLINE ASM](lib/openzeppelin-contracts/contracts/utils/math/Math.sol#L26-L29)\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts/contracts/utils/math/Math.sol"
+                },
+                "region": {
+                  "startLine": 25,
+                  "endLine": 30
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "28bdebcd76b79ef2976918aae40b2d93a0922c69961989873a3970a98b70bc7f"
+          }
+        },
+        {
+          "ruleId": "3-0-assembly",
+          "message": {
+            "text": "Initializable._getInitializableStorage() (lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol#232-237) uses assembly\n\t- INLINE ASM (lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol#234-236)\n",
+            "markdown": "[Initializable._getInitializableStorage()](lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol#L232-L237) uses assembly\n\t- [INLINE ASM](lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol#L234-L236)\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol"
+                },
+                "region": {
+                  "startLine": 232,
+                  "endLine": 237
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "322d8a38819182cf247e79bc0bc324bfbe3baba97ee5f19b3ab5b1890e90dd40"
+          }
+        },
+        {
+          "ruleId": "3-0-assembly",
+          "message": {
+            "text": "Proxy._delegate(address) (lib/openzeppelin-contracts/contracts/proxy/Proxy.sol#22-45) uses assembly\n\t- INLINE ASM (lib/openzeppelin-contracts/contracts/proxy/Proxy.sol#23-44)\n",
+            "markdown": "[Proxy._delegate(address)](lib/openzeppelin-contracts/contracts/proxy/Proxy.sol#L22-L45) uses assembly\n\t- [INLINE ASM](lib/openzeppelin-contracts/contracts/proxy/Proxy.sol#L23-L44)\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts/contracts/proxy/Proxy.sol"
+                },
+                "region": {
+                  "startLine": 22,
+                  "endLine": 45
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "33cc230cee4ef2fd623b0a07b2d5001d8c036105a8228b9277310a276456c20b"
+          }
+        },
+        {
+          "ruleId": "3-0-assembly",
+          "message": {
+            "text": "SafeCast.toUint(bool) (lib/openzeppelin-contracts/contracts/utils/math/SafeCast.sol#1157-1161) uses assembly\n\t- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/math/SafeCast.sol#1158-1160)\n",
+            "markdown": "[SafeCast.toUint(bool)](lib/openzeppelin-contracts/contracts/utils/math/SafeCast.sol#L1157-L1161) uses assembly\n\t- [INLINE ASM](lib/openzeppelin-contracts/contracts/utils/math/SafeCast.sol#L1158-L1160)\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts/contracts/utils/math/SafeCast.sol"
+                },
+                "region": {
+                  "startLine": 1157,
+                  "endLine": 1161
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "34f9a9306e1110542216cbccf2fca90cca99dfbf63bb6c8f67872d4824c90459"
+          }
+        },
+        {
+          "ruleId": "3-0-assembly",
+          "message": {
+            "text": "EIP712Upgradeable._getEIP712Storage() (lib/openzeppelin-contracts-upgradeable/contracts/utils/cryptography/EIP712Upgradeable.sol#49-53) uses assembly\n\t- INLINE ASM (lib/openzeppelin-contracts-upgradeable/contracts/utils/cryptography/EIP712Upgradeable.sol#50-52)\n",
+            "markdown": "[EIP712Upgradeable._getEIP712Storage()](lib/openzeppelin-contracts-upgradeable/contracts/utils/cryptography/EIP712Upgradeable.sol#L49-L53) uses assembly\n\t- [INLINE ASM](lib/openzeppelin-contracts-upgradeable/contracts/utils/cryptography/EIP712Upgradeable.sol#L50-L52)\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts-upgradeable/contracts/utils/cryptography/EIP712Upgradeable.sol"
+                },
+                "region": {
+                  "startLine": 49,
+                  "endLine": 53
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "350eca0e8a9cdef485b05b9a20ceac1479aa1a229697cbcf0bdbc0bbd9976b76"
+          }
+        },
+        {
+          "ruleId": "3-0-assembly",
+          "message": {
+            "text": "Strings._unsafeReadBytesOffset(bytes,uint256) (lib/openzeppelin-contracts/contracts/utils/Strings.sol#484-489) uses assembly\n\t- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/Strings.sol#486-488)\n",
+            "markdown": "[Strings._unsafeReadBytesOffset(bytes,uint256)](lib/openzeppelin-contracts/contracts/utils/Strings.sol#L484-L489) uses assembly\n\t- [INLINE ASM](lib/openzeppelin-contracts/contracts/utils/Strings.sol#L486-L488)\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts/contracts/utils/Strings.sol"
+                },
+                "region": {
+                  "startLine": 484,
+                  "endLine": 489
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "3599f1690efeaf6995e28287b753ebedf48dd3da0c137c291eef8c27fc0d3233"
+          }
+        },
+        {
+          "ruleId": "3-0-assembly",
+          "message": {
+            "text": "StorageSlot.getInt256Slot(bytes32) (lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol#102-106) uses assembly\n\t- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol#103-105)\n",
+            "markdown": "[StorageSlot.getInt256Slot(bytes32)](lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol#L102-L106) uses assembly\n\t- [INLINE ASM](lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol#L103-L105)\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol"
+                },
+                "region": {
+                  "startLine": 102,
+                  "endLine": 106
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "39b269e77ca4a55a660c8ff6fb0327594b7836943bf18153a5a3f415eaec6ee2"
+          }
+        },
+        {
+          "ruleId": "3-0-assembly",
+          "message": {
+            "text": "SafeERC20._callOptionalReturn(IERC20,bytes) (lib/openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol#173-191) uses assembly\n\t- INLINE ASM (lib/openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol#176-186)\n",
+            "markdown": "[SafeERC20._callOptionalReturn(IERC20,bytes)](lib/openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol#L173-L191) uses assembly\n\t- [INLINE ASM](lib/openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol#L176-L186)\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol"
+                },
+                "region": {
+                  "startLine": 173,
+                  "endLine": 191
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "40c5da443014bed63152572f6d0027390dba46586706324bd60eee448766070c"
+          }
+        },
+        {
+          "ruleId": "3-0-assembly",
+          "message": {
+            "text": "ERC4626Upgradeable._getERC4626Storage() (lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/ERC4626Upgradeable.sol#63-67) uses assembly\n\t- INLINE ASM (lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/ERC4626Upgradeable.sol#64-66)\n",
+            "markdown": "[ERC4626Upgradeable._getERC4626Storage()](lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/ERC4626Upgradeable.sol#L63-L67) uses assembly\n\t- [INLINE ASM](lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/ERC4626Upgradeable.sol#L64-L66)\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/ERC4626Upgradeable.sol"
+                },
+                "region": {
+                  "startLine": 63,
+                  "endLine": 67
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "43ac3928d571c11c573ca44e29ff89e0db0bed5b28f82d0c35fb215411be7b95"
+          }
+        },
+        {
+          "ruleId": "3-0-assembly",
+          "message": {
+            "text": "Math.log2(uint256) (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#612-651) uses assembly\n\t- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#648-650)\n",
+            "markdown": "[Math.log2(uint256)](lib/openzeppelin-contracts/contracts/utils/math/Math.sol#L612-L651) uses assembly\n\t- [INLINE ASM](lib/openzeppelin-contracts/contracts/utils/math/Math.sol#L648-L650)\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts/contracts/utils/math/Math.sol"
+                },
+                "region": {
+                  "startLine": 612,
+                  "endLine": 651
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "4c9536b9faf03a8218f49a8737c79b548551266154dfaa88d0ecaa2dbff0dee0"
+          }
+        },
+        {
+          "ruleId": "3-0-assembly",
+          "message": {
+            "text": "ECDSA.tryRecover(bytes32,bytes) (lib/openzeppelin-contracts/contracts/utils/cryptography/ECDSA.sol#56-75) uses assembly\n\t- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/cryptography/ECDSA.sol#66-70)\n",
+            "markdown": "[ECDSA.tryRecover(bytes32,bytes)](lib/openzeppelin-contracts/contracts/utils/cryptography/ECDSA.sol#L56-L75) uses assembly\n\t- [INLINE ASM](lib/openzeppelin-contracts/contracts/utils/cryptography/ECDSA.sol#L66-L70)\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts/contracts/utils/cryptography/ECDSA.sol"
+                },
+                "region": {
+                  "startLine": 56,
+                  "endLine": 75
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "4ca0b43bc8bd21c9c25fb7a73ebf3f1e21238df69e3cfddc919a0bca2a4e955c"
+          }
+        },
+        {
+          "ruleId": "3-0-assembly",
+          "message": {
+            "text": "Math.mulDiv(uint256,uint256,uint256) (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#204-275) uses assembly\n\t- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#227-234)\n\t- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#240-249)\n",
+            "markdown": "[Math.mulDiv(uint256,uint256,uint256)](lib/openzeppelin-contracts/contracts/utils/math/Math.sol#L204-L275) uses assembly\n\t- [INLINE ASM](lib/openzeppelin-contracts/contracts/utils/math/Math.sol#L227-L234)\n\t- [INLINE ASM](lib/openzeppelin-contracts/contracts/utils/math/Math.sol#L240-L249)\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts/contracts/utils/math/Math.sol"
+                },
+                "region": {
+                  "startLine": 204,
+                  "endLine": 275
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "4dc2b09a2a232ef941d73aec166b8a203d35630f4931ad288f59dad16b5ef6c5"
+          }
+        },
+        {
+          "ruleId": "3-0-assembly",
+          "message": {
+            "text": "OwnableUpgradeable._getOwnableStorage() (lib/openzeppelin-contracts-upgradeable/contracts/access/OwnableUpgradeable.sol#30-34) uses assembly\n\t- INLINE ASM (lib/openzeppelin-contracts-upgradeable/contracts/access/OwnableUpgradeable.sol#31-33)\n",
+            "markdown": "[OwnableUpgradeable._getOwnableStorage()](lib/openzeppelin-contracts-upgradeable/contracts/access/OwnableUpgradeable.sol#L30-L34) uses assembly\n\t- [INLINE ASM](lib/openzeppelin-contracts-upgradeable/contracts/access/OwnableUpgradeable.sol#L31-L33)\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts-upgradeable/contracts/access/OwnableUpgradeable.sol"
+                },
+                "region": {
+                  "startLine": 30,
+                  "endLine": 34
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "4ec591a929c77d09c0f309d567d74ff763ab363424aaad1013504b4e29f41037"
+          }
+        },
+        {
+          "ruleId": "3-0-assembly",
+          "message": {
+            "text": "Panic.panic(uint256) (lib/openzeppelin-contracts/contracts/utils/Panic.sol#50-56) uses assembly\n\t- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/Panic.sol#51-55)\n",
+            "markdown": "[Panic.panic(uint256)](lib/openzeppelin-contracts/contracts/utils/Panic.sol#L50-L56) uses assembly\n\t- [INLINE ASM](lib/openzeppelin-contracts/contracts/utils/Panic.sol#L51-L55)\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts/contracts/utils/Panic.sol"
+                },
+                "region": {
+                  "startLine": 50,
+                  "endLine": 56
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "514042b8e90a4f94cc8e124d087dd1ee57e83611d0d7143d6ea91f34a1a40c2b"
+          }
+        },
+        {
+          "ruleId": "3-0-assembly",
+          "message": {
+            "text": "StorageSlot.getBytesSlot(bytes32) (lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol#129-133) uses assembly\n\t- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol#130-132)\n",
+            "markdown": "[StorageSlot.getBytesSlot(bytes32)](lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol#L129-L133) uses assembly\n\t- [INLINE ASM](lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol#L130-L132)\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol"
+                },
+                "region": {
+                  "startLine": 129,
+                  "endLine": 133
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "5312cebb2ab4b8c384cec1819b8568b6c3421d67d46e2d67394b702843826ee6"
+          }
+        },
+        {
+          "ruleId": "3-0-assembly",
+          "message": {
+            "text": "Strings.escapeJSON(string) (lib/openzeppelin-contracts/contracts/utils/Strings.sol#446-476) uses assembly\n\t- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/Strings.sol#470-473)\n",
+            "markdown": "[Strings.escapeJSON(string)](lib/openzeppelin-contracts/contracts/utils/Strings.sol#L446-L476) uses assembly\n\t- [INLINE ASM](lib/openzeppelin-contracts/contracts/utils/Strings.sol#L470-L473)\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts/contracts/utils/Strings.sol"
+                },
+                "region": {
+                  "startLine": 446,
+                  "endLine": 476
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "623dcb535ace5507679d3beed269268e0f8cb24c782dd2b7b290ad4102d5131c"
+          }
+        },
+        {
+          "ruleId": "3-0-assembly",
+          "message": {
+            "text": "NoncesUpgradeable._getNoncesStorage() (lib/openzeppelin-contracts-upgradeable/contracts/utils/NoncesUpgradeable.sol#23-27) uses assembly\n\t- INLINE ASM (lib/openzeppelin-contracts-upgradeable/contracts/utils/NoncesUpgradeable.sol#24-26)\n",
+            "markdown": "[NoncesUpgradeable._getNoncesStorage()](lib/openzeppelin-contracts-upgradeable/contracts/utils/NoncesUpgradeable.sol#L23-L27) uses assembly\n\t- [INLINE ASM](lib/openzeppelin-contracts-upgradeable/contracts/utils/NoncesUpgradeable.sol#L24-L26)\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts-upgradeable/contracts/utils/NoncesUpgradeable.sol"
+                },
+                "region": {
+                  "startLine": 23,
+                  "endLine": 27
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "66c9c0573157358eb6113e773464384ad149625d751883eb3342f2601649eba4"
+          }
+        },
+        {
+          "ruleId": "3-0-assembly",
+          "message": {
+            "text": "StorageSlot.getStringSlot(string) (lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol#120-124) uses assembly\n\t- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol#121-123)\n",
+            "markdown": "[StorageSlot.getStringSlot(string)](lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol#L120-L124) uses assembly\n\t- [INLINE ASM](lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol#L121-L123)\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol"
+                },
+                "region": {
+                  "startLine": 120,
+                  "endLine": 124
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "6a9ae1f07a6a025e863e9db6b62be4f7010ba985b05c152e4f03dae1893353f7"
+          }
+        },
+        {
+          "ruleId": "3-0-assembly",
+          "message": {
+            "text": "ERC20Upgradeable._getERC20Storage() (lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol#46-50) uses assembly\n\t- INLINE ASM (lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol#47-49)\n",
+            "markdown": "[ERC20Upgradeable._getERC20Storage()](lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol#L46-L50) uses assembly\n\t- [INLINE ASM](lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol#L47-L49)\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol"
+                },
+                "region": {
+                  "startLine": 46,
+                  "endLine": 50
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "6c456a24e5e7720fb7430bd0cd8251670fbf00bd073bcc1cd1e6473cf03617d1"
+          }
+        },
+        {
+          "ruleId": "3-0-assembly",
+          "message": {
+            "text": "StorageSlot.getBytes32Slot(bytes32) (lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol#84-88) uses assembly\n\t- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol#85-87)\n",
+            "markdown": "[StorageSlot.getBytes32Slot(bytes32)](lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol#L84-L88) uses assembly\n\t- [INLINE ASM](lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol#L85-L87)\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol"
+                },
+                "region": {
+                  "startLine": 84,
+                  "endLine": 88
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "6e227cedcd7e749e974202ff8de10aac20188eab08f34d87055eed0e201722d2"
+          }
+        },
+        {
+          "ruleId": "3-0-assembly",
+          "message": {
+            "text": "Math.tryMod(uint256,uint256) (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#102-110) uses assembly\n\t- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#105-108)\n",
+            "markdown": "[Math.tryMod(uint256,uint256)](lib/openzeppelin-contracts/contracts/utils/math/Math.sol#L102-L110) uses assembly\n\t- [INLINE ASM](lib/openzeppelin-contracts/contracts/utils/math/Math.sol#L105-L108)\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts/contracts/utils/math/Math.sol"
+                },
+                "region": {
+                  "startLine": 102,
+                  "endLine": 110
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "7313f74380b103670486dbd8cf457c4b4778807730acf647419c5b82c007e98d"
+          }
+        },
+        {
+          "ruleId": "3-0-assembly",
+          "message": {
+            "text": "StorageSlot.getBytesSlot(bytes) (lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol#138-142) uses assembly\n\t- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol#139-141)\n",
+            "markdown": "[StorageSlot.getBytesSlot(bytes)](lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol#L138-L142) uses assembly\n\t- [INLINE ASM](lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol#L139-L141)\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol"
+                },
+                "region": {
+                  "startLine": 138,
+                  "endLine": 142
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "749137134693cf0304f52b590e5a47c5286e0c8814e75ef8be3f6159fd60f08c"
+          }
+        },
+        {
+          "ruleId": "3-0-assembly",
+          "message": {
+            "text": "Strings.toString(uint256) (lib/openzeppelin-contracts/contracts/utils/Strings.sol#45-63) uses assembly\n\t- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/Strings.sol#50-52)\n\t- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/Strings.sol#55-57)\n",
+            "markdown": "[Strings.toString(uint256)](lib/openzeppelin-contracts/contracts/utils/Strings.sol#L45-L63) uses assembly\n\t- [INLINE ASM](lib/openzeppelin-contracts/contracts/utils/Strings.sol#L50-L52)\n\t- [INLINE ASM](lib/openzeppelin-contracts/contracts/utils/Strings.sol#L55-L57)\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts/contracts/utils/Strings.sol"
+                },
+                "region": {
+                  "startLine": 45,
+                  "endLine": 63
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "750399e830ec3d3343b0bac8dde2fd15ea760a0a2fd2df6366aa4ed5daf0f847"
+          }
+        },
+        {
+          "ruleId": "3-0-assembly",
+          "message": {
+            "text": "Math.tryDiv(uint256,uint256) (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#89-97) uses assembly\n\t- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#92-95)\n",
+            "markdown": "[Math.tryDiv(uint256,uint256)](lib/openzeppelin-contracts/contracts/utils/math/Math.sol#L89-L97) uses assembly\n\t- [INLINE ASM](lib/openzeppelin-contracts/contracts/utils/math/Math.sol#L92-L95)\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts/contracts/utils/math/Math.sol"
+                },
+                "region": {
+                  "startLine": 89,
+                  "endLine": 97
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "7d30224ad923fb46b530816990ce5e4fbe1512dd2fa9f27e469f40cae1573b3f"
+          }
+        },
+        {
+          "ruleId": "3-0-assembly",
+          "message": {
+            "text": "PausableUpgradeable._getPausableStorage() (lib/openzeppelin-contracts-upgradeable/contracts/utils/PausableUpgradeable.sol#27-31) uses assembly\n\t- INLINE ASM (lib/openzeppelin-contracts-upgradeable/contracts/utils/PausableUpgradeable.sol#28-30)\n",
+            "markdown": "[PausableUpgradeable._getPausableStorage()](lib/openzeppelin-contracts-upgradeable/contracts/utils/PausableUpgradeable.sol#L27-L31) uses assembly\n\t- [INLINE ASM](lib/openzeppelin-contracts-upgradeable/contracts/utils/PausableUpgradeable.sol#L28-L30)\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts-upgradeable/contracts/utils/PausableUpgradeable.sol"
+                },
+                "region": {
+                  "startLine": 27,
+                  "endLine": 31
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "871438c7e670857d2a2cf074ffd0ecfe9f319c51bef3a4bbaccace93eb1553db"
+          }
+        },
+        {
+          "ruleId": "3-0-assembly",
+          "message": {
+            "text": "Strings.toChecksumHexString(address) (lib/openzeppelin-contracts/contracts/utils/Strings.sol#111-129) uses assembly\n\t- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/Strings.sol#116-118)\n",
+            "markdown": "[Strings.toChecksumHexString(address)](lib/openzeppelin-contracts/contracts/utils/Strings.sol#L111-L129) uses assembly\n\t- [INLINE ASM](lib/openzeppelin-contracts/contracts/utils/Strings.sol#L116-L118)\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts/contracts/utils/Strings.sol"
+                },
+                "region": {
+                  "startLine": 111,
+                  "endLine": 129
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "8e22a213af9882b2dbd985391be91d03bc1921e2fd959971f3c34c111361546b"
+          }
+        },
+        {
+          "ruleId": "3-0-assembly",
+          "message": {
+            "text": "StorageSlot.getBooleanSlot(bytes32) (lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol#75-79) uses assembly\n\t- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol#76-78)\n",
+            "markdown": "[StorageSlot.getBooleanSlot(bytes32)](lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol#L75-L79) uses assembly\n\t- [INLINE ASM](lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol#L76-L78)\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol"
+                },
+                "region": {
+                  "startLine": 75,
+                  "endLine": 79
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "983222c57c42f357d634e6a0307e308f2f0068150a399b605dcd74e034e93c8b"
+          }
+        },
+        {
+          "ruleId": "3-0-assembly",
+          "message": {
+            "text": "Math.tryModExp(uint256,uint256,uint256) (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#409-433) uses assembly\n\t- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#411-432)\n",
+            "markdown": "[Math.tryModExp(uint256,uint256,uint256)](lib/openzeppelin-contracts/contracts/utils/math/Math.sol#L409-L433) uses assembly\n\t- [INLINE ASM](lib/openzeppelin-contracts/contracts/utils/math/Math.sol#L411-L432)\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts/contracts/utils/math/Math.sol"
+                },
+                "region": {
+                  "startLine": 409,
+                  "endLine": 433
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "98b67111a4eb9f57d069285261087a3d7af73d5ce0a98ca10ff8c2dc466167ad"
+          }
+        },
+        {
+          "ruleId": "3-0-assembly",
+          "message": {
+            "text": "StorageSlot.getStringSlot(bytes32) (lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol#111-115) uses assembly\n\t- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol#112-114)\n",
+            "markdown": "[StorageSlot.getStringSlot(bytes32)](lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol#L111-L115) uses assembly\n\t- [INLINE ASM](lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol#L112-L114)\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol"
+                },
+                "region": {
+                  "startLine": 111,
+                  "endLine": 115
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "a06128e1b1c97ee25c55d74dda6e1aaa0976f9d134f60bf4344ab3080b21abd2"
+          }
+        },
+        {
+          "ruleId": "3-0-assembly",
+          "message": {
+            "text": "AccessControlUpgradeable._getAccessControlStorage() (lib/openzeppelin-contracts-upgradeable/contracts/access/AccessControlUpgradeable.sol#68-72) uses assembly\n\t- INLINE ASM (lib/openzeppelin-contracts-upgradeable/contracts/access/AccessControlUpgradeable.sol#69-71)\n",
+            "markdown": "[AccessControlUpgradeable._getAccessControlStorage()](lib/openzeppelin-contracts-upgradeable/contracts/access/AccessControlUpgradeable.sol#L68-L72) uses assembly\n\t- [INLINE ASM](lib/openzeppelin-contracts-upgradeable/contracts/access/AccessControlUpgradeable.sol#L69-L71)\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts-upgradeable/contracts/access/AccessControlUpgradeable.sol"
+                },
+                "region": {
+                  "startLine": 68,
+                  "endLine": 72
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "a5c9643801752c3d8a97e7c093ba186a68a49c0b457ed69dd88870703c116ecc"
+          }
+        },
+        {
+          "ruleId": "3-0-assembly",
+          "message": {
+            "text": "Address._revert(bytes) (lib/openzeppelin-contracts/contracts/utils/Address.sol#138-148) uses assembly\n\t- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/Address.sol#142-144)\n",
+            "markdown": "[Address._revert(bytes)](lib/openzeppelin-contracts/contracts/utils/Address.sol#L138-L148) uses assembly\n\t- [INLINE ASM](lib/openzeppelin-contracts/contracts/utils/Address.sol#L142-L144)\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts/contracts/utils/Address.sol"
+                },
+                "region": {
+                  "startLine": 138,
+                  "endLine": 148
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "ab57eba634ffdaf54d8a116b60b119c3b38ad7b7548a9bf84780b0f81b877a90"
+          }
+        },
+        {
+          "ruleId": "3-0-assembly",
+          "message": {
+            "text": "MessageHashUtils.toDataWithIntendedValidatorHash(address,bytes32) (lib/openzeppelin-contracts/contracts/utils/cryptography/MessageHashUtils.sol#69-79) uses assembly\n\t- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/cryptography/MessageHashUtils.sol#73-78)\n",
+            "markdown": "[MessageHashUtils.toDataWithIntendedValidatorHash(address,bytes32)](lib/openzeppelin-contracts/contracts/utils/cryptography/MessageHashUtils.sol#L69-L79) uses assembly\n\t- [INLINE ASM](lib/openzeppelin-contracts/contracts/utils/cryptography/MessageHashUtils.sol#L73-L78)\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts/contracts/utils/cryptography/MessageHashUtils.sol"
+                },
+                "region": {
+                  "startLine": 69,
+                  "endLine": 79
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "c9bdbebe35ba3ad06235d662e4efd202964b56d41772cde664569725bcab497f"
+          }
+        },
+        {
+          "ruleId": "3-0-assembly",
+          "message": {
+            "text": "SafeERC20._callOptionalReturnBool(IERC20,bytes) (lib/openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol#201-211) uses assembly\n\t- INLINE ASM (lib/openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol#205-209)\n",
+            "markdown": "[SafeERC20._callOptionalReturnBool(IERC20,bytes)](lib/openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol#L201-L211) uses assembly\n\t- [INLINE ASM](lib/openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol#L205-L209)\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol"
+                },
+                "region": {
+                  "startLine": 201,
+                  "endLine": 211
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "dc73cc41a11380e5d830d61a42df13d9e0c84149ffdd68ae1e4ce6f96d5f6461"
+          }
+        },
+        {
+          "ruleId": "3-0-assembly",
+          "message": {
+            "text": "StorageSlot.getUint256Slot(bytes32) (lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol#93-97) uses assembly\n\t- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol#94-96)\n",
+            "markdown": "[StorageSlot.getUint256Slot(bytes32)](lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol#L93-L97) uses assembly\n\t- [INLINE ASM](lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol#L94-L96)\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol"
+                },
+                "region": {
+                  "startLine": 93,
+                  "endLine": 97
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "e0999a78e2a4800028a800b8f94e81bd4b1fcbb9c2c0021af31da78c22e747e4"
+          }
+        },
+        {
+          "ruleId": "3-0-assembly",
+          "message": {
+            "text": "MessageHashUtils.toEthSignedMessageHash(bytes32) (lib/openzeppelin-contracts/contracts/utils/cryptography/MessageHashUtils.sol#30-36) uses assembly\n\t- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/cryptography/MessageHashUtils.sol#31-35)\n",
+            "markdown": "[MessageHashUtils.toEthSignedMessageHash(bytes32)](lib/openzeppelin-contracts/contracts/utils/cryptography/MessageHashUtils.sol#L30-L36) uses assembly\n\t- [INLINE ASM](lib/openzeppelin-contracts/contracts/utils/cryptography/MessageHashUtils.sol#L31-L35)\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts/contracts/utils/cryptography/MessageHashUtils.sol"
+                },
+                "region": {
+                  "startLine": 30,
+                  "endLine": 36
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "e64dff1d7a0a8565344587c467e88d65c880743aea3fc85b766d300e057a5ae7"
+          }
+        },
+        {
+          "ruleId": "3-0-assembly",
+          "message": {
+            "text": "MessageHashUtils.toTypedDataHash(bytes32,bytes32) (lib/openzeppelin-contracts/contracts/utils/cryptography/MessageHashUtils.sol#90-98) uses assembly\n\t- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/cryptography/MessageHashUtils.sol#91-97)\n",
+            "markdown": "[MessageHashUtils.toTypedDataHash(bytes32,bytes32)](lib/openzeppelin-contracts/contracts/utils/cryptography/MessageHashUtils.sol#L90-L98) uses assembly\n\t- [INLINE ASM](lib/openzeppelin-contracts/contracts/utils/cryptography/MessageHashUtils.sol#L91-L97)\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts/contracts/utils/cryptography/MessageHashUtils.sol"
+                },
+                "region": {
+                  "startLine": 90,
+                  "endLine": 98
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "eeb437b50e02cda215154f8aa76c7bd8c704fb0ceb259d08b8ff69f8b1631bcf"
+          }
+        },
+        {
+          "ruleId": "3-0-assembly",
+          "message": {
+            "text": "Math.tryModExp(bytes,bytes,bytes) (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#449-471) uses assembly\n\t- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#461-470)\n",
+            "markdown": "[Math.tryModExp(bytes,bytes,bytes)](lib/openzeppelin-contracts/contracts/utils/math/Math.sol#L449-L471) uses assembly\n\t- [INLINE ASM](lib/openzeppelin-contracts/contracts/utils/math/Math.sol#L461-L470)\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts/contracts/utils/math/Math.sol"
+                },
+                "region": {
+                  "startLine": 449,
+                  "endLine": 471
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "f01e5bbd62b99072c0bc5f31405ed82782603484a36820281191bfe33619b9d9"
+          }
+        },
+        {
+          "ruleId": "3-0-pragma",
+          "message": {
+            "text": "9 different versions of Solidity are used:\n\t- Version constraint ^0.8.20 is used by:\n\t\t-^0.8.20 (lib/openzeppelin-contracts/contracts/access/AccessControl.sol#4)\n\t\t-^0.8.20 (lib/openzeppelin-contracts/contracts/access/Ownable.sol#4)\n\t\t-^0.8.20 (lib/openzeppelin-contracts/contracts/proxy/Proxy.sol#4)\n\t\t-^0.8.20 (lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol#4)\n\t\t-^0.8.20 (lib/openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol#4)\n\t\t-^0.8.20 (lib/openzeppelin-contracts/contracts/utils/Address.sol#4)\n\t\t-^0.8.20 (lib/openzeppelin-contracts/contracts/utils/Context.sol#4)\n\t\t-^0.8.20 (lib/openzeppelin-contracts/contracts/utils/Errors.sol#4)\n\t\t-^0.8.20 (lib/openzeppelin-contracts/contracts/utils/Panic.sol#4)\n\t\t-^0.8.20 (lib/openzeppelin-contracts/contracts/utils/ReentrancyGuard.sol#4)\n\t\t-^0.8.20 (lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol#5)\n\t\t-^0.8.20 (lib/openzeppelin-contracts/contracts/utils/Strings.sol#4)\n\t\t-^0.8.20 (lib/openzeppelin-contracts/contracts/utils/cryptography/ECDSA.sol#4)\n\t\t-^0.8.20 (lib/openzeppelin-contracts/contracts/utils/cryptography/MessageHashUtils.sol#4)\n\t\t-^0.8.20 (lib/openzeppelin-contracts/contracts/utils/introspection/ERC165.sol#4)\n\t\t-^0.8.20 (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#4)\n\t\t-^0.8.20 (lib/openzeppelin-contracts/contracts/utils/math/SafeCast.sol#5)\n\t\t-^0.8.20 (lib/openzeppelin-contracts/contracts/utils/math/SignedMath.sol#4)\n\t\t-^0.8.20 (lib/openzeppelin-contracts-upgradeable/contracts/access/AccessControlUpgradeable.sol#4)\n\t\t-^0.8.20 (lib/openzeppelin-contracts-upgradeable/contracts/access/OwnableUpgradeable.sol#4)\n\t\t-^0.8.20 (lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol#4)\n\t\t-^0.8.20 (lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol#4)\n\t\t-^0.8.20 (lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/ERC20BurnableUpgradeable.sol#4)\n\t\t-^0.8.20 (lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/ERC20PermitUpgradeable.sol#4)\n\t\t-^0.8.20 (lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/ERC4626Upgradeable.sol#4)\n\t\t-^0.8.20 (lib/openzeppelin-contracts-upgradeable/contracts/utils/ContextUpgradeable.sol#4)\n\t\t-^0.8.20 (lib/openzeppelin-contracts-upgradeable/contracts/utils/NoncesUpgradeable.sol#3)\n\t\t-^0.8.20 (lib/openzeppelin-contracts-upgradeable/contracts/utils/PausableUpgradeable.sol#4)\n\t\t-^0.8.20 (lib/openzeppelin-contracts-upgradeable/contracts/utils/ReentrancyGuardUpgradeable.sol#4)\n\t\t-^0.8.20 (lib/openzeppelin-contracts-upgradeable/contracts/utils/cryptography/EIP712Upgradeable.sol#4)\n\t\t-^0.8.20 (lib/openzeppelin-contracts-upgradeable/contracts/utils/introspection/ERC165Upgradeable.sol#4)\n\t- Version constraint >=0.8.4 is used by:\n\t\t->=0.8.4 (lib/openzeppelin-contracts/contracts/access/IAccessControl.sol#4)\n\t\t->=0.8.4 (lib/openzeppelin-contracts/contracts/interfaces/draft-IERC6093.sol#3)\n\t- Version constraint >=0.6.2 is used by:\n\t\t->=0.6.2 (lib/openzeppelin-contracts/contracts/interfaces/IERC1363.sol#4)\n\t\t->=0.6.2 (lib/openzeppelin-contracts/contracts/interfaces/IERC4626.sol#4)\n\t\t->=0.6.2 (lib/openzeppelin-contracts/contracts/token/ERC20/extensions/IERC20Metadata.sol#4)\n\t- Version constraint >=0.4.16 is used by:\n\t\t->=0.4.16 (lib/openzeppelin-contracts/contracts/interfaces/IERC165.sol#4)\n\t\t->=0.4.16 (lib/openzeppelin-contracts/contracts/interfaces/IERC20.sol#4)\n\t\t->=0.4.16 (lib/openzeppelin-contracts/contracts/interfaces/IERC5267.sol#4)\n\t\t->=0.4.16 (lib/openzeppelin-contracts/contracts/interfaces/draft-IERC1822.sol#4)\n\t\t->=0.4.16 (lib/openzeppelin-contracts/contracts/proxy/beacon/IBeacon.sol#4)\n\t\t->=0.4.16 (lib/openzeppelin-contracts/contracts/token/ERC20/IERC20.sol#4)\n\t\t->=0.4.16 (lib/openzeppelin-contracts/contracts/token/ERC20/extensions/IERC20Permit.sol#4)\n\t\t->=0.4.16 (lib/openzeppelin-contracts/contracts/utils/introspection/IERC165.sol#4)\n\t- Version constraint >=0.4.11 is used by:\n\t\t->=0.4.11 (lib/openzeppelin-contracts/contracts/interfaces/IERC1967.sol#4)\n\t- Version constraint ^0.8.22 is used by:\n\t\t-^0.8.22 (lib/openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol#4)\n\t\t-^0.8.22 (lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/UUPSUpgradeable.sol#4)\n\t- Version constraint ^0.8.21 is used by:\n\t\t-^0.8.21 (lib/openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Utils.sol#4)\n\t- Version constraint 0.8.24 is used by:\n\t\t-0.8.24 (src/Hub.sol#2)\n\t\t-0.8.24 (src/USDzy.sol#2)\n\t\t-0.8.24 (src/zpx/MintGate_Arb.sol#2)\n\t\t-0.8.24 (src/zpx/ZPXArb.sol#2)\n\t\t-0.8.24 (src/zpx/ZPXArbV2_Burnable.sol#2)\n\t\t-0.8.24 (src/zpx/ZPXRewarder.sol#2)\n\t- Version constraint ^0.8.24 is used by:\n\t\t-^0.8.24 (src/factory/Factory.sol#2)\n\t\t-^0.8.24 (src/gateway/LocalDepositGateway.sol#2)\n\t\t-^0.8.24 (src/interfaces/IMessagingAdapter.sol#2)\n\t\t-^0.8.24 (src/interfaces/IRouter.sol#2)\n\t\t-^0.8.24 (src/interfaces/ISpokeVault.sol#2)\n\t\t-^0.8.24 (src/messaging/AdapterRegistry.sol#2)\n\t\t-^0.8.24 (src/messaging/IMessagingEndpoint.sol#2)\n\t\t-^0.8.24 (src/messaging/MessagingEndpointReceiver.sol#2)\n\t\t-^0.8.24 (src/messaging/MockAdapter.sol#2)\n\t\t-^0.8.24 (src/messaging/SuperchainAdapter.sol#2)\n\t\t-^0.8.24 (src/messaging/interfaces/IL2ToL2CrossDomainMessenger.sol#2)\n\t\t-^0.8.24 (src/mocks/MockDIAFeed.sol#2)\n\t\t-^0.8.24 (src/mocks/MockERC20.sol#2)\n\t\t-^0.8.24 (src/mocks/MockUSDC.sol#2)\n\t\t-^0.8.24 (src/policy/IPolicySource.sol#2)\n\t\t-^0.8.24 (src/policy/PolicyBeacon.sol#2)\n\t\t-^0.8.24 (src/pps/IPpsSource.sol#2)\n\t\t-^0.8.24 (src/pps/PpsBeacon.sol#2)\n\t\t-^0.8.24 (src/pps/PpsMirror.sol#2)\n\t\t-^0.8.24 (src/router/Router.sol#2)\n\t\t-^0.8.24 (src/spoke/SpokeVault.sol#2)\n\t\t-^0.8.24 (src/usdzy/IUSDzy.sol#2)\n\t\t-^0.8.24 (src/usdzy/SharesAggregator.sol#2)\n\t\t-^0.8.24 (src/usdzy/USDzyRemoteMinter.sol#2)\n",
+            "markdown": "9 different versions of Solidity are used:\n\t- Version constraint ^0.8.20 is used by:\n\t\t-[^0.8.20](lib/openzeppelin-contracts/contracts/access/AccessControl.sol#L4)\n\t\t-[^0.8.20](lib/openzeppelin-contracts/contracts/access/Ownable.sol#L4)\n\t\t-[^0.8.20](lib/openzeppelin-contracts/contracts/proxy/Proxy.sol#L4)\n\t\t-[^0.8.20](lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol#L4)\n\t\t-[^0.8.20](lib/openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol#L4)\n\t\t-[^0.8.20](lib/openzeppelin-contracts/contracts/utils/Address.sol#L4)\n\t\t-[^0.8.20](lib/openzeppelin-contracts/contracts/utils/Context.sol#L4)\n\t\t-[^0.8.20](lib/openzeppelin-contracts/contracts/utils/Errors.sol#L4)\n\t\t-[^0.8.20](lib/openzeppelin-contracts/contracts/utils/Panic.sol#L4)\n\t\t-[^0.8.20](lib/openzeppelin-contracts/contracts/utils/ReentrancyGuard.sol#L4)\n\t\t-[^0.8.20](lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol#L5)\n\t\t-[^0.8.20](lib/openzeppelin-contracts/contracts/utils/Strings.sol#L4)\n\t\t-[^0.8.20](lib/openzeppelin-contracts/contracts/utils/cryptography/ECDSA.sol#L4)\n\t\t-[^0.8.20](lib/openzeppelin-contracts/contracts/utils/cryptography/MessageHashUtils.sol#L4)\n\t\t-[^0.8.20](lib/openzeppelin-contracts/contracts/utils/introspection/ERC165.sol#L4)\n\t\t-[^0.8.20](lib/openzeppelin-contracts/contracts/utils/math/Math.sol#L4)\n\t\t-[^0.8.20](lib/openzeppelin-contracts/contracts/utils/math/SafeCast.sol#L5)\n\t\t-[^0.8.20](lib/openzeppelin-contracts/contracts/utils/math/SignedMath.sol#L4)\n\t\t-[^0.8.20](lib/openzeppelin-contracts-upgradeable/contracts/access/AccessControlUpgradeable.sol#L4)\n\t\t-[^0.8.20](lib/openzeppelin-contracts-upgradeable/contracts/access/OwnableUpgradeable.sol#L4)\n\t\t-[^0.8.20](lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol#L4)\n\t\t-[^0.8.20](lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol#L4)\n\t\t-[^0.8.20](lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/ERC20BurnableUpgradeable.sol#L4)\n\t\t-[^0.8.20](lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/ERC20PermitUpgradeable.sol#L4)\n\t\t-[^0.8.20](lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/ERC4626Upgradeable.sol#L4)\n\t\t-[^0.8.20](lib/openzeppelin-contracts-upgradeable/contracts/utils/ContextUpgradeable.sol#L4)\n\t\t-[^0.8.20](lib/openzeppelin-contracts-upgradeable/contracts/utils/NoncesUpgradeable.sol#L3)\n\t\t-[^0.8.20](lib/openzeppelin-contracts-upgradeable/contracts/utils/PausableUpgradeable.sol#L4)\n\t\t-[^0.8.20](lib/openzeppelin-contracts-upgradeable/contracts/utils/ReentrancyGuardUpgradeable.sol#L4)\n\t\t-[^0.8.20](lib/openzeppelin-contracts-upgradeable/contracts/utils/cryptography/EIP712Upgradeable.sol#L4)\n\t\t-[^0.8.20](lib/openzeppelin-contracts-upgradeable/contracts/utils/introspection/ERC165Upgradeable.sol#L4)\n\t- Version constraint >=0.8.4 is used by:\n\t\t-[>=0.8.4](lib/openzeppelin-contracts/contracts/access/IAccessControl.sol#L4)\n\t\t-[>=0.8.4](lib/openzeppelin-contracts/contracts/interfaces/draft-IERC6093.sol#L3)\n\t- Version constraint >=0.6.2 is used by:\n\t\t-[>=0.6.2](lib/openzeppelin-contracts/contracts/interfaces/IERC1363.sol#L4)\n\t\t-[>=0.6.2](lib/openzeppelin-contracts/contracts/interfaces/IERC4626.sol#L4)\n\t\t-[>=0.6.2](lib/openzeppelin-contracts/contracts/token/ERC20/extensions/IERC20Metadata.sol#L4)\n\t- Version constraint >=0.4.16 is used by:\n\t\t-[>=0.4.16](lib/openzeppelin-contracts/contracts/interfaces/IERC165.sol#L4)\n\t\t-[>=0.4.16](lib/openzeppelin-contracts/contracts/interfaces/IERC20.sol#L4)\n\t\t-[>=0.4.16](lib/openzeppelin-contracts/contracts/interfaces/IERC5267.sol#L4)\n\t\t-[>=0.4.16](lib/openzeppelin-contracts/contracts/interfaces/draft-IERC1822.sol#L4)\n\t\t-[>=0.4.16](lib/openzeppelin-contracts/contracts/proxy/beacon/IBeacon.sol#L4)\n\t\t-[>=0.4.16](lib/openzeppelin-contracts/contracts/token/ERC20/IERC20.sol#L4)\n\t\t-[>=0.4.16](lib/openzeppelin-contracts/contracts/token/ERC20/extensions/IERC20Permit.sol#L4)\n\t\t-[>=0.4.16](lib/openzeppelin-contracts/contracts/utils/introspection/IERC165.sol#L4)\n\t- Version constraint >=0.4.11 is used by:\n\t\t-[>=0.4.11](lib/openzeppelin-contracts/contracts/interfaces/IERC1967.sol#L4)\n\t- Version constraint ^0.8.22 is used by:\n\t\t-[^0.8.22](lib/openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol#L4)\n\t\t-[^0.8.22](lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/UUPSUpgradeable.sol#L4)\n\t- Version constraint ^0.8.21 is used by:\n\t\t-[^0.8.21](lib/openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Utils.sol#L4)\n\t- Version constraint 0.8.24 is used by:\n\t\t-[0.8.24](src/Hub.sol#L2)\n\t\t-[0.8.24](src/USDzy.sol#L2)\n\t\t-[0.8.24](src/zpx/MintGate_Arb.sol#L2)\n\t\t-[0.8.24](src/zpx/ZPXArb.sol#L2)\n\t\t-[0.8.24](src/zpx/ZPXArbV2_Burnable.sol#L2)\n\t\t-[0.8.24](src/zpx/ZPXRewarder.sol#L2)\n\t- Version constraint ^0.8.24 is used by:\n\t\t-[^0.8.24](src/factory/Factory.sol#L2)\n\t\t-[^0.8.24](src/gateway/LocalDepositGateway.sol#L2)\n\t\t-[^0.8.24](src/interfaces/IMessagingAdapter.sol#L2)\n\t\t-[^0.8.24](src/interfaces/IRouter.sol#L2)\n\t\t-[^0.8.24](src/interfaces/ISpokeVault.sol#L2)\n\t\t-[^0.8.24](src/messaging/AdapterRegistry.sol#L2)\n\t\t-[^0.8.24](src/messaging/IMessagingEndpoint.sol#L2)\n\t\t-[^0.8.24](src/messaging/MessagingEndpointReceiver.sol#L2)\n\t\t-[^0.8.24](src/messaging/MockAdapter.sol#L2)\n\t\t-[^0.8.24](src/messaging/SuperchainAdapter.sol#L2)\n\t\t-[^0.8.24](src/messaging/interfaces/IL2ToL2CrossDomainMessenger.sol#L2)\n\t\t-[^0.8.24](src/mocks/MockDIAFeed.sol#L2)\n\t\t-[^0.8.24](src/mocks/MockERC20.sol#L2)\n\t\t-[^0.8.24](src/mocks/MockUSDC.sol#L2)\n\t\t-[^0.8.24](src/policy/IPolicySource.sol#L2)\n\t\t-[^0.8.24](src/policy/PolicyBeacon.sol#L2)\n\t\t-[^0.8.24](src/pps/IPpsSource.sol#L2)\n\t\t-[^0.8.24](src/pps/PpsBeacon.sol#L2)\n\t\t-[^0.8.24](src/pps/PpsMirror.sol#L2)\n\t\t-[^0.8.24](src/router/Router.sol#L2)\n\t\t-[^0.8.24](src/spoke/SpokeVault.sol#L2)\n\t\t-[^0.8.24](src/usdzy/IUSDzy.sol#L2)\n\t\t-[^0.8.24](src/usdzy/SharesAggregator.sol#L2)\n\t\t-[^0.8.24](src/usdzy/USDzyRemoteMinter.sol#L2)\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts/contracts/access/AccessControl.sol"
+                },
+                "region": {
+                  "startLine": 4,
+                  "endLine": 4
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "511db9f3f23396f65ed8c6b41c2fae2a949c7e8fca85d6b2286c22a26d0ce199"
+          }
+        },
+        {
+          "ruleId": "3-0-solc-version",
+          "message": {
+            "text": "Version constraint ^0.8.20 contains known severe issues (https://solidity.readthedocs.io/en/latest/bugs.html)\n\t- VerbatimInvalidDeduplication\n\t- FullInlinerNonExpressionSplitArgumentEvaluationOrder\n\t- MissingSideEffectsOnSelectorAccess.\nIt is used by:\n\t- ^0.8.20 (lib/openzeppelin-contracts/contracts/access/AccessControl.sol#4)\n\t- ^0.8.20 (lib/openzeppelin-contracts/contracts/access/Ownable.sol#4)\n\t- ^0.8.20 (lib/openzeppelin-contracts/contracts/proxy/Proxy.sol#4)\n\t- ^0.8.20 (lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol#4)\n\t- ^0.8.20 (lib/openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol#4)\n\t- ^0.8.20 (lib/openzeppelin-contracts/contracts/utils/Address.sol#4)\n\t- ^0.8.20 (lib/openzeppelin-contracts/contracts/utils/Context.sol#4)\n\t- ^0.8.20 (lib/openzeppelin-contracts/contracts/utils/Errors.sol#4)\n\t- ^0.8.20 (lib/openzeppelin-contracts/contracts/utils/Panic.sol#4)\n\t- ^0.8.20 (lib/openzeppelin-contracts/contracts/utils/ReentrancyGuard.sol#4)\n\t- ^0.8.20 (lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol#5)\n\t- ^0.8.20 (lib/openzeppelin-contracts/contracts/utils/Strings.sol#4)\n\t- ^0.8.20 (lib/openzeppelin-contracts/contracts/utils/cryptography/ECDSA.sol#4)\n\t- ^0.8.20 (lib/openzeppelin-contracts/contracts/utils/cryptography/MessageHashUtils.sol#4)\n\t- ^0.8.20 (lib/openzeppelin-contracts/contracts/utils/introspection/ERC165.sol#4)\n\t- ^0.8.20 (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#4)\n\t- ^0.8.20 (lib/openzeppelin-contracts/contracts/utils/math/SafeCast.sol#5)\n\t- ^0.8.20 (lib/openzeppelin-contracts/contracts/utils/math/SignedMath.sol#4)\n\t- ^0.8.20 (lib/openzeppelin-contracts-upgradeable/contracts/access/AccessControlUpgradeable.sol#4)\n\t- ^0.8.20 (lib/openzeppelin-contracts-upgradeable/contracts/access/OwnableUpgradeable.sol#4)\n\t- ^0.8.20 (lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol#4)\n\t- ^0.8.20 (lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol#4)\n\t- ^0.8.20 (lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/ERC20BurnableUpgradeable.sol#4)\n\t- ^0.8.20 (lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/ERC20PermitUpgradeable.sol#4)\n\t- ^0.8.20 (lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/ERC4626Upgradeable.sol#4)\n\t- ^0.8.20 (lib/openzeppelin-contracts-upgradeable/contracts/utils/ContextUpgradeable.sol#4)\n\t- ^0.8.20 (lib/openzeppelin-contracts-upgradeable/contracts/utils/NoncesUpgradeable.sol#3)\n\t- ^0.8.20 (lib/openzeppelin-contracts-upgradeable/contracts/utils/PausableUpgradeable.sol#4)\n\t- ^0.8.20 (lib/openzeppelin-contracts-upgradeable/contracts/utils/ReentrancyGuardUpgradeable.sol#4)\n\t- ^0.8.20 (lib/openzeppelin-contracts-upgradeable/contracts/utils/cryptography/EIP712Upgradeable.sol#4)\n\t- ^0.8.20 (lib/openzeppelin-contracts-upgradeable/contracts/utils/introspection/ERC165Upgradeable.sol#4)\n",
+            "markdown": "Version constraint ^0.8.20 contains known severe issues (https://solidity.readthedocs.io/en/latest/bugs.html)\n\t- VerbatimInvalidDeduplication\n\t- FullInlinerNonExpressionSplitArgumentEvaluationOrder\n\t- MissingSideEffectsOnSelectorAccess.\nIt is used by:\n\t- [^0.8.20](lib/openzeppelin-contracts/contracts/access/AccessControl.sol#L4)\n\t- [^0.8.20](lib/openzeppelin-contracts/contracts/access/Ownable.sol#L4)\n\t- [^0.8.20](lib/openzeppelin-contracts/contracts/proxy/Proxy.sol#L4)\n\t- [^0.8.20](lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol#L4)\n\t- [^0.8.20](lib/openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol#L4)\n\t- [^0.8.20](lib/openzeppelin-contracts/contracts/utils/Address.sol#L4)\n\t- [^0.8.20](lib/openzeppelin-contracts/contracts/utils/Context.sol#L4)\n\t- [^0.8.20](lib/openzeppelin-contracts/contracts/utils/Errors.sol#L4)\n\t- [^0.8.20](lib/openzeppelin-contracts/contracts/utils/Panic.sol#L4)\n\t- [^0.8.20](lib/openzeppelin-contracts/contracts/utils/ReentrancyGuard.sol#L4)\n\t- [^0.8.20](lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol#L5)\n\t- [^0.8.20](lib/openzeppelin-contracts/contracts/utils/Strings.sol#L4)\n\t- [^0.8.20](lib/openzeppelin-contracts/contracts/utils/cryptography/ECDSA.sol#L4)\n\t- [^0.8.20](lib/openzeppelin-contracts/contracts/utils/cryptography/MessageHashUtils.sol#L4)\n\t- [^0.8.20](lib/openzeppelin-contracts/contracts/utils/introspection/ERC165.sol#L4)\n\t- [^0.8.20](lib/openzeppelin-contracts/contracts/utils/math/Math.sol#L4)\n\t- [^0.8.20](lib/openzeppelin-contracts/contracts/utils/math/SafeCast.sol#L5)\n\t- [^0.8.20](lib/openzeppelin-contracts/contracts/utils/math/SignedMath.sol#L4)\n\t- [^0.8.20](lib/openzeppelin-contracts-upgradeable/contracts/access/AccessControlUpgradeable.sol#L4)\n\t- [^0.8.20](lib/openzeppelin-contracts-upgradeable/contracts/access/OwnableUpgradeable.sol#L4)\n\t- [^0.8.20](lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol#L4)\n\t- [^0.8.20](lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol#L4)\n\t- [^0.8.20](lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/ERC20BurnableUpgradeable.sol#L4)\n\t- [^0.8.20](lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/ERC20PermitUpgradeable.sol#L4)\n\t- [^0.8.20](lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/ERC4626Upgradeable.sol#L4)\n\t- [^0.8.20](lib/openzeppelin-contracts-upgradeable/contracts/utils/ContextUpgradeable.sol#L4)\n\t- [^0.8.20](lib/openzeppelin-contracts-upgradeable/contracts/utils/NoncesUpgradeable.sol#L3)\n\t- [^0.8.20](lib/openzeppelin-contracts-upgradeable/contracts/utils/PausableUpgradeable.sol#L4)\n\t- [^0.8.20](lib/openzeppelin-contracts-upgradeable/contracts/utils/ReentrancyGuardUpgradeable.sol#L4)\n\t- [^0.8.20](lib/openzeppelin-contracts-upgradeable/contracts/utils/cryptography/EIP712Upgradeable.sol#L4)\n\t- [^0.8.20](lib/openzeppelin-contracts-upgradeable/contracts/utils/introspection/ERC165Upgradeable.sol#L4)\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts/contracts/access/AccessControl.sol"
+                },
+                "region": {
+                  "startLine": 4,
+                  "endLine": 4
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "07086c1f3da7f1ae15f2205bc1b806898329fb61a816a46f5e0f81aa47c19a46"
+          }
+        },
+        {
+          "ruleId": "3-0-solc-version",
+          "message": {
+            "text": "Version constraint ^0.8.22 contains known severe issues (https://solidity.readthedocs.io/en/latest/bugs.html)\n\t- VerbatimInvalidDeduplication.\nIt is used by:\n\t- ^0.8.22 (lib/openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol#4)\n\t- ^0.8.22 (lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/UUPSUpgradeable.sol#4)\n",
+            "markdown": "Version constraint ^0.8.22 contains known severe issues (https://solidity.readthedocs.io/en/latest/bugs.html)\n\t- VerbatimInvalidDeduplication.\nIt is used by:\n\t- [^0.8.22](lib/openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol#L4)\n\t- [^0.8.22](lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/UUPSUpgradeable.sol#L4)\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol"
+                },
+                "region": {
+                  "startLine": 4,
+                  "endLine": 4
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "2b0b7f93da45a63275a6132d6e57b8f0d6f0e16064ee8385a3819fae3b893f67"
+          }
+        },
+        {
+          "ruleId": "3-0-solc-version",
+          "message": {
+            "text": "Version constraint >=0.4.16 contains known severe issues (https://solidity.readthedocs.io/en/latest/bugs.html)\n\t- DirtyBytesArrayToStorage\n\t- ABIDecodeTwoDimensionalArrayMemory\n\t- KeccakCaching\n\t- EmptyByteArrayCopy\n\t- DynamicArrayCleanup\n\t- ImplicitConstructorCallvalueCheck\n\t- TupleAssignmentMultiStackSlotComponents\n\t- MemoryArrayCreationOverflow\n\t- privateCanBeOverridden\n\t- SignedArrayStorageCopy\n\t- ABIEncoderV2StorageArrayWithMultiSlotElement\n\t- DynamicConstructorArgumentsClippedABIV2\n\t- UninitializedFunctionPointerInConstructor_0.4.x\n\t- IncorrectEventSignatureInLibraries_0.4.x\n\t- ExpExponentCleanup\n\t- NestedArrayFunctionCallDecoder\n\t- ZeroFunctionSelector.\nIt is used by:\n\t- >=0.4.16 (lib/openzeppelin-contracts/contracts/interfaces/IERC165.sol#4)\n\t- >=0.4.16 (lib/openzeppelin-contracts/contracts/interfaces/IERC20.sol#4)\n\t- >=0.4.16 (lib/openzeppelin-contracts/contracts/interfaces/IERC5267.sol#4)\n\t- >=0.4.16 (lib/openzeppelin-contracts/contracts/interfaces/draft-IERC1822.sol#4)\n\t- >=0.4.16 (lib/openzeppelin-contracts/contracts/proxy/beacon/IBeacon.sol#4)\n\t- >=0.4.16 (lib/openzeppelin-contracts/contracts/token/ERC20/IERC20.sol#4)\n\t- >=0.4.16 (lib/openzeppelin-contracts/contracts/token/ERC20/extensions/IERC20Permit.sol#4)\n\t- >=0.4.16 (lib/openzeppelin-contracts/contracts/utils/introspection/IERC165.sol#4)\n",
+            "markdown": "Version constraint >=0.4.16 contains known severe issues (https://solidity.readthedocs.io/en/latest/bugs.html)\n\t- DirtyBytesArrayToStorage\n\t- ABIDecodeTwoDimensionalArrayMemory\n\t- KeccakCaching\n\t- EmptyByteArrayCopy\n\t- DynamicArrayCleanup\n\t- ImplicitConstructorCallvalueCheck\n\t- TupleAssignmentMultiStackSlotComponents\n\t- MemoryArrayCreationOverflow\n\t- privateCanBeOverridden\n\t- SignedArrayStorageCopy\n\t- ABIEncoderV2StorageArrayWithMultiSlotElement\n\t- DynamicConstructorArgumentsClippedABIV2\n\t- UninitializedFunctionPointerInConstructor_0.4.x\n\t- IncorrectEventSignatureInLibraries_0.4.x\n\t- ExpExponentCleanup\n\t- NestedArrayFunctionCallDecoder\n\t- ZeroFunctionSelector.\nIt is used by:\n\t- [>=0.4.16](lib/openzeppelin-contracts/contracts/interfaces/IERC165.sol#L4)\n\t- [>=0.4.16](lib/openzeppelin-contracts/contracts/interfaces/IERC20.sol#L4)\n\t- [>=0.4.16](lib/openzeppelin-contracts/contracts/interfaces/IERC5267.sol#L4)\n\t- [>=0.4.16](lib/openzeppelin-contracts/contracts/interfaces/draft-IERC1822.sol#L4)\n\t- [>=0.4.16](lib/openzeppelin-contracts/contracts/proxy/beacon/IBeacon.sol#L4)\n\t- [>=0.4.16](lib/openzeppelin-contracts/contracts/token/ERC20/IERC20.sol#L4)\n\t- [>=0.4.16](lib/openzeppelin-contracts/contracts/token/ERC20/extensions/IERC20Permit.sol#L4)\n\t- [>=0.4.16](lib/openzeppelin-contracts/contracts/utils/introspection/IERC165.sol#L4)\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts/contracts/interfaces/IERC165.sol"
+                },
+                "region": {
+                  "startLine": 4,
+                  "endLine": 4
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "3066fb96bf490b84e9cc1c7b4689fdd9bb0efa5f5e3e5d31f693cd7b272ccd71"
+          }
+        },
+        {
+          "ruleId": "3-0-solc-version",
+          "message": {
+            "text": "Version constraint >=0.4.11 contains known severe issues (https://solidity.readthedocs.io/en/latest/bugs.html)\n\t- DirtyBytesArrayToStorage\n\t- KeccakCaching\n\t- EmptyByteArrayCopy\n\t- DynamicArrayCleanup\n\t- ImplicitConstructorCallvalueCheck\n\t- TupleAssignmentMultiStackSlotComponents\n\t- MemoryArrayCreationOverflow\n\t- privateCanBeOverridden\n\t- SignedArrayStorageCopy\n\t- UninitializedFunctionPointerInConstructor_0.4.x\n\t- IncorrectEventSignatureInLibraries_0.4.x\n\t- ExpExponentCleanup\n\t- NestedArrayFunctionCallDecoder\n\t- ZeroFunctionSelector\n\t- DelegateCallReturnValue\n\t- ECRecoverMalformedInput\n\t- SkipEmptyStringLiteral.\nIt is used by:\n\t- >=0.4.11 (lib/openzeppelin-contracts/contracts/interfaces/IERC1967.sol#4)\n",
+            "markdown": "Version constraint >=0.4.11 contains known severe issues (https://solidity.readthedocs.io/en/latest/bugs.html)\n\t- DirtyBytesArrayToStorage\n\t- KeccakCaching\n\t- EmptyByteArrayCopy\n\t- DynamicArrayCleanup\n\t- ImplicitConstructorCallvalueCheck\n\t- TupleAssignmentMultiStackSlotComponents\n\t- MemoryArrayCreationOverflow\n\t- privateCanBeOverridden\n\t- SignedArrayStorageCopy\n\t- UninitializedFunctionPointerInConstructor_0.4.x\n\t- IncorrectEventSignatureInLibraries_0.4.x\n\t- ExpExponentCleanup\n\t- NestedArrayFunctionCallDecoder\n\t- ZeroFunctionSelector\n\t- DelegateCallReturnValue\n\t- ECRecoverMalformedInput\n\t- SkipEmptyStringLiteral.\nIt is used by:\n\t- [>=0.4.11](lib/openzeppelin-contracts/contracts/interfaces/IERC1967.sol#L4)\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts/contracts/interfaces/IERC1967.sol"
+                },
+                "region": {
+                  "startLine": 4,
+                  "endLine": 4
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "7054e36651b4766c39eb53a98afe661d79847bd242af70928e27bc5d999aedd0"
+          }
+        },
+        {
+          "ruleId": "3-0-solc-version",
+          "message": {
+            "text": "Version constraint ^0.8.21 contains known severe issues (https://solidity.readthedocs.io/en/latest/bugs.html)\n\t- VerbatimInvalidDeduplication.\nIt is used by:\n\t- ^0.8.21 (lib/openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Utils.sol#4)\n",
+            "markdown": "Version constraint ^0.8.21 contains known severe issues (https://solidity.readthedocs.io/en/latest/bugs.html)\n\t- VerbatimInvalidDeduplication.\nIt is used by:\n\t- [^0.8.21](lib/openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Utils.sol#L4)\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Utils.sol"
+                },
+                "region": {
+                  "startLine": 4,
+                  "endLine": 4
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "a119fe791dd36767b538304a3f2b63ea81047a5f5ead2cc9225dfa47aeaf5d20"
+          }
+        },
+        {
+          "ruleId": "3-0-solc-version",
+          "message": {
+            "text": "Version constraint >=0.6.2 contains known severe issues (https://solidity.readthedocs.io/en/latest/bugs.html)\n\t- MissingSideEffectsOnSelectorAccess\n\t- AbiReencodingHeadOverflowWithStaticArrayCleanup\n\t- DirtyBytesArrayToStorage\n\t- NestedCalldataArrayAbiReencodingSizeValidation\n\t- ABIDecodeTwoDimensionalArrayMemory\n\t- KeccakCaching\n\t- EmptyByteArrayCopy\n\t- DynamicArrayCleanup\n\t- MissingEscapingInFormatting\n\t- ArraySliceDynamicallyEncodedBaseType\n\t- ImplicitConstructorCallvalueCheck\n\t- TupleAssignmentMultiStackSlotComponents\n\t- MemoryArrayCreationOverflow.\nIt is used by:\n\t- >=0.6.2 (lib/openzeppelin-contracts/contracts/interfaces/IERC1363.sol#4)\n\t- >=0.6.2 (lib/openzeppelin-contracts/contracts/interfaces/IERC4626.sol#4)\n\t- >=0.6.2 (lib/openzeppelin-contracts/contracts/token/ERC20/extensions/IERC20Metadata.sol#4)\n",
+            "markdown": "Version constraint >=0.6.2 contains known severe issues (https://solidity.readthedocs.io/en/latest/bugs.html)\n\t- MissingSideEffectsOnSelectorAccess\n\t- AbiReencodingHeadOverflowWithStaticArrayCleanup\n\t- DirtyBytesArrayToStorage\n\t- NestedCalldataArrayAbiReencodingSizeValidation\n\t- ABIDecodeTwoDimensionalArrayMemory\n\t- KeccakCaching\n\t- EmptyByteArrayCopy\n\t- DynamicArrayCleanup\n\t- MissingEscapingInFormatting\n\t- ArraySliceDynamicallyEncodedBaseType\n\t- ImplicitConstructorCallvalueCheck\n\t- TupleAssignmentMultiStackSlotComponents\n\t- MemoryArrayCreationOverflow.\nIt is used by:\n\t- [>=0.6.2](lib/openzeppelin-contracts/contracts/interfaces/IERC1363.sol#L4)\n\t- [>=0.6.2](lib/openzeppelin-contracts/contracts/interfaces/IERC4626.sol#L4)\n\t- [>=0.6.2](lib/openzeppelin-contracts/contracts/token/ERC20/extensions/IERC20Metadata.sol#L4)\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts/contracts/interfaces/IERC1363.sol"
+                },
+                "region": {
+                  "startLine": 4,
+                  "endLine": 4
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "c7dd856e491867a88dd1f510c7b6213417d3602eef06d080bddb9521ed3ba322"
+          }
+        },
+        {
+          "ruleId": "3-0-solc-version",
+          "message": {
+            "text": "Version constraint >=0.8.4 contains known severe issues (https://solidity.readthedocs.io/en/latest/bugs.html)\n\t- FullInlinerNonExpressionSplitArgumentEvaluationOrder\n\t- MissingSideEffectsOnSelectorAccess\n\t- AbiReencodingHeadOverflowWithStaticArrayCleanup\n\t- DirtyBytesArrayToStorage\n\t- DataLocationChangeInInternalOverride\n\t- NestedCalldataArrayAbiReencodingSizeValidation\n\t- SignedImmutables.\nIt is used by:\n\t- >=0.8.4 (lib/openzeppelin-contracts/contracts/access/IAccessControl.sol#4)\n\t- >=0.8.4 (lib/openzeppelin-contracts/contracts/interfaces/draft-IERC6093.sol#3)\n",
+            "markdown": "Version constraint >=0.8.4 contains known severe issues (https://solidity.readthedocs.io/en/latest/bugs.html)\n\t- FullInlinerNonExpressionSplitArgumentEvaluationOrder\n\t- MissingSideEffectsOnSelectorAccess\n\t- AbiReencodingHeadOverflowWithStaticArrayCleanup\n\t- DirtyBytesArrayToStorage\n\t- DataLocationChangeInInternalOverride\n\t- NestedCalldataArrayAbiReencodingSizeValidation\n\t- SignedImmutables.\nIt is used by:\n\t- [>=0.8.4](lib/openzeppelin-contracts/contracts/access/IAccessControl.sol#L4)\n\t- [>=0.8.4](lib/openzeppelin-contracts/contracts/interfaces/draft-IERC6093.sol#L3)\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts/contracts/access/IAccessControl.sol"
+                },
+                "region": {
+                  "startLine": 4,
+                  "endLine": 4
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "f8a796531fc90fb599cfe0d3c1bcffc38c08b3c05f77f92e249e4b67cded94fa"
+          }
+        },
+        {
+          "ruleId": "3-0-low-level-calls",
+          "message": {
+            "text": "Low level call in SuperchainAdapter.onMessage(bytes) (src/messaging/SuperchainAdapter.sol#59-71):\n\t- (ok,None) = endpoint.call(inner) (src/messaging/SuperchainAdapter.sol#68)\n",
+            "markdown": "Low level call in [SuperchainAdapter.onMessage(bytes)](src/messaging/SuperchainAdapter.sol#L59-L71):\n\t- [(ok,None) = endpoint.call(inner)](src/messaging/SuperchainAdapter.sol#L68)\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/messaging/SuperchainAdapter.sol"
+                },
+                "region": {
+                  "startLine": 59,
+                  "endLine": 71
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "12dddf725b1f68e5b5d61713c67874b20a8e3b05b8d7b0b397bd21ab46e4cdc7"
+          }
+        },
+        {
+          "ruleId": "3-0-low-level-calls",
+          "message": {
+            "text": "Low level call in Address.functionDelegateCall(address,bytes) (lib/openzeppelin-contracts/contracts/utils/Address.sol#96-99):\n\t- (success,returndata) = target.delegatecall(data) (lib/openzeppelin-contracts/contracts/utils/Address.sol#97)\n",
+            "markdown": "Low level call in [Address.functionDelegateCall(address,bytes)](lib/openzeppelin-contracts/contracts/utils/Address.sol#L96-L99):\n\t- [(success,returndata) = target.delegatecall(data)](lib/openzeppelin-contracts/contracts/utils/Address.sol#L97)\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts/contracts/utils/Address.sol"
+                },
+                "region": {
+                  "startLine": 96,
+                  "endLine": 99
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "30dcbd060bc3245005cdd7d2de77cbd0da17f4156f05ddc4d05e2c407f044067"
+          }
+        },
+        {
+          "ruleId": "3-0-low-level-calls",
+          "message": {
+            "text": "Low level call in Address.functionCallWithValue(address,bytes,uint256) (lib/openzeppelin-contracts/contracts/utils/Address.sol#75-81):\n\t- (success,returndata) = target.call{value: value}(data) (lib/openzeppelin-contracts/contracts/utils/Address.sol#79)\n",
+            "markdown": "Low level call in [Address.functionCallWithValue(address,bytes,uint256)](lib/openzeppelin-contracts/contracts/utils/Address.sol#L75-L81):\n\t- [(success,returndata) = target.call{value: value}(data)](lib/openzeppelin-contracts/contracts/utils/Address.sol#L79)\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts/contracts/utils/Address.sol"
+                },
+                "region": {
+                  "startLine": 75,
+                  "endLine": 81
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "5380d1409648dd2f02249eca95f259951aa81acea54cf2e82b472b2b15d9b9a1"
+          }
+        },
+        {
+          "ruleId": "3-0-low-level-calls",
+          "message": {
+            "text": "Low level call in Address.sendValue(address,uint256) (lib/openzeppelin-contracts/contracts/utils/Address.sol#33-42):\n\t- (success,returndata) = recipient.call{value: amount}() (lib/openzeppelin-contracts/contracts/utils/Address.sol#38)\n",
+            "markdown": "Low level call in [Address.sendValue(address,uint256)](lib/openzeppelin-contracts/contracts/utils/Address.sol#L33-L42):\n\t- [(success,returndata) = recipient.call{value: amount}()](lib/openzeppelin-contracts/contracts/utils/Address.sol#L38)\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts/contracts/utils/Address.sol"
+                },
+                "region": {
+                  "startLine": 33,
+                  "endLine": 42
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "556c8fa268ef234913b309d4985eb1fab8ad360a43e45d6751244baaff62cd0d"
+          }
+        },
+        {
+          "ruleId": "3-0-low-level-calls",
+          "message": {
+            "text": "Low level call in ERC4626Upgradeable._tryGetAssetDecimals(IERC20) (lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/ERC4626Upgradeable.sol#106-117):\n\t- (success,encodedDecimals) = address(asset_).staticcall(abi.encodeCall(IERC20Metadata.decimals,())) (lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/ERC4626Upgradeable.sol#107-109)\n",
+            "markdown": "Low level call in [ERC4626Upgradeable._tryGetAssetDecimals(IERC20)](lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/ERC4626Upgradeable.sol#L106-L117):\n\t- [(success,encodedDecimals) = address(asset_).staticcall(abi.encodeCall(IERC20Metadata.decimals,()))](lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/ERC4626Upgradeable.sol#L107-L109)\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/ERC4626Upgradeable.sol"
+                },
+                "region": {
+                  "startLine": 106,
+                  "endLine": 117
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "c15e1b766e456b52be8466d8b7fedf27abb033e33184af893e5ecdf5e4ad2656"
+          }
+        },
+        {
+          "ruleId": "3-0-low-level-calls",
+          "message": {
+            "text": "Low level call in MockAdapter.send(uint64,address,bytes) (src/messaging/MockAdapter.sol#25-36):\n\t- (ok,None) = dst.call(abi.encodeWithSignature(onMessage(uint64,address,bytes,uint64),dstChainId,msg.sender,payload,nonce)) (src/messaging/MockAdapter.sol#31-33)\n",
+            "markdown": "Low level call in [MockAdapter.send(uint64,address,bytes)](src/messaging/MockAdapter.sol#L25-L36):\n\t- [(ok,None) = dst.call(abi.encodeWithSignature(onMessage(uint64,address,bytes,uint64),dstChainId,msg.sender,payload,nonce))](src/messaging/MockAdapter.sol#L31-L33)\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/messaging/MockAdapter.sol"
+                },
+                "region": {
+                  "startLine": 25,
+                  "endLine": 36
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "d98bc21cf7f29ebecdc66442678c13c12e3fc365dc22b4f7fc1aa51741b8c057"
+          }
+        },
+        {
+          "ruleId": "3-0-low-level-calls",
+          "message": {
+            "text": "Low level call in Address.functionStaticCall(address,bytes) (lib/openzeppelin-contracts/contracts/utils/Address.sol#87-90):\n\t- (success,returndata) = target.staticcall(data) (lib/openzeppelin-contracts/contracts/utils/Address.sol#88)\n",
+            "markdown": "Low level call in [Address.functionStaticCall(address,bytes)](lib/openzeppelin-contracts/contracts/utils/Address.sol#L87-L90):\n\t- [(success,returndata) = target.staticcall(data)](lib/openzeppelin-contracts/contracts/utils/Address.sol#L88)\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts/contracts/utils/Address.sol"
+                },
+                "region": {
+                  "startLine": 87,
+                  "endLine": 90
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "df11d5bae4996761c2af346fbc3ab55e207fc2663ddd191b6178624d321a2135"
+          }
+        },
+        {
+          "ruleId": "3-0-missing-inheritance",
+          "message": {
+            "text": "MockERC20 (src/mocks/MockERC20.sol#6-16) should inherit from IUSDzy (src/usdzy/IUSDzy.sol#4-6)\n",
+            "markdown": "[MockERC20](src/mocks/MockERC20.sol#L6-L16) should inherit from [IUSDzy](src/usdzy/IUSDzy.sol#L4-L6)\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/mocks/MockERC20.sol"
+                },
+                "region": {
+                  "startLine": 6,
+                  "endLine": 16
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "37db92070b668d2be8c2c0097574ff18932ea3a534dad6906ff4e906cf61bf00"
+          }
+        },
+        {
+          "ruleId": "3-0-missing-inheritance",
+          "message": {
+            "text": "USDzyRemoteMinter (src/usdzy/USDzyRemoteMinter.sol#15-63) should inherit from IUSDzyRemoteMinter (src/gateway/LocalDepositGateway.sol#16-18)\n",
+            "markdown": "[USDzyRemoteMinter](src/usdzy/USDzyRemoteMinter.sol#L15-L63) should inherit from [IUSDzyRemoteMinter](src/gateway/LocalDepositGateway.sol#L16-L18)\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/usdzy/USDzyRemoteMinter.sol"
+                },
+                "region": {
+                  "startLine": 15,
+                  "endLine": 63
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "39f195a88f3f9fddcff18ee6f58c6c4dcda818443b632e4a1ddae62bf0f2a2f3"
+          }
+        },
+        {
+          "ruleId": "3-0-missing-inheritance",
+          "message": {
+            "text": "MockDIAFeed (src/mocks/MockDIAFeed.sol#4-21) should inherit from IDIAFeed (src/Hub.sol#17-19)\n",
+            "markdown": "[MockDIAFeed](src/mocks/MockDIAFeed.sol#L4-L21) should inherit from [IDIAFeed](src/Hub.sol#L17-L19)\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/mocks/MockDIAFeed.sol"
+                },
+                "region": {
+                  "startLine": 4,
+                  "endLine": 21
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "820057b6f10cc7f13d45ad7ec0165a1b6671c8b4461acbb83f0b1fc7c576914b"
+          }
+        },
+        {
+          "ruleId": "3-0-missing-inheritance",
+          "message": {
+            "text": "MockUSDC (src/mocks/MockUSDC.sol#6-16) should inherit from IUSDzy (src/usdzy/IUSDzy.sol#4-6)\n",
+            "markdown": "[MockUSDC](src/mocks/MockUSDC.sol#L6-L16) should inherit from [IUSDzy](src/usdzy/IUSDzy.sol#L4-L6)\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/mocks/MockUSDC.sol"
+                },
+                "region": {
+                  "startLine": 6,
+                  "endLine": 16
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "85962a6c05f519c66743a80bec5f7174fc23932f54d0d40a149f3efe1b4a9eb8"
+          }
+        },
+        {
+          "ruleId": "3-0-missing-inheritance",
+          "message": {
+            "text": "USDzy (src/USDzy.sol#18-72) should inherit from IUSDzy (src/usdzy/IUSDzy.sol#4-6)\n",
+            "markdown": "[USDzy](src/USDzy.sol#L18-L72) should inherit from [IUSDzy](src/usdzy/IUSDzy.sol#L4-L6)\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/USDzy.sol"
+                },
+                "region": {
+                  "startLine": 18,
+                  "endLine": 72
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "c5c5d196079f55940efd78dd06fdb9dfa405256a099b5a5e63e43d12c795a0d4"
+          }
+        },
+        {
+          "ruleId": "3-0-naming-convention",
+          "message": {
+            "text": "Variable ZPXArb.__gap (src/zpx/ZPXArb.sol#65) is not in mixedCase\n",
+            "markdown": "Variable [ZPXArb.__gap](src/zpx/ZPXArb.sol#L65) is not in mixedCase\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/zpx/ZPXArb.sol"
+                },
+                "region": {
+                  "startLine": 65,
+                  "endLine": 65
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "014e6652961d1a0dc5118a96cd24864cb1aee2abfdb0abc5fd4c55a581e7177d"
+          }
+        },
+        {
+          "ruleId": "3-0-naming-convention",
+          "message": {
+            "text": "Constant NoncesUpgradeable.NoncesStorageLocation (lib/openzeppelin-contracts-upgradeable/contracts/utils/NoncesUpgradeable.sol#21) is not in UPPER_CASE_WITH_UNDERSCORES\n",
+            "markdown": "Constant [NoncesUpgradeable.NoncesStorageLocation](lib/openzeppelin-contracts-upgradeable/contracts/utils/NoncesUpgradeable.sol#L21) is not in UPPER_CASE_WITH_UNDERSCORES\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts-upgradeable/contracts/utils/NoncesUpgradeable.sol"
+                },
+                "region": {
+                  "startLine": 21,
+                  "endLine": 21
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "01881a0fd243ed892e04a1ba250fdcf71495447d8cd7a8a03451fa83d06ab74f"
+          }
+        },
+        {
+          "ruleId": "3-0-naming-convention",
+          "message": {
+            "text": "Function ERC20PermitUpgradeable.__ERC20Permit_init(string) (lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/ERC20PermitUpgradeable.sol#40-42) is not in mixedCase\n",
+            "markdown": "Function [ERC20PermitUpgradeable.__ERC20Permit_init(string)](lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/ERC20PermitUpgradeable.sol#L40-L42) is not in mixedCase\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/ERC20PermitUpgradeable.sol"
+                },
+                "region": {
+                  "startLine": 40,
+                  "endLine": 42
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "09c57342b7337f0065c5737881e38d04ac917537e4140293fa1342422c405f53"
+          }
+        },
+        {
+          "ruleId": "3-0-naming-convention",
+          "message": {
+            "text": "Constant AccessControlUpgradeable.AccessControlStorageLocation (lib/openzeppelin-contracts-upgradeable/contracts/access/AccessControlUpgradeable.sol#66) is not in UPPER_CASE_WITH_UNDERSCORES\n",
+            "markdown": "Constant [AccessControlUpgradeable.AccessControlStorageLocation](lib/openzeppelin-contracts-upgradeable/contracts/access/AccessControlUpgradeable.sol#L66) is not in UPPER_CASE_WITH_UNDERSCORES\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts-upgradeable/contracts/access/AccessControlUpgradeable.sol"
+                },
+                "region": {
+                  "startLine": 66,
+                  "endLine": 66
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "0c5e75082cb1ae4de268786ea31269d9fb4bcf024dfd1f9d96c81678bd55bc7d"
+          }
+        },
+        {
+          "ruleId": "3-0-naming-convention",
+          "message": {
+            "text": "Variable USDzy.__gap (src/USDzy.sol#71) is not in mixedCase\n",
+            "markdown": "Variable [USDzy.__gap](src/USDzy.sol#L71) is not in mixedCase\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/USDzy.sol"
+                },
+                "region": {
+                  "startLine": 71,
+                  "endLine": 71
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "103d37fadbcc12fdbe36694c2f932b65389f46289dc6e98f87836bae0962a49e"
+          }
+        },
+        {
+          "ruleId": "3-0-naming-convention",
+          "message": {
+            "text": "Function ERC4626Upgradeable.__ERC4626_init(IERC20) (lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/ERC4626Upgradeable.sol#92-94) is not in mixedCase\n",
+            "markdown": "Function [ERC4626Upgradeable.__ERC4626_init(IERC20)](lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/ERC4626Upgradeable.sol#L92-L94) is not in mixedCase\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/ERC4626Upgradeable.sol"
+                },
+                "region": {
+                  "startLine": 92,
+                  "endLine": 94
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "1b49fb0eca9566f83e645d4b218e1fdc7a37241bd41bdf6d39b9fd46eaac366c"
+          }
+        },
+        {
+          "ruleId": "3-0-naming-convention",
+          "message": {
+            "text": "Function ERC4626Upgradeable.__ERC4626_init_unchained(IERC20) (lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/ERC4626Upgradeable.sol#96-101) is not in mixedCase\n",
+            "markdown": "Function [ERC4626Upgradeable.__ERC4626_init_unchained(IERC20)](lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/ERC4626Upgradeable.sol#L96-L101) is not in mixedCase\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/ERC4626Upgradeable.sol"
+                },
+                "region": {
+                  "startLine": 96,
+                  "endLine": 101
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "1fca75846d13ec0bc0dcd1830684337a0d3b369d2e006c14342eb7b0ae0f3202"
+          }
+        },
+        {
+          "ruleId": "3-0-naming-convention",
+          "message": {
+            "text": "Function AccessControlUpgradeable.__AccessControl_init_unchained() (lib/openzeppelin-contracts-upgradeable/contracts/access/AccessControlUpgradeable.sol#86-87) is not in mixedCase\n",
+            "markdown": "Function [AccessControlUpgradeable.__AccessControl_init_unchained()](lib/openzeppelin-contracts-upgradeable/contracts/access/AccessControlUpgradeable.sol#L86-L87) is not in mixedCase\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts-upgradeable/contracts/access/AccessControlUpgradeable.sol"
+                },
+                "region": {
+                  "startLine": 86,
+                  "endLine": 87
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "226e7d5af64c132f41abf0df79c0723e2a9ee53e2961f745732ce61ab1360dbe"
+          }
+        },
+        {
+          "ruleId": "3-0-naming-convention",
+          "message": {
+            "text": "Constant OwnableUpgradeable.OwnableStorageLocation (lib/openzeppelin-contracts-upgradeable/contracts/access/OwnableUpgradeable.sol#28) is not in UPPER_CASE_WITH_UNDERSCORES\n",
+            "markdown": "Constant [OwnableUpgradeable.OwnableStorageLocation](lib/openzeppelin-contracts-upgradeable/contracts/access/OwnableUpgradeable.sol#L28) is not in UPPER_CASE_WITH_UNDERSCORES\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts-upgradeable/contracts/access/OwnableUpgradeable.sol"
+                },
+                "region": {
+                  "startLine": 28,
+                  "endLine": 28
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "279af69e3d74a239896235dfb77680bd4b93859eb30aa47dfa0fa287b1b43d26"
+          }
+        },
+        {
+          "ruleId": "3-0-naming-convention",
+          "message": {
+            "text": "Contract MintGate_Arb (src/zpx/MintGate_Arb.sol#12-49) is not in CapWords\n",
+            "markdown": "Contract [MintGate_Arb](src/zpx/MintGate_Arb.sol#L12-L49) is not in CapWords\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/zpx/MintGate_Arb.sol"
+                },
+                "region": {
+                  "startLine": 12,
+                  "endLine": 49
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "2ae6c2dc1d2cc19828b9285750327cca418ab936f2ca534b637b4a511e461030"
+          }
+        },
+        {
+          "ruleId": "3-0-naming-convention",
+          "message": {
+            "text": "Variable PpsBeacon.__gap (src/pps/PpsBeacon.sol#47) is not in mixedCase\n",
+            "markdown": "Variable [PpsBeacon.__gap](src/pps/PpsBeacon.sol#L47) is not in mixedCase\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/pps/PpsBeacon.sol"
+                },
+                "region": {
+                  "startLine": 47,
+                  "endLine": 47
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "2cfa390a987b13314efdb6768a43a10e6a65b1d016b296ba4675e8f79c2a1cc0"
+          }
+        },
+        {
+          "ruleId": "3-0-naming-convention",
+          "message": {
+            "text": "Constant ERC4626Upgradeable.ERC4626StorageLocation (lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/ERC4626Upgradeable.sol#61) is not in UPPER_CASE_WITH_UNDERSCORES\n",
+            "markdown": "Constant [ERC4626Upgradeable.ERC4626StorageLocation](lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/ERC4626Upgradeable.sol#L61) is not in UPPER_CASE_WITH_UNDERSCORES\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/ERC4626Upgradeable.sol"
+                },
+                "region": {
+                  "startLine": 61,
+                  "endLine": 61
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "307ab6b8c272b04f26f035fb56e0b3964a351e9b249b68ae383bceda592f305e"
+          }
+        },
+        {
+          "ruleId": "3-0-naming-convention",
+          "message": {
+            "text": "Function EIP712Upgradeable.__EIP712_init(string,string) (lib/openzeppelin-contracts-upgradeable/contracts/utils/cryptography/EIP712Upgradeable.sol#67-69) is not in mixedCase\n",
+            "markdown": "Function [EIP712Upgradeable.__EIP712_init(string,string)](lib/openzeppelin-contracts-upgradeable/contracts/utils/cryptography/EIP712Upgradeable.sol#L67-L69) is not in mixedCase\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts-upgradeable/contracts/utils/cryptography/EIP712Upgradeable.sol"
+                },
+                "region": {
+                  "startLine": 67,
+                  "endLine": 69
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "315093c3dd3285f8f3b213cce6a8d0d9534939cd0356079b03bad3b959411dc9"
+          }
+        },
+        {
+          "ruleId": "3-0-naming-convention",
+          "message": {
+            "text": "Function ERC20PermitUpgradeable.__ERC20Permit_init_unchained(string) (lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/ERC20PermitUpgradeable.sol#44) is not in mixedCase\n",
+            "markdown": "Function [ERC20PermitUpgradeable.__ERC20Permit_init_unchained(string)](lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/ERC20PermitUpgradeable.sol#L44) is not in mixedCase\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/ERC20PermitUpgradeable.sol"
+                },
+                "region": {
+                  "startLine": 44,
+                  "endLine": 44
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "363bee7bebea0e6a2dbe810a52616d5dafb93892d99e4970ced7ffef9f80dd12"
+          }
+        },
+        {
+          "ruleId": "3-0-naming-convention",
+          "message": {
+            "text": "Variable SpokeVault.__gap (src/spoke/SpokeVault.sol#178) is not in mixedCase\n",
+            "markdown": "Variable [SpokeVault.__gap](src/spoke/SpokeVault.sol#L178) is not in mixedCase\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/spoke/SpokeVault.sol"
+                },
+                "region": {
+                  "startLine": 178,
+                  "endLine": 178
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "3cb539cd3e3bca602fd10c47216f45b36d4831fcb1550ee6a7ef62bba066cc2f"
+          }
+        },
+        {
+          "ruleId": "3-0-naming-convention",
+          "message": {
+            "text": "Function ReentrancyGuardUpgradeable.__ReentrancyGuard_init_unchained() (lib/openzeppelin-contracts-upgradeable/contracts/utils/ReentrancyGuardUpgradeable.sol#64-67) is not in mixedCase\n",
+            "markdown": "Function [ReentrancyGuardUpgradeable.__ReentrancyGuard_init_unchained()](lib/openzeppelin-contracts-upgradeable/contracts/utils/ReentrancyGuardUpgradeable.sol#L64-L67) is not in mixedCase\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts-upgradeable/contracts/utils/ReentrancyGuardUpgradeable.sol"
+                },
+                "region": {
+                  "startLine": 64,
+                  "endLine": 67
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "3e75801ad9978e638414efcd60e7f0073b008a621502b3366b5fb8e7ac736ea4"
+          }
+        },
+        {
+          "ruleId": "3-0-naming-convention",
+          "message": {
+            "text": "Variable Hub.__gap (src/Hub.sol#308) is not in mixedCase\n",
+            "markdown": "Variable [Hub.__gap](src/Hub.sol#L308) is not in mixedCase\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/Hub.sol"
+                },
+                "region": {
+                  "startLine": 308,
+                  "endLine": 308
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "44b821848395eb96066765087b824698c63f801ef505fe2e0d183a3fba935097"
+          }
+        },
+        {
+          "ruleId": "3-0-naming-convention",
+          "message": {
+            "text": "Variable Router.__gap (src/router/Router.sol#263) is not in mixedCase\n",
+            "markdown": "Variable [Router.__gap](src/router/Router.sol#L263) is not in mixedCase\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/router/Router.sol"
+                },
+                "region": {
+                  "startLine": 263,
+                  "endLine": 263
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "46f228ff802d8a25690c9de81571e87d92f0119deeba8fca853cfe371111b525"
+          }
+        },
+        {
+          "ruleId": "3-0-naming-convention",
+          "message": {
+            "text": "Function OwnableUpgradeable.__Ownable_init(address) (lib/openzeppelin-contracts-upgradeable/contracts/access/OwnableUpgradeable.sol#51-53) is not in mixedCase\n",
+            "markdown": "Function [OwnableUpgradeable.__Ownable_init(address)](lib/openzeppelin-contracts-upgradeable/contracts/access/OwnableUpgradeable.sol#L51-L53) is not in mixedCase\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts-upgradeable/contracts/access/OwnableUpgradeable.sol"
+                },
+                "region": {
+                  "startLine": 51,
+                  "endLine": 53
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "604d451ebbaba9269182fffded431ebd3543130b9937426083f6f1abd4fc9df5"
+          }
+        },
+        {
+          "ruleId": "3-0-naming-convention",
+          "message": {
+            "text": "Variable USDzyRemoteMinter.__gap (src/usdzy/USDzyRemoteMinter.sol#62) is not in mixedCase\n",
+            "markdown": "Variable [USDzyRemoteMinter.__gap](src/usdzy/USDzyRemoteMinter.sol#L62) is not in mixedCase\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/usdzy/USDzyRemoteMinter.sol"
+                },
+                "region": {
+                  "startLine": 62,
+                  "endLine": 62
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "6136c3b7e1205b2ef4d55f17f2e155eec2266cc21428cdd0485eafc8859bd135"
+          }
+        },
+        {
+          "ruleId": "3-0-naming-convention",
+          "message": {
+            "text": "Function ERC20BurnableUpgradeable.__ERC20Burnable_init() (lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/ERC20BurnableUpgradeable.sol#16-17) is not in mixedCase\n",
+            "markdown": "Function [ERC20BurnableUpgradeable.__ERC20Burnable_init()](lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/ERC20BurnableUpgradeable.sol#L16-L17) is not in mixedCase\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/ERC20BurnableUpgradeable.sol"
+                },
+                "region": {
+                  "startLine": 16,
+                  "endLine": 17
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "656dd558198e138b2e174cdf5f8ed76134c9d89f994aa92ea87c3d4839ce4224"
+          }
+        },
+        {
+          "ruleId": "3-0-naming-convention",
+          "message": {
+            "text": "Variable ZPXArbV2_Burnable.__gap_v2 (src/zpx/ZPXArbV2_Burnable.sol#16) is not in mixedCase\n",
+            "markdown": "Variable [ZPXArbV2_Burnable.__gap_v2](src/zpx/ZPXArbV2_Burnable.sol#L16) is not in mixedCase\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/zpx/ZPXArbV2_Burnable.sol"
+                },
+                "region": {
+                  "startLine": 16,
+                  "endLine": 16
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "687180848d5cce3564cb888d48398a153b715354ca518bcc3e5521c3a2e2cc60"
+          }
+        },
+        {
+          "ruleId": "3-0-naming-convention",
+          "message": {
+            "text": "Function ERC20Upgradeable.__ERC20_init_unchained(string,string) (lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol#61-65) is not in mixedCase\n",
+            "markdown": "Function [ERC20Upgradeable.__ERC20_init_unchained(string,string)](lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol#L61-L65) is not in mixedCase\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol"
+                },
+                "region": {
+                  "startLine": 61,
+                  "endLine": 65
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "74c629176a16cccc0c00bada69b465bc625751ea0b6a6c34a6948576e5a63d53"
+          }
+        },
+        {
+          "ruleId": "3-0-naming-convention",
+          "message": {
+            "text": "Function OwnableUpgradeable.__Ownable_init_unchained(address) (lib/openzeppelin-contracts-upgradeable/contracts/access/OwnableUpgradeable.sol#55-60) is not in mixedCase\n",
+            "markdown": "Function [OwnableUpgradeable.__Ownable_init_unchained(address)](lib/openzeppelin-contracts-upgradeable/contracts/access/OwnableUpgradeable.sol#L55-L60) is not in mixedCase\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts-upgradeable/contracts/access/OwnableUpgradeable.sol"
+                },
+                "region": {
+                  "startLine": 55,
+                  "endLine": 60
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "789a5e9117fc7e088319a9417f217369cfcfa16570d60c6001a271cf5b6d3606"
+          }
+        },
+        {
+          "ruleId": "3-0-naming-convention",
+          "message": {
+            "text": "Variable MessagingEndpointReceiver.__gap (src/messaging/MessagingEndpointReceiver.sol#75) is not in mixedCase\n",
+            "markdown": "Variable [MessagingEndpointReceiver.__gap](src/messaging/MessagingEndpointReceiver.sol#L75) is not in mixedCase\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/messaging/MessagingEndpointReceiver.sol"
+                },
+                "region": {
+                  "startLine": 75,
+                  "endLine": 75
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "81de031b78edb50af5b651fe2ee5dfb8a0bf0ef4b680398a4ae24d5de1d71d8e"
+          }
+        },
+        {
+          "ruleId": "3-0-naming-convention",
+          "message": {
+            "text": "Function ERC20Upgradeable.__ERC20_init(string,string) (lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol#57-59) is not in mixedCase\n",
+            "markdown": "Function [ERC20Upgradeable.__ERC20_init(string,string)](lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol#L57-L59) is not in mixedCase\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol"
+                },
+                "region": {
+                  "startLine": 57,
+                  "endLine": 59
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "8238dcf62f913fda66edd22ee2b08e732cfae65517418f334b31b357d5fb02c5"
+          }
+        },
+        {
+          "ruleId": "3-0-naming-convention",
+          "message": {
+            "text": "Function ReentrancyGuardUpgradeable.__ReentrancyGuard_init() (lib/openzeppelin-contracts-upgradeable/contracts/utils/ReentrancyGuardUpgradeable.sol#60-62) is not in mixedCase\n",
+            "markdown": "Function [ReentrancyGuardUpgradeable.__ReentrancyGuard_init()](lib/openzeppelin-contracts-upgradeable/contracts/utils/ReentrancyGuardUpgradeable.sol#L60-L62) is not in mixedCase\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts-upgradeable/contracts/utils/ReentrancyGuardUpgradeable.sol"
+                },
+                "region": {
+                  "startLine": 60,
+                  "endLine": 62
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "8358359e33b12b973b39646749b14bc461ec4795e26f2669ed0c3b687a34fd7c"
+          }
+        },
+        {
+          "ruleId": "3-0-naming-convention",
+          "message": {
+            "text": "Constant EIP712Upgradeable.EIP712StorageLocation (lib/openzeppelin-contracts-upgradeable/contracts/utils/cryptography/EIP712Upgradeable.sol#47) is not in UPPER_CASE_WITH_UNDERSCORES\n",
+            "markdown": "Constant [EIP712Upgradeable.EIP712StorageLocation](lib/openzeppelin-contracts-upgradeable/contracts/utils/cryptography/EIP712Upgradeable.sol#L47) is not in UPPER_CASE_WITH_UNDERSCORES\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts-upgradeable/contracts/utils/cryptography/EIP712Upgradeable.sol"
+                },
+                "region": {
+                  "startLine": 47,
+                  "endLine": 47
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "852f1d8cadde6a344229488f7a4cd762188cb09f26b991e074e42200d47413cf"
+          }
+        },
+        {
+          "ruleId": "3-0-naming-convention",
+          "message": {
+            "text": "Function ERC165Upgradeable.__ERC165_init_unchained() (lib/openzeppelin-contracts-upgradeable/contracts/utils/introspection/ERC165Upgradeable.sol#25-26) is not in mixedCase\n",
+            "markdown": "Function [ERC165Upgradeable.__ERC165_init_unchained()](lib/openzeppelin-contracts-upgradeable/contracts/utils/introspection/ERC165Upgradeable.sol#L25-L26) is not in mixedCase\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts-upgradeable/contracts/utils/introspection/ERC165Upgradeable.sol"
+                },
+                "region": {
+                  "startLine": 25,
+                  "endLine": 26
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "85d4e6d503145e70d4f27b51c03c2aecc7efa120329a4cf27b34d33cd9a2c942"
+          }
+        },
+        {
+          "ruleId": "3-0-naming-convention",
+          "message": {
+            "text": "Function ContextUpgradeable.__Context_init_unchained() (lib/openzeppelin-contracts-upgradeable/contracts/utils/ContextUpgradeable.sol#21-22) is not in mixedCase\n",
+            "markdown": "Function [ContextUpgradeable.__Context_init_unchained()](lib/openzeppelin-contracts-upgradeable/contracts/utils/ContextUpgradeable.sol#L21-L22) is not in mixedCase\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts-upgradeable/contracts/utils/ContextUpgradeable.sol"
+                },
+                "region": {
+                  "startLine": 21,
+                  "endLine": 22
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "8629c89abc9e568d22212182eb038287fc4f676ff34add41294173d644b25bcb"
+          }
+        },
+        {
+          "ruleId": "3-0-naming-convention",
+          "message": {
+            "text": "Function EIP712Upgradeable._EIP712VersionHash() (lib/openzeppelin-contracts-upgradeable/contracts/utils/cryptography/EIP712Upgradeable.sol#191-206) is not in mixedCase\n",
+            "markdown": "Function [EIP712Upgradeable._EIP712VersionHash()](lib/openzeppelin-contracts-upgradeable/contracts/utils/cryptography/EIP712Upgradeable.sol#L191-L206) is not in mixedCase\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts-upgradeable/contracts/utils/cryptography/EIP712Upgradeable.sol"
+                },
+                "region": {
+                  "startLine": 191,
+                  "endLine": 206
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "8c727563c0f67fc3318b400d66099a08eb5cbb606c5ca2587871153888cf5bc4"
+          }
+        },
+        {
+          "ruleId": "3-0-naming-convention",
+          "message": {
+            "text": "Function UUPSUpgradeable.__UUPSUpgradeable_init_unchained() (lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/UUPSUpgradeable.sol#68-69) is not in mixedCase\n",
+            "markdown": "Function [UUPSUpgradeable.__UUPSUpgradeable_init_unchained()](lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/UUPSUpgradeable.sol#L68-L69) is not in mixedCase\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/UUPSUpgradeable.sol"
+                },
+                "region": {
+                  "startLine": 68,
+                  "endLine": 69
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "8ff7b5e08e6880768da974c4a296eba4ffa484881ed81786ba37c7da4749321d"
+          }
+        },
+        {
+          "ruleId": "3-0-naming-convention",
+          "message": {
+            "text": "Variable PolicyBeacon.__gap (src/policy/PolicyBeacon.sol#86) is not in mixedCase\n",
+            "markdown": "Variable [PolicyBeacon.__gap](src/policy/PolicyBeacon.sol#L86) is not in mixedCase\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/policy/PolicyBeacon.sol"
+                },
+                "region": {
+                  "startLine": 86,
+                  "endLine": 86
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "90ab4ec13ee77f4602c2474f3ac615c30e9a22664c0921b9f71eb2d2cea7b610"
+          }
+        },
+        {
+          "ruleId": "3-0-naming-convention",
+          "message": {
+            "text": "Function IERC20Permit.DOMAIN_SEPARATOR() (lib/openzeppelin-contracts/contracts/token/ERC20/extensions/IERC20Permit.sol#89) is not in mixedCase\n",
+            "markdown": "Function [IERC20Permit.DOMAIN_SEPARATOR()](lib/openzeppelin-contracts/contracts/token/ERC20/extensions/IERC20Permit.sol#L89) is not in mixedCase\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts/contracts/token/ERC20/extensions/IERC20Permit.sol"
+                },
+                "region": {
+                  "startLine": 89,
+                  "endLine": 89
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "9a77c79a6cf40e2f151723e49ba63d30100a56d0f72688e58cdf4a550a6ff843"
+          }
+        },
+        {
+          "ruleId": "3-0-naming-convention",
+          "message": {
+            "text": "Function NoncesUpgradeable.__Nonces_init() (lib/openzeppelin-contracts-upgradeable/contracts/utils/NoncesUpgradeable.sol#29-30) is not in mixedCase\n",
+            "markdown": "Function [NoncesUpgradeable.__Nonces_init()](lib/openzeppelin-contracts-upgradeable/contracts/utils/NoncesUpgradeable.sol#L29-L30) is not in mixedCase\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts-upgradeable/contracts/utils/NoncesUpgradeable.sol"
+                },
+                "region": {
+                  "startLine": 29,
+                  "endLine": 30
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "a0a4b6a0d8ff4ded4d1f6d1087f2424e615cfdf4e2c281d6c22ca9c3394bdd2d"
+          }
+        },
+        {
+          "ruleId": "3-0-naming-convention",
+          "message": {
+            "text": "Variable SharesAggregator.__gap (src/usdzy/SharesAggregator.sol#55) is not in mixedCase\n",
+            "markdown": "Variable [SharesAggregator.__gap](src/usdzy/SharesAggregator.sol#L55) is not in mixedCase\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/usdzy/SharesAggregator.sol"
+                },
+                "region": {
+                  "startLine": 55,
+                  "endLine": 55
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "a164a66d3e53491ba97ffc171557cc61aae74050d9a45a552fe479d254cc91c7"
+          }
+        },
+        {
+          "ruleId": "3-0-naming-convention",
+          "message": {
+            "text": "Function AccessControlUpgradeable.__AccessControl_init() (lib/openzeppelin-contracts-upgradeable/contracts/access/AccessControlUpgradeable.sol#83-84) is not in mixedCase\n",
+            "markdown": "Function [AccessControlUpgradeable.__AccessControl_init()](lib/openzeppelin-contracts-upgradeable/contracts/access/AccessControlUpgradeable.sol#L83-L84) is not in mixedCase\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts-upgradeable/contracts/access/AccessControlUpgradeable.sol"
+                },
+                "region": {
+                  "startLine": 83,
+                  "endLine": 84
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "a333fa38b5f96027543bfa2131aac6765059644ab6c7dae2f8d357b5fbaa2f2b"
+          }
+        },
+        {
+          "ruleId": "3-0-naming-convention",
+          "message": {
+            "text": "Function NoncesUpgradeable.__Nonces_init_unchained() (lib/openzeppelin-contracts-upgradeable/contracts/utils/NoncesUpgradeable.sol#32-33) is not in mixedCase\n",
+            "markdown": "Function [NoncesUpgradeable.__Nonces_init_unchained()](lib/openzeppelin-contracts-upgradeable/contracts/utils/NoncesUpgradeable.sol#L32-L33) is not in mixedCase\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts-upgradeable/contracts/utils/NoncesUpgradeable.sol"
+                },
+                "region": {
+                  "startLine": 32,
+                  "endLine": 33
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "ac6df2840a8fedb0503d74b6b62730073117e9404c23c876c9d97d57d7237826"
+          }
+        },
+        {
+          "ruleId": "3-0-naming-convention",
+          "message": {
+            "text": "Function EIP712Upgradeable._EIP712NameHash() (lib/openzeppelin-contracts-upgradeable/contracts/utils/cryptography/EIP712Upgradeable.sol#169-184) is not in mixedCase\n",
+            "markdown": "Function [EIP712Upgradeable._EIP712NameHash()](lib/openzeppelin-contracts-upgradeable/contracts/utils/cryptography/EIP712Upgradeable.sol#L169-L184) is not in mixedCase\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts-upgradeable/contracts/utils/cryptography/EIP712Upgradeable.sol"
+                },
+                "region": {
+                  "startLine": 169,
+                  "endLine": 184
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "b348b93c416e6808baf6370eed97a95d16debb4f8b6e03f564c0e3b4f3a487b2"
+          }
+        },
+        {
+          "ruleId": "3-0-naming-convention",
+          "message": {
+            "text": "Function EIP712Upgradeable._EIP712Version() (lib/openzeppelin-contracts-upgradeable/contracts/utils/cryptography/EIP712Upgradeable.sol#159-162) is not in mixedCase\n",
+            "markdown": "Function [EIP712Upgradeable._EIP712Version()](lib/openzeppelin-contracts-upgradeable/contracts/utils/cryptography/EIP712Upgradeable.sol#L159-L162) is not in mixedCase\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts-upgradeable/contracts/utils/cryptography/EIP712Upgradeable.sol"
+                },
+                "region": {
+                  "startLine": 159,
+                  "endLine": 162
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "b3b4a0a34e61f4410ce8161a354c38fcde6cd5cb70b4612bc464b83fb9afe4e0"
+          }
+        },
+        {
+          "ruleId": "3-0-naming-convention",
+          "message": {
+            "text": "Variable LocalDepositGateway.__gap (src/gateway/LocalDepositGateway.sol#146) is not in mixedCase\n",
+            "markdown": "Variable [LocalDepositGateway.__gap](src/gateway/LocalDepositGateway.sol#L146) is not in mixedCase\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/gateway/LocalDepositGateway.sol"
+                },
+                "region": {
+                  "startLine": 146,
+                  "endLine": 146
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "ba30b242c1cc55713a136fb51886c892e038f8507716c490e9cdc177f1eb0833"
+          }
+        },
+        {
+          "ruleId": "3-0-naming-convention",
+          "message": {
+            "text": "Function ZPXArbV2_Burnable.initializeV2_Burnable() (src/zpx/ZPXArbV2_Burnable.sol#13) is not in mixedCase\n",
+            "markdown": "Function [ZPXArbV2_Burnable.initializeV2_Burnable()](src/zpx/ZPXArbV2_Burnable.sol#L13) is not in mixedCase\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/zpx/ZPXArbV2_Burnable.sol"
+                },
+                "region": {
+                  "startLine": 13,
+                  "endLine": 13
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "be853ec95812481c8f09a87aac8bd5805e29307ae71c7ff1008014edcbfd062f"
+          }
+        },
+        {
+          "ruleId": "3-0-naming-convention",
+          "message": {
+            "text": "Variable UUPSUpgradeable.__self (lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/UUPSUpgradeable.sol#22) is not in mixedCase\n",
+            "markdown": "Variable [UUPSUpgradeable.__self](lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/UUPSUpgradeable.sol#L22) is not in mixedCase\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/UUPSUpgradeable.sol"
+                },
+                "region": {
+                  "startLine": 22,
+                  "endLine": 22
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "bfe49cc9b28397f73932ef963ff532a1f0ce51ddd0b26dae025d661602049864"
+          }
+        },
+        {
+          "ruleId": "3-0-naming-convention",
+          "message": {
+            "text": "Constant ERC20Upgradeable.ERC20StorageLocation (lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol#44) is not in UPPER_CASE_WITH_UNDERSCORES\n",
+            "markdown": "Constant [ERC20Upgradeable.ERC20StorageLocation](lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol#L44) is not in UPPER_CASE_WITH_UNDERSCORES\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol"
+                },
+                "region": {
+                  "startLine": 44,
+                  "endLine": 44
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "cb30ae3c1a1bfe3cb95184f5fe03e6ce4a5ea625c3b22a19482d198acedacce7"
+          }
+        },
+        {
+          "ruleId": "3-0-naming-convention",
+          "message": {
+            "text": "Function EIP712Upgradeable._EIP712Name() (lib/openzeppelin-contracts-upgradeable/contracts/utils/cryptography/EIP712Upgradeable.sol#148-151) is not in mixedCase\n",
+            "markdown": "Function [EIP712Upgradeable._EIP712Name()](lib/openzeppelin-contracts-upgradeable/contracts/utils/cryptography/EIP712Upgradeable.sol#L148-L151) is not in mixedCase\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts-upgradeable/contracts/utils/cryptography/EIP712Upgradeable.sol"
+                },
+                "region": {
+                  "startLine": 148,
+                  "endLine": 151
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "cb5da74bd03c5cb679ca5124d72835a0d5956f13cd9bed96ce9375464d74b0ac"
+          }
+        },
+        {
+          "ruleId": "3-0-naming-convention",
+          "message": {
+            "text": "Function UUPSUpgradeable.__UUPSUpgradeable_init() (lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/UUPSUpgradeable.sol#65-66) is not in mixedCase\n",
+            "markdown": "Function [UUPSUpgradeable.__UUPSUpgradeable_init()](lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/UUPSUpgradeable.sol#L65-L66) is not in mixedCase\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/UUPSUpgradeable.sol"
+                },
+                "region": {
+                  "startLine": 65,
+                  "endLine": 66
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "cb76c4a025b81b1d34120a39f72a25e8426de1c2f55fbd29d6a5eb8442335219"
+          }
+        },
+        {
+          "ruleId": "3-0-naming-convention",
+          "message": {
+            "text": "Parameter MockDIAFeed.set(int256,uint256)._ts (src/mocks/MockDIAFeed.sol#13) is not in mixedCase\n",
+            "markdown": "Parameter [MockDIAFeed.set(int256,uint256)._ts](src/mocks/MockDIAFeed.sol#L13) is not in mixedCase\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/mocks/MockDIAFeed.sol"
+                },
+                "region": {
+                  "startLine": 13,
+                  "endLine": 13
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "cf18bad2465d922cc8fd5f65aaa9031b901947dd5fc8c4f0cd6195af7560a411"
+          }
+        },
+        {
+          "ruleId": "3-0-naming-convention",
+          "message": {
+            "text": "Variable PpsMirror.__gap (src/pps/PpsMirror.sol#60) is not in mixedCase\n",
+            "markdown": "Variable [PpsMirror.__gap](src/pps/PpsMirror.sol#L60) is not in mixedCase\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/pps/PpsMirror.sol"
+                },
+                "region": {
+                  "startLine": 60,
+                  "endLine": 60
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "d45cc0341f558aaba31ce6161757f614f2fcc6f57cf4fab2043265ba6cacb71a"
+          }
+        },
+        {
+          "ruleId": "3-0-naming-convention",
+          "message": {
+            "text": "Constant ReentrancyGuardUpgradeable.ReentrancyGuardStorageLocation (lib/openzeppelin-contracts-upgradeable/contracts/utils/ReentrancyGuardUpgradeable.sol#47) is not in UPPER_CASE_WITH_UNDERSCORES\n",
+            "markdown": "Constant [ReentrancyGuardUpgradeable.ReentrancyGuardStorageLocation](lib/openzeppelin-contracts-upgradeable/contracts/utils/ReentrancyGuardUpgradeable.sol#L47) is not in UPPER_CASE_WITH_UNDERSCORES\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts-upgradeable/contracts/utils/ReentrancyGuardUpgradeable.sol"
+                },
+                "region": {
+                  "startLine": 47,
+                  "endLine": 47
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "d99d11cc0f723d6a83f22b62a548455749daba0aa55a2086d6d260beab797227"
+          }
+        },
+        {
+          "ruleId": "3-0-naming-convention",
+          "message": {
+            "text": "Contract ZPXArbV2_Burnable (src/zpx/ZPXArbV2_Burnable.sol#7-17) is not in CapWords\n",
+            "markdown": "Contract [ZPXArbV2_Burnable](src/zpx/ZPXArbV2_Burnable.sol#L7-L17) is not in CapWords\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/zpx/ZPXArbV2_Burnable.sol"
+                },
+                "region": {
+                  "startLine": 7,
+                  "endLine": 17
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "d9e4828e2483dd4b875c934bdc8395e234e02864d3629a10a829e391f816136e"
+          }
+        },
+        {
+          "ruleId": "3-0-naming-convention",
+          "message": {
+            "text": "Function MessagingEndpointReceiver.__MessagingEndpointReceiver_init(address) (src/messaging/MessagingEndpointReceiver.sol#41-43) is not in mixedCase\n",
+            "markdown": "Function [MessagingEndpointReceiver.__MessagingEndpointReceiver_init(address)](src/messaging/MessagingEndpointReceiver.sol#L41-L43) is not in mixedCase\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/messaging/MessagingEndpointReceiver.sol"
+                },
+                "region": {
+                  "startLine": 41,
+                  "endLine": 43
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "db8ca9b3d7b4d685ba85700b9db5f77dbfd97634e1b9781c031b5fb2a9f8a857"
+          }
+        },
+        {
+          "ruleId": "3-0-naming-convention",
+          "message": {
+            "text": "Function PausableUpgradeable.__Pausable_init() (lib/openzeppelin-contracts-upgradeable/contracts/utils/PausableUpgradeable.sol#77-78) is not in mixedCase\n",
+            "markdown": "Function [PausableUpgradeable.__Pausable_init()](lib/openzeppelin-contracts-upgradeable/contracts/utils/PausableUpgradeable.sol#L77-L78) is not in mixedCase\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts-upgradeable/contracts/utils/PausableUpgradeable.sol"
+                },
+                "region": {
+                  "startLine": 77,
+                  "endLine": 78
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "e6eb49a8474ee89911571567ab886a806c53ce65d23a5eda711bcaf34fb163ce"
+          }
+        },
+        {
+          "ruleId": "3-0-naming-convention",
+          "message": {
+            "text": "Function ERC20PermitUpgradeable.DOMAIN_SEPARATOR() (lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/ERC20PermitUpgradeable.sol#79-81) is not in mixedCase\n",
+            "markdown": "Function [ERC20PermitUpgradeable.DOMAIN_SEPARATOR()](lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/ERC20PermitUpgradeable.sol#L79-L81) is not in mixedCase\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/ERC20PermitUpgradeable.sol"
+                },
+                "region": {
+                  "startLine": 79,
+                  "endLine": 81
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "e894100837865f2e78fc1ab813057babf6fdaa12c4248eaeb88a160d3341c1b2"
+          }
+        },
+        {
+          "ruleId": "3-0-naming-convention",
+          "message": {
+            "text": "Function ContextUpgradeable.__Context_init() (lib/openzeppelin-contracts-upgradeable/contracts/utils/ContextUpgradeable.sol#18-19) is not in mixedCase\n",
+            "markdown": "Function [ContextUpgradeable.__Context_init()](lib/openzeppelin-contracts-upgradeable/contracts/utils/ContextUpgradeable.sol#L18-L19) is not in mixedCase\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts-upgradeable/contracts/utils/ContextUpgradeable.sol"
+                },
+                "region": {
+                  "startLine": 18,
+                  "endLine": 19
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "ec47067e22967ab37ddb79c5eae4c225b0c9f1e4e15f1452db70b0a6f86103e0"
+          }
+        },
+        {
+          "ruleId": "3-0-naming-convention",
+          "message": {
+            "text": "Function ERC20BurnableUpgradeable.__ERC20Burnable_init_unchained() (lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/ERC20BurnableUpgradeable.sol#19-20) is not in mixedCase\n",
+            "markdown": "Function [ERC20BurnableUpgradeable.__ERC20Burnable_init_unchained()](lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/ERC20BurnableUpgradeable.sol#L19-L20) is not in mixedCase\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/ERC20BurnableUpgradeable.sol"
+                },
+                "region": {
+                  "startLine": 19,
+                  "endLine": 20
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "ee60bfe178e2637516efb16bfb2bf5651c0cdf04217e22de33d4f96de686ea37"
+          }
+        },
+        {
+          "ruleId": "3-0-naming-convention",
+          "message": {
+            "text": "Function ERC165Upgradeable.__ERC165_init() (lib/openzeppelin-contracts-upgradeable/contracts/utils/introspection/ERC165Upgradeable.sol#22-23) is not in mixedCase\n",
+            "markdown": "Function [ERC165Upgradeable.__ERC165_init()](lib/openzeppelin-contracts-upgradeable/contracts/utils/introspection/ERC165Upgradeable.sol#L22-L23) is not in mixedCase\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts-upgradeable/contracts/utils/introspection/ERC165Upgradeable.sol"
+                },
+                "region": {
+                  "startLine": 22,
+                  "endLine": 23
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "f226b70c0c428d938e421293c43b68d973d744168b94b568e0deb7b189c26f50"
+          }
+        },
+        {
+          "ruleId": "3-0-naming-convention",
+          "message": {
+            "text": "Constant PausableUpgradeable.PausableStorageLocation (lib/openzeppelin-contracts-upgradeable/contracts/utils/PausableUpgradeable.sol#25) is not in UPPER_CASE_WITH_UNDERSCORES\n",
+            "markdown": "Constant [PausableUpgradeable.PausableStorageLocation](lib/openzeppelin-contracts-upgradeable/contracts/utils/PausableUpgradeable.sol#L25) is not in UPPER_CASE_WITH_UNDERSCORES\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts-upgradeable/contracts/utils/PausableUpgradeable.sol"
+                },
+                "region": {
+                  "startLine": 25,
+                  "endLine": 25
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "fbd85c56783523089f3dbfced5e6f8d4e44d909f4e2b7fc7497cac12b8f85e38"
+          }
+        },
+        {
+          "ruleId": "3-0-naming-convention",
+          "message": {
+            "text": "Function EIP712Upgradeable.__EIP712_init_unchained(string,string) (lib/openzeppelin-contracts-upgradeable/contracts/utils/cryptography/EIP712Upgradeable.sol#71-79) is not in mixedCase\n",
+            "markdown": "Function [EIP712Upgradeable.__EIP712_init_unchained(string,string)](lib/openzeppelin-contracts-upgradeable/contracts/utils/cryptography/EIP712Upgradeable.sol#L71-L79) is not in mixedCase\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts-upgradeable/contracts/utils/cryptography/EIP712Upgradeable.sol"
+                },
+                "region": {
+                  "startLine": 71,
+                  "endLine": 79
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "fc034b8fe7ec5b96fc40ddf238e026b6f6d8d20944159f9da353e5eecd1a58e5"
+          }
+        },
+        {
+          "ruleId": "3-0-naming-convention",
+          "message": {
+            "text": "Function PausableUpgradeable.__Pausable_init_unchained() (lib/openzeppelin-contracts-upgradeable/contracts/utils/PausableUpgradeable.sol#80-81) is not in mixedCase\n",
+            "markdown": "Function [PausableUpgradeable.__Pausable_init_unchained()](lib/openzeppelin-contracts-upgradeable/contracts/utils/PausableUpgradeable.sol#L80-L81) is not in mixedCase\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts-upgradeable/contracts/utils/PausableUpgradeable.sol"
+                },
+                "region": {
+                  "startLine": 80,
+                  "endLine": 81
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "ff7188fd803c6119535c59c84febe5219fc17cabd9b56b619f8b9d9185aec81b"
+          }
+        },
+        {
+          "ruleId": "3-1-too-many-digits",
+          "message": {
+            "text": "Math.log2(uint256) (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#612-651) uses literals with too many digits:\n\t- r = r | byte(uint256,uint256)(x >> r,0x0000010102020202030303030303030300000000000000000000000000000000) (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#649)\n",
+            "markdown": "[Math.log2(uint256)](lib/openzeppelin-contracts/contracts/utils/math/Math.sol#L612-L651) uses literals with too many digits:\n\t- [r = r | byte(uint256,uint256)(x >> r,0x0000010102020202030303030303030300000000000000000000000000000000)](lib/openzeppelin-contracts/contracts/utils/math/Math.sol#L649)\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/openzeppelin-contracts/contracts/utils/math/Math.sol"
+                },
+                "region": {
+                  "startLine": 612,
+                  "endLine": 651
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "d4e0a626c90e9e44a08f5e9eaa9398f2803521dc3d1d6065167c8e7a56866e9f"
+          }
+        },
+        {
+          "ruleId": "3-0-unused-state",
+          "message": {
+            "text": "SharesAggregator.__gap (src/usdzy/SharesAggregator.sol#55) is never used in SharesAggregator (src/usdzy/SharesAggregator.sol#8-56)\n",
+            "markdown": "[SharesAggregator.__gap](src/usdzy/SharesAggregator.sol#L55) is never used in [SharesAggregator](src/usdzy/SharesAggregator.sol#L8-L56)\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/usdzy/SharesAggregator.sol"
+                },
+                "region": {
+                  "startLine": 55,
+                  "endLine": 55
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "3d9e0d853ccdf619f2b47fb1ce38095ecfecbf3ba1073b28cd7d9dbc76aeb6cb"
+          }
+        },
+        {
+          "ruleId": "3-0-unused-state",
+          "message": {
+            "text": "ZPXArbV2_Burnable.__gap_v2 (src/zpx/ZPXArbV2_Burnable.sol#16) is never used in ZPXArbV2_Burnable (src/zpx/ZPXArbV2_Burnable.sol#7-17)\n",
+            "markdown": "[ZPXArbV2_Burnable.__gap_v2](src/zpx/ZPXArbV2_Burnable.sol#L16) is never used in [ZPXArbV2_Burnable](src/zpx/ZPXArbV2_Burnable.sol#L7-L17)\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/zpx/ZPXArbV2_Burnable.sol"
+                },
+                "region": {
+                  "startLine": 16,
+                  "endLine": 16
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "43857b92b3a289d71746e2e7ed539f556be3d5d6752f3b017549d13ce6e2f342"
+          }
+        },
+        {
+          "ruleId": "3-0-unused-state",
+          "message": {
+            "text": "SpokeVault.__gap (src/spoke/SpokeVault.sol#178) is never used in SpokeVault (src/spoke/SpokeVault.sol#18-179)\n",
+            "markdown": "[SpokeVault.__gap](src/spoke/SpokeVault.sol#L178) is never used in [SpokeVault](src/spoke/SpokeVault.sol#L18-L179)\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/spoke/SpokeVault.sol"
+                },
+                "region": {
+                  "startLine": 178,
+                  "endLine": 178
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "4b9f2533a1c2b68bbeda5786786f991630d3700d72166c685e1981adba9053cb"
+          }
+        },
+        {
+          "ruleId": "3-0-unused-state",
+          "message": {
+            "text": "Hub.__gap (src/Hub.sol#308) is never used in Hub (src/Hub.sol#25-309)\n",
+            "markdown": "[Hub.__gap](src/Hub.sol#L308) is never used in [Hub](src/Hub.sol#L25-L309)\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/Hub.sol"
+                },
+                "region": {
+                  "startLine": 308,
+                  "endLine": 308
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "4e0c064ab69942dcaf6e9618ad425fa64e2c8227b85630fb7242d457fc0a5831"
+          }
+        },
+        {
+          "ruleId": "3-0-unused-state",
+          "message": {
+            "text": "PpsMirror.__gap (src/pps/PpsMirror.sol#60) is never used in PpsMirror (src/pps/PpsMirror.sol#11-61)\n",
+            "markdown": "[PpsMirror.__gap](src/pps/PpsMirror.sol#L60) is never used in [PpsMirror](src/pps/PpsMirror.sol#L11-L61)\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/pps/PpsMirror.sol"
+                },
+                "region": {
+                  "startLine": 60,
+                  "endLine": 60
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "5ce8cabad47cfb0a8db5241d019f858f614831808c2c8a94b29a5210fa33d86d"
+          }
+        },
+        {
+          "ruleId": "3-0-unused-state",
+          "message": {
+            "text": "USDzy.__gap (src/USDzy.sol#71) is never used in USDzy (src/USDzy.sol#18-72)\n",
+            "markdown": "[USDzy.__gap](src/USDzy.sol#L71) is never used in [USDzy](src/USDzy.sol#L18-L72)\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/USDzy.sol"
+                },
+                "region": {
+                  "startLine": 71,
+                  "endLine": 71
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "5d18e43ef9d8ad6bcc0753bb36c226567d7227a9189dd0b52c4797aab5b09bad"
+          }
+        },
+        {
+          "ruleId": "3-0-unused-state",
+          "message": {
+            "text": "Router.__gap (src/router/Router.sol#263) is never used in Router (src/router/Router.sol#17-264)\n",
+            "markdown": "[Router.__gap](src/router/Router.sol#L263) is never used in [Router](src/router/Router.sol#L17-L264)\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/router/Router.sol"
+                },
+                "region": {
+                  "startLine": 263,
+                  "endLine": 263
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "677951dcba653a8764bf62fc855d687f7ae9418cd786842e1facad923ec7b13a"
+          }
+        },
+        {
+          "ruleId": "3-0-unused-state",
+          "message": {
+            "text": "PolicyBeacon.__gap (src/policy/PolicyBeacon.sol#86) is never used in PolicyBeacon (src/policy/PolicyBeacon.sol#10-87)\n",
+            "markdown": "[PolicyBeacon.__gap](src/policy/PolicyBeacon.sol#L86) is never used in [PolicyBeacon](src/policy/PolicyBeacon.sol#L10-L87)\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/policy/PolicyBeacon.sol"
+                },
+                "region": {
+                  "startLine": 86,
+                  "endLine": 86
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "739be23fb0740f08512b5698d54e7fa9e4cec36bb11421f6a113f19147cdf185"
+          }
+        },
+        {
+          "ruleId": "3-0-unused-state",
+          "message": {
+            "text": "PpsBeacon.__gap (src/pps/PpsBeacon.sol#47) is never used in PpsBeacon (src/pps/PpsBeacon.sol#10-48)\n",
+            "markdown": "[PpsBeacon.__gap](src/pps/PpsBeacon.sol#L47) is never used in [PpsBeacon](src/pps/PpsBeacon.sol#L10-L48)\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/pps/PpsBeacon.sol"
+                },
+                "region": {
+                  "startLine": 47,
+                  "endLine": 47
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "867e09b2485223a4f6f940ecd21c27526444b4e21ab702ada43c8ede7d01ddf5"
+          }
+        },
+        {
+          "ruleId": "3-0-unused-state",
+          "message": {
+            "text": "USDzyRemoteMinter.__gap (src/usdzy/USDzyRemoteMinter.sol#62) is never used in USDzyRemoteMinter (src/usdzy/USDzyRemoteMinter.sol#15-63)\n",
+            "markdown": "[USDzyRemoteMinter.__gap](src/usdzy/USDzyRemoteMinter.sol#L62) is never used in [USDzyRemoteMinter](src/usdzy/USDzyRemoteMinter.sol#L15-L63)\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/usdzy/USDzyRemoteMinter.sol"
+                },
+                "region": {
+                  "startLine": 62,
+                  "endLine": 62
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "aabf1a87d34c38d0c38fbd89ed628022f0f02f8ebc125e001aa71c22432dbba7"
+          }
+        },
+        {
+          "ruleId": "3-0-unused-state",
+          "message": {
+            "text": "LocalDepositGateway.__gap (src/gateway/LocalDepositGateway.sol#146) is never used in LocalDepositGateway (src/gateway/LocalDepositGateway.sol#29-147)\n",
+            "markdown": "[LocalDepositGateway.__gap](src/gateway/LocalDepositGateway.sol#L146) is never used in [LocalDepositGateway](src/gateway/LocalDepositGateway.sol#L29-L147)\n"
+          },
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/gateway/LocalDepositGateway.sol"
+                },
+                "region": {
+                  "startLine": 146,
+                  "endLine": 146
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "id": "ec4897c79c9bad6c7b07708dce95810e2092d752a73b6cea397eeb7e44e3a4c8"
+          }
+        }
+      ]
+    }
+  ]
+}

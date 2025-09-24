@@ -1,0 +1,29 @@
+Prod Coverage Summary (line-level):
+ Total: 85.82% (569/663) across 18 files
+
+ Per-file (sorted ascending):
+   0.00%     0/31    src/messaging/SuperchainAdapter.sol
+  80.77%    21/26    src/messaging/MessagingEndpointReceiver.sol
+  81.58%    93/114   src/Hub.sol
+  82.35%    14/17    src/pps/PpsMirror.sol
+  83.33%    60/72    src/spoke/SpokeVault.sol
+  86.36%    38/44    src/factory/Factory.sol
+  88.24%    15/17    src/USDzy.sol
+  88.24%    15/17    src/zpx/ZPXArb.sol
+  93.18%    41/44    src/gateway/LocalDepositGateway.sol
+  93.33%    14/15    src/pps/PpsBeacon.sol
+  93.75%    15/16    src/policy/PolicyBeacon.sol
+  94.12%    16/17    src/usdzy/USDzyRemoteMinter.sol
+  94.67%    71/75    src/zpx/ZPXRewarder.sol
+  95.83%    23/24    src/usdzy/SharesAggregator.sol
+  99.07%   106/107   src/router/Router.sol
+  100.00%     8/8     src/messaging/AdapterRegistry.sol
+  100.00%    16/16    src/zpx/MintGate_Arb.sol
+  100.00%     3/3     src/zpx/ZPXArbV2_Burnable.sol
+
+ Files <85%:
+  - src/Hub.sol (81.58%)
+  - src/messaging/MessagingEndpointReceiver.sol (80.77%)
+  - src/messaging/SuperchainAdapter.sol (0.00%)
+  - src/pps/PpsMirror.sol (82.35%)
+  - src/spoke/SpokeVault.sol (83.33%)
